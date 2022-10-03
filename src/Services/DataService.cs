@@ -41,7 +41,7 @@ namespace Nekres.Chat_Shorts.Services
             }
             else
             {
-                e.Text = model.Text;
+                e.TextLines = model.TextLines.ToList();
                 e.Title = model.Title;
                 e.GameMode = model.Mode;
                 e.MapIds = model.MapIds.ToList();
@@ -57,7 +57,7 @@ namespace Nekres.Chat_Shorts.Services
         public IEnumerable<MacroEntity> GetAll()
         {
             this.Loading = true;
-            var result = _ctx.FindAll();
+            IEnumerable<MacroEntity> result = _ctx.FindAll();
             return result;
         }
 
@@ -67,7 +67,8 @@ namespace Nekres.Chat_Shorts.Services
             MacroDeleted?.Invoke(this, new ValueEventArgs<Guid>(id));
         }
 
-        public IEnumerable<MacroEntity> GetAllActives() => _ctx.Find(e => 
+        public IEnumerable<MacroEntity> GetAllActives() => _ctx.Find(e =>
+            e.TextLines != null && e.TextLines.Any() &&
             (e.GameMode == MapUtil.GetCurrentGameMode() || e.GameMode == GameMode.All) &&
             (e.MapIds.Any(id => id == GameService.Gw2Mumble.CurrentMap.Id) || !e.MapIds.Any()) &&
             e.ExcludedMapIds.All(id => id != GameService.Gw2Mumble.CurrentMap.Id) &&

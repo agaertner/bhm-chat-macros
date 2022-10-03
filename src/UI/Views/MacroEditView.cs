@@ -33,8 +33,11 @@ namespace Nekres.Chat_Shorts.UI.Views
 
         protected override async Task<bool> Load(IProgress<string> progress)
         {
-            var mapIds = this.Presenter.Model.MapIds.Concat(this.Presenter.Model.ExcludedMapIds).ToList();
-            if (!mapIds.Any()) return true;
+            List<int> mapIds = this.Presenter.Model.MapIds.Concat(this.Presenter.Model.ExcludedMapIds).ToList();
+            if (!mapIds.Any()) {
+                return true;
+            }
+
             _maps = (await ChatShorts.Instance.Gw2ApiManager.Gw2ApiClient.V2.Maps.ManyAsync(mapIds)).ToList();
             return _maps.Any();
         }
@@ -62,31 +65,41 @@ namespace Nekres.Chat_Shorts.UI.Views
             };
             editTitle.InputFocusChanged += EditTitle_InputFocusChanged;
 
-            var editText = new MultilineTextBox
-            {
-                Parent = buildPanel,
-                Size = new Point(buildPanel.ContentRegion.Width, buildPanel.ContentRegion.Height / 2 - 60),
-                Location = new Point(0, editTitle.Bottom + Panel.BOTTOM_PADDING),
-                Text = this.Presenter.Model.Text,
-                PlaceholderText = "/say Hello World!"
+            var textFlowPanel = new FlowPanel {
+                Parent   = buildPanel,
+                Size     = new Point(buildPanel.ContentRegion.Width, buildPanel.ContentRegion.Height / 2 - 60),
+                Location = new Point(0,                              editTitle.Bottom                    + Panel.BOTTOM_PADDING),
+
             };
-            editText.InputFocusChanged += EditText_InputFocusChanged;
+
+            foreach (string message in this.Presenter.Model.TextLines) {
+                var inputBox = new TextBox {
+                    Parent          = textFlowPanel,
+                    Size            = new Point(textFlowPanel.Width, 32),
+                    PlaceholderText = "/say Hello World!",
+                    Text = message
+                };
+
+                inputBox.InputFocusChanged += EditText_InputFocusChanged;
+            }
 
             // MapIds selection
             _mapsPanel = new FlowPanel
             {
-                Parent = buildPanel,
-                Size = new Point(editText.Width / 4 - 5, buildPanel.ContentRegion.Height - editText.Height - 100),
-                Location = new Point(0, editText.Bottom + Panel.BOTTOM_PADDING),
-                FlowDirection = ControlFlowDirection.LeftToRight,
+                Parent         = buildPanel,
+                Size           = new Point(textFlowPanel.Width / 4 - 5, buildPanel.ContentRegion.Height - textFlowPanel.Height - 100),
+                Location       = new Point(0,                           textFlowPanel.Bottom            + Panel.BOTTOM_PADDING),
+                FlowDirection  = ControlFlowDirection.LeftToRight,
                 ControlPadding = new Vector2(5, 5),
-                CanCollapse = false,
-                CanScroll = true,
-                Collapsed = false,
-                ShowTint = true,
-                ShowBorder = true
+                CanCollapse    = false,
+                CanScroll      = true,
+                Collapsed      = false,
+                ShowTint       = true,
+                ShowBorder     = true
             };
-            foreach (var id in this.Presenter.Model.MapIds) CreateMapEntry(id, _mapsPanel, OnMapClick);
+            foreach (int id in this.Presenter.Model.MapIds) {
+                CreateMapEntry(id, _mapsPanel, OnMapClick);
+            }
 
             var btnIncludeMap = new StandardButton
             {
@@ -100,18 +113,20 @@ namespace Nekres.Chat_Shorts.UI.Views
             // MapIds selection
             _mapsExclusionPanel = new FlowPanel
             {
-                Parent = buildPanel,
-                Size = new Point(editText.Width / 4 - 5, buildPanel.ContentRegion.Height - editText.Height - 100),
-                Location = new Point(_mapsPanel.Right + 5, editText.Bottom + Panel.BOTTOM_PADDING),
-                FlowDirection = ControlFlowDirection.LeftToRight,
+                Parent         = buildPanel,
+                Size           = new Point(textFlowPanel.Width / 4 - 5, buildPanel.ContentRegion.Height - textFlowPanel.Height - 100),
+                Location       = new Point(_mapsPanel.Right        + 5, textFlowPanel.Bottom            + Panel.BOTTOM_PADDING),
+                FlowDirection  = ControlFlowDirection.LeftToRight,
                 ControlPadding = new Vector2(5, 5),
-                CanCollapse = false,
-                CanScroll = true,
-                Collapsed = false,
-                ShowTint = true,
-                ShowBorder = true
+                CanCollapse    = false,
+                CanScroll      = true,
+                Collapsed      = false,
+                ShowTint       = true,
+                ShowBorder     = true
             };
-            foreach (var id in this.Presenter.Model.ExcludedMapIds) CreateMapEntry(id, _mapsExclusionPanel, OnExcludedMapClick);
+            foreach (int id in this.Presenter.Model.ExcludedMapIds) {
+                CreateMapEntry(id, _mapsExclusionPanel, OnExcludedMapClick);
+            }
 
             var btnExcludeMap = new StandardButton
             {
@@ -123,23 +138,25 @@ namespace Nekres.Chat_Shorts.UI.Views
             btnExcludeMap.Click += BtnExcludeMap_Click;
 
             var settings = new SettingCollection(); 
-            var contextCol = settings.AddSubCollection("Context", true, false);
-            var squadBroadcastSetting = contextCol.DefineSetting("isSquadBroadcast", this.Presenter.Model.SquadBroadcast,
-                () => "Squad Broadcast",
-                () => "Send this text as a squad broadcast instead.");
-            var gameModeSetting = contextCol.DefineSetting("inGameMode", this.Presenter.Model.Mode,
-                () => "GameMode",
-                () => "GameMode this macro will be active in.");
-            var controlsCol = settings.AddSubCollection("Hotkeys", true, false);
-            var keyBindingSetting = controlsCol.DefineSetting("Macro Key", this.Presenter.Model.KeyBinding,
-                () => "Macro Key",
-                () => "Shortcut to use the macro with (optional).");
+            var contextCol = settings.AddSubCollection("Context");
+            contextCol.RenderInUi = true;
+            SettingEntry<bool> squadBroadcastSetting = contextCol.DefineSetting("isSquadBroadcast", this.Presenter.Model.SquadBroadcast,
+                                                                                () => "Squad Broadcast",
+                                                                                () => "Send this text as a squad broadcast instead.");
+            SettingEntry<GameMode> gameModeSetting = contextCol.DefineSetting("inGameMode", this.Presenter.Model.Mode,
+                                                                              () => "GameMode",
+                                                                              () => "GameMode this macro will be active in.");
+            var controlsCol = settings.AddSubCollection("Hotkeys");
+            controlsCol.RenderInUi = true;
+            SettingEntry<KeyBinding> keyBindingSetting = controlsCol.DefineSetting("Macro Key", this.Presenter.Model.KeyBinding,
+                                                                                   () => "Macro Key",
+                                                                                   () => "Shortcut to use the macro with (optional).");
 
             _settingsPanel = new ViewContainer
             {
                 Parent = buildPanel,
                 Width = buildPanel.ContentRegion.Width / 2,
-                Height = buildPanel.ContentRegion.Height - editText.Height - 100,
+                Height = buildPanel.ContentRegion.Height - textFlowPanel.Height - 100,
                 Location = new Point(_mapsExclusionPanel.Right + 10, _mapsExclusionPanel.Location.Y),
                 ShowBorder = true
             };
@@ -166,46 +183,60 @@ namespace Nekres.Chat_Shorts.UI.Views
         private void EditTitle_InputFocusChanged(object o, EventArgs e)
         {
             var ctrl = (TextBox)o;
-            if (ctrl.Focused) return;
+            if (ctrl.Focused) {
+                return;
+            }
             this.Presenter.Model.Title = ctrl.Text;
             ((StandardWindow)ctrl.Parent).Title = $"Edit Macro - {ctrl.Text}";
         }
 
         private void EditText_InputFocusChanged(object o, EventArgs e)
         {
-            var ctrl = (MultilineTextBox)o;
-            if (ctrl.Focused) return;
-            this.Presenter.Model.Text = ctrl.Text;
+            var ctrl = (TextBox)o;
+            if (ctrl.Focused) {
+                return;
+            }
+            this.Presenter.Model.TextLines.Add(ctrl.Text);
         }
 
         private async void BtnIncludeMap_Click(object o, MouseEventArgs e)
         {
             GameService.Content.PlaySoundEffectByName("button-click");
-            if (this.Presenter.Model.MapIds.Any(id => id.Equals(GameService.Gw2Mumble.CurrentMap.Id))) return;
+            if (this.Presenter.Model.MapIds.Any(id => id.Equals(GameService.Gw2Mumble.CurrentMap.Id))) {
+                return;
+            }
             await ChatShorts.Instance.Gw2ApiManager.Gw2ApiClient.V2.Maps
-                .GetAsync(GameService.Gw2Mumble.CurrentMap.Id).ContinueWith(t =>
-                    {
-                        if (t.IsFaulted) return;
-                        var map = t.Result;
-                        _maps.Add(map);
-                        this.Presenter.Model.MapIds.Add(map.Id);
-                        CreateMapEntry(map.Id, _mapsPanel, OnMapClick);
-                    });
+                            .GetAsync(GameService.Gw2Mumble.CurrentMap.Id).ContinueWith(t =>
+                             {
+                                 if (t.IsFaulted) {
+                                     return;
+                                 }
+
+                                 var map = t.Result;
+                                 _maps.Add(map);
+                                 this.Presenter.Model.MapIds.Add(map.Id);
+                                 CreateMapEntry(map.Id, _mapsPanel, OnMapClick);
+                             });
         }
 
         private async void BtnExcludeMap_Click(object o, MouseEventArgs e)
         {
             GameService.Content.PlaySoundEffectByName("button-click");
-            if (this.Presenter.Model.ExcludedMapIds.Any(id => id.Equals(GameService.Gw2Mumble.CurrentMap.Id))) return;
+            if (this.Presenter.Model.ExcludedMapIds.Any(id => id.Equals(GameService.Gw2Mumble.CurrentMap.Id))) {
+                return;
+            }
             await ChatShorts.Instance.Gw2ApiManager.Gw2ApiClient.V2.Maps
-                .GetAsync(GameService.Gw2Mumble.CurrentMap.Id).ContinueWith(t =>
-                {
-                    if (t.IsFaulted) return;
-                    var map = t.Result;
-                    _maps.Add(map);
-                    this.Presenter.Model.ExcludedMapIds.Add(map.Id);
-                    CreateMapEntry(map.Id, _mapsExclusionPanel, OnExcludedMapClick);
-                });
+                            .GetAsync(GameService.Gw2Mumble.CurrentMap.Id).ContinueWith(t =>
+                             {
+                                 if (t.IsFaulted) {
+                                     return;
+                                 }
+
+                                 var map = t.Result;
+                                 _maps.Add(map);
+                                 this.Presenter.Model.ExcludedMapIds.Add(map.Id);
+                                 CreateMapEntry(map.Id, _mapsExclusionPanel, OnExcludedMapClick);
+                             });
         }
 
         private void CreateMapEntry(int mapId, FlowPanel parent, EventHandler<MouseEventArgs> clickAction)

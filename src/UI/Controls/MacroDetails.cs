@@ -73,8 +73,14 @@ namespace Nekres.Chat_Shorts.UI.Controls
         protected override async void OnClick(MouseEventArgs e)
         {
             GameService.Content.PlaySoundEffectByName("button-click");
-            if (_mouseOverEditButton && !this.Active) EditClick?.Invoke(this, e);
-            if (_mouseOverSendButton) await ChatShorts.Instance.ChatService.Send(this.Model.Text, this.Model.SquadBroadcast);
+            if (_mouseOverEditButton && !this.Active) {
+                this.EditClick?.Invoke(this, e);
+            }
+
+            if (_mouseOverSendButton) {
+                await ChatShorts.Instance.ChatService.Send(this.Model.Text, this.Model.SquadBroadcast);
+            }
+
             base.OnClick(e);
         }
 
@@ -95,13 +101,16 @@ namespace Nekres.Chat_Shorts.UI.Controls
             spriteBatch.DrawOnCtrl(this, editIcon, _editButtonBounds, Color.White);
 
             // Wrap text
-            var wrappedText = DrawUtil.WrapText(Content.DefaultFont14, this.Title, BUTTON_WIDTH - 40 - 20);
+            string wrappedText = DrawUtil.WrapText(Content.DefaultFont14, this.Title, BUTTON_WIDTH - 40 - 20);
             spriteBatch.DrawStringOnCtrl(this, wrappedText, Content.DefaultFont14, new Rectangle(89, 0, 216, this.Height - BOTTOMSECTION_HEIGHT), Color.White, false, true, 2);
 
             // Draw the user;
             _sendButtonBounds = new Rectangle(5, bounds.Height - BOTTOMSECTION_HEIGHT, USER_WIDTH, 35);
-            if (string.IsNullOrEmpty(this.Model.Text)) return;
-            var sendText = string.IsNullOrEmpty(this.Keys) ? "Click to send" : $"Click to send ({this.Keys})";
+            if (string.IsNullOrEmpty(this.Model.Text)) {
+                return;
+            }
+
+            string sendText = string.IsNullOrEmpty(this.Keys) ? "Click to send" : $"Click to send ({this.Keys})";
             spriteBatch.DrawStringOnCtrl(this, sendText, Content.DefaultFont14, _sendButtonBounds, Color.White, false, false, 0);
         }
     }
