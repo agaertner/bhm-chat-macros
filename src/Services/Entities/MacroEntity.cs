@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Nekres.Chat_Shorts.UI.Models
 {
@@ -44,8 +45,11 @@ namespace Nekres.Chat_Shorts.UI.Models
         [BsonField("gameMode")]
         public GameMode GameMode { get; set; }
 
-        [BsonField("text")]
+        [BsonField("text"), Obsolete("The property Text is obsolete.")]
         public string Text { get; set; }
+
+        [BsonField("textLines")]
+        public List<string> TextLines { get; set; }
 
         public MacroEntity(Guid id)
         {
@@ -56,11 +60,12 @@ namespace Nekres.Chat_Shorts.UI.Models
             this.PrimaryKey = Keys.None;
             this.Title = string.Empty;
             this.Text = string.Empty;
+            this.TextLines = new List<string>();
         }
 
         public static bool CanActivate(MacroEntity e)
         {
-            return (e.GameMode == MapUtil.GetCurrentGameMode() || e.GameMode == GameMode.All) &&
+            return e.TextLines != null && e.TextLines.Any() && (e.GameMode == MapUtil.GetCurrentGameMode() || e.GameMode == GameMode.All) &&
                    e.MapIds.Any(id => id == GameService.Gw2Mumble.CurrentMap.Id || !e.MapIds.Any()) &&
                    e.ExcludedMapIds.All(id => id != GameService.Gw2Mumble.CurrentMap.Id) &&
                    (!e.SquadBroadcast || GameService.Gw2Mumble.PlayerCharacter.IsCommander);

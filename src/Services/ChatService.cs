@@ -11,7 +11,6 @@ namespace Nekres.Chat_Shorts.Services
 {
     internal class ChatService : IDisposable
     {
-
         private DataService _dataService;
 
         private List<Macro> _activeMacros;
@@ -26,13 +25,19 @@ namespace Nekres.Chat_Shorts.Services
 
         private void OnMapChanged(object o, ValueEventArgs<int> e)
         {
-            if (!ChatShorts.Instance.Loaded) return;
+            if (!ChatShorts.Instance.Loaded) {
+                return;
+            }
+
             LoadMacros();
         }
 
         private void OnIsCommanderChanged(object o, ValueEventArgs<bool> e)
         {
-            if (!ChatShorts.Instance.Loaded) return;
+            if (!ChatShorts.Instance.Loaded) {
+                return;
+            }
+
             LoadMacros();
         }
 
@@ -54,10 +59,16 @@ namespace Nekres.Chat_Shorts.Services
         {
             var macro = _activeMacros.FirstOrDefault(x => x.Model.Id.Equals(model.Id));
             _activeMacros.RemoveAll(x => x.Model.Id.Equals(model.Id));
-            if (macro != null) macro.Activated -= OnMacroActivated;
+            if (macro != null) {
+                macro.Activated -= OnMacroActivated;
+            }
+
             macro?.Dispose();
             macro = Macro.FromModel(model);
-            if (!macro.CanActivate()) return;
+            if (!macro.CanActivate()) {
+                return;
+            }
+
             macro.Activated += OnMacroActivated;
             _activeMacros.Add(macro);
         }
@@ -65,28 +76,19 @@ namespace Nekres.Chat_Shorts.Services
         private async void OnMacroActivated(object o, EventArgs e)
         {
             var macro = (Macro)o;
-            await this.Send(macro.Model.Text, macro.Model.SquadBroadcast);
+            foreach (string textLine in macro.Model.TextLines)
+            {
+                await this.Send(textLine, macro.Model.SquadBroadcast);
+            }
         }
 
         public async Task Send(string text, bool squadBroadcast = false)
         {
-            if (IsBusy() || !IsTextValid(text)) return;
-            if (squadBroadcast && !GameService.Gw2Mumble.PlayerCharacter.IsCommander) return;
+            if (squadBroadcast && !GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
+                return;
+            }
+
             await ChatUtil.Send(text, squadBroadcast ? ChatShorts.Instance.SquadBroadcast.Value : ChatShorts.Instance.ChatMessage.Value);
-        }
-
-        private bool IsTextValid(string text)
-        {
-            return !string.IsNullOrEmpty(text) && text.Length < 200;
-            // More checks? (Symbols: https://wiki.guildwars2.com/wiki/User:MithranArkanere/Charset)
-        }
-
-        private bool IsBusy()
-        {
-            return !GameService.GameIntegration.Gw2Instance.Gw2IsRunning 
-                   || !GameService.GameIntegration.Gw2Instance.Gw2HasFocus 
-                   || !GameService.GameIntegration.Gw2Instance.IsInGame
-                   || GameService.Gw2Mumble.UI.IsTextInputFocused;
         }
 
         public void Dispose()

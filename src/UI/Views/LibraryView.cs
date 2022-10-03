@@ -90,7 +90,9 @@ namespace Nekres.Chat_Shorts.UI.Views
             };
             btnAddNew.Click += BtnAddNew_Click;
 
-            foreach (var model in this.Presenter.Model.MacroModels) this.Presenter.AddMacro(model);
+            foreach (var model in this.Presenter.Model.MacroModels) {
+                this.Presenter.AddMacro(model);
+            }
 
         }
 
@@ -102,25 +104,31 @@ namespace Nekres.Chat_Shorts.UI.Views
 
         private void OnSearchFilterChanged(object o, EventArgs e)
         {
-            var text = ((TextBox)o).Text;
+            string text = ((TextBox)o).Text;
             text = string.IsNullOrEmpty(text) ? text : text.ToLowerInvariant();
             this.MacroPanel.SortChildren<MacroDetails>((x, y) =>
             {
                 x.Visible = string.IsNullOrEmpty(text) || x.Title.ToLowerInvariant().Contains(text);
                 y.Visible = string.IsNullOrEmpty(text) || y.Title.ToLowerInvariant().Contains(text);
-                if (!x.Visible || !y.Visible) return 0;
+                if (!x.Visible || !y.Visible) {
+                    return 0;
+                }
+
                 return string.Compare(x.Title, y.Title, StringComparison.InvariantCultureIgnoreCase);
             });
         }
 
         private void OnSortChanged(object o, ValueChangedEventArgs e)
         {
-            var filter = ((Dropdown)o).SelectedItem;
+            string filter = ((Dropdown)o).SelectedItem;
             this.MacroPanel.SortChildren<MacroDetails>((x, y) =>
             {
                 x.Visible = filter.Equals(FILTER_ALL) || x.Model.Mode.ToString().Equals(filter) || x.Model.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id);
                 y.Visible = filter.Equals(FILTER_ALL) || y.Model.Mode.ToString().Equals(filter) || y.Model.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id); ;
-                if (!x.Visible || !y.Visible) return 0;
+                if (!x.Visible || !y.Visible) {
+                    return 0;
+                }
+
                 return string.Compare(x.Title, y.Title, StringComparison.InvariantCultureIgnoreCase);
             });
         }

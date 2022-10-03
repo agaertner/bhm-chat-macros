@@ -2,10 +2,8 @@
 using Blish_HUD.Input;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Nekres.Chat_Shorts.UI.Controls;
 
 namespace Nekres.Chat_Shorts.UI.Models
 {
@@ -51,13 +49,15 @@ namespace Nekres.Chat_Shorts.UI.Models
             }
         }
 
-        private List<string> _messages;
-        public List<string> Messages
+        private ObservableCollection<string> _textLines;
+        public ObservableCollection<string> TextLines
         {
-            get => _messages;
+            get => _textLines;
             set
             {
-
+                if (_textLines != null && _textLines.Equals(value)) return;
+                _textLines = value;
+                _textLines.CollectionChanged += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -126,6 +126,7 @@ namespace Nekres.Chat_Shorts.UI.Models
             this.KeyBinding.Enabled = false;
             this.Title = "Empty Macro";
             this.Text = string.Empty;
+            this.TextLines = new ObservableCollection<string>();
         }
 
         public MacroModel() : this(Guid.NewGuid(), new KeyBinding(Keys.None))
@@ -139,11 +140,12 @@ namespace Nekres.Chat_Shorts.UI.Models
                 Title = this.Title,
                 GameMode = this.Mode,
                 Text = this.Text,
+                TextLines = this.TextLines.ToList(),
                 MapIds = this.MapIds.ToList(),
                 ExcludedMapIds = this.ExcludedMapIds.ToList(),
                 SquadBroadcast = this.SquadBroadcast,
                 ModifierKey = this.KeyBinding.ModifierKeys,
-                PrimaryKey = this.KeyBinding.PrimaryKey,
+                PrimaryKey = this.KeyBinding.PrimaryKey
             };
         }
 
@@ -155,6 +157,7 @@ namespace Nekres.Chat_Shorts.UI.Models
                 Mode = entity.GameMode,
                 SquadBroadcast = entity.SquadBroadcast,
                 Text = entity.Text,
+                TextLines = new ObservableCollection<string>(entity.TextLines),
                 MapIds = new ObservableCollection<int>(entity.MapIds),
                 ExcludedMapIds = new ObservableCollection<int>(entity.ExcludedMapIds)
             };

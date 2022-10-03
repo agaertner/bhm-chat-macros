@@ -57,7 +57,8 @@ namespace Nekres.Chat_Shorts
 
         protected override void DefineSettings(SettingCollection settings)
         {
-            var controlSettings = settings.AddSubCollection("Control Options (User Interface)", true, false);
+            var controlSettings = settings.AddSubCollection("Control Options (User Interface)", true, false,
+                () => "Control Options (User Interface)");
             ChatMessage = controlSettings.DefineSetting("chatMessageKeyBinding", new KeyBinding(Keys.Enter),
                 () => "Chat Message",
                 () => "Give focus to the chat edit box.");
@@ -92,7 +93,8 @@ namespace Nekres.Chat_Shorts
             };
             _cornerIcon = new CornerIcon
             {
-                Icon = ContentsManager.GetTexture("corner_icon.png")
+                Icon = ContentsManager.GetTexture("corner_icon.png"),
+                BasicTooltipText = this.Name
             };
             _cornerIcon.Click += OnModuleIconClick;
 

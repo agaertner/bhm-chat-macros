@@ -63,6 +63,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\submodules\bhud-extended\**\*.cs" Link="_Submodules\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Remove="..\submodules\**\AssemblyInfo.cs"/>
     <EmbeddedResource Include="..\submodules\bhud-extended\**\Resources\*.png" Link="_Submodules\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
   <ItemGroup>
     <Compile Include="ChatShortsModule.cs" />
     <Compile Include="Core\Macro.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ChatService.cs" />
     <Compile Include="Services\DataService.cs" />
     <Compile Include="UI\Controls\ContextMenuStripItemSeparator.cs" />
