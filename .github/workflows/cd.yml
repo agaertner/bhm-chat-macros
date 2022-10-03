@@ -73,8 +73,9 @@ jobs:
               uses: TriPSs/conventional-changelog-action@v3.15.0
               with:
                 skip-commit: 'true'
-                output-file: 'false'
                 skip-version-file: 'true'
+                git-path: 'src/**/*'
+                git-push: 'false'
                 
             - name: Create Release
               uses: svenstaro/upload-release-action@2.3.0
