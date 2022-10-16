@@ -58,6 +58,7 @@ jobs:
                 value: ${{ steps.gitversion.outputs.majorMinorPatch }}
 
             - name: Commit version changes
+              shell: pwsh
               run: |
                 git config --local user.email "action@github.com"
                 git config --local user.name "GitHub Action"
@@ -78,12 +79,14 @@ jobs:
             
             - name: Build Solution
               working-directory: ./src
-              run: msbuild -p:Configuration=Release -p:VERSIONED_BUILD=${{ steps.gitversion.outputs.semVer }}
+              shell: pwsh
+              run: msbuild -p:Configuration=Debug -p:VERSIONED_BUILD=${{ steps.gitversion.outputs.semVer }}
 
             # Required to find output module BHM without glob pattern.
             - name: Get module *.csproj name
               id: csproj
               working-directory: ./src
+              shell: pwsh
               run: Write-Output "::set-output name=name::$((Get-ChildItem $dir -File '*.csproj').Basename)"
             
             # Used as prefix in module BHM naming scheme.
@@ -96,26 +99,30 @@ jobs:
 
             - name: Create Changelog
               id: changelog
-              uses: TriPSs/conventional-changelog-action@v3.15.0
+              uses: actions/github-script@v6.3.1
+              env:
+                COMMITS: ${{ toJSON(github.event.commits) }}
               with:
-                github-token: ${{ github.token }}
-                skip-commit: 'true'
-                skip-version-file: 'true'
-                git-path: 'src/**/*'
-                git-push: 'false'
+                result-encoding: string
+                script: |
+                    const commits = JSON.parse(process.env.COMMITS);
+                    var lines = "## What’s Changed\n\n";
+                    for (const commit of commits) {
+                      lines += "- " + commit.message + " (" + commit.id + ") @" + commit.author.username + "\n"
+                    }
+                    return lines
                 
             - name: Create Pre-Release
               uses: svenstaro/upload-release-action@2.3.0
-              if: ${{ steps.changelog.outputs.skipped == 'false' }}
               with:
                 repo_token: ${{ github.token }}
                 # Using 'file_glob' disables 'asset_name' renaming.
                 # We use the *.csproj name to workaround this.
                 file_glob: 'false'
-                file: src/bin/Release/${{ steps.csproj.outputs.name }}.bhm
+                file: src/bin/Debug/${{ steps.csproj.outputs.name }}.bhm
                 # Rename the module BHM to release naming scheme.
                 asset_name: '${{ steps.namespace.outputs.prop }}-${{ steps.gitversion.outputs.fullSemVer }}.bhm'
                 overwrite: true
                 tag: v${{ steps.gitversion.outputs.fullSemVer }}
                 prerelease: true
-                body: ${{ steps.changelog.outputs.clean_changelog }}
+                body: ${{ steps.changelog.outputs.result }}
