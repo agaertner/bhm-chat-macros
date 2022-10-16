@@ -42,6 +42,7 @@ jobs:
             - name: Get module *.csproj name
               id: csproj
               working-directory: ./src
+              shell: pwsh
               run: Write-Output "::set-output name=name::$((Get-ChildItem $dir -File '*.csproj').Basename)"
             
             # Used as prefix in module BHM naming scheme.
@@ -62,25 +63,37 @@ jobs:
             # 'msbuild restore' does not support NuGet package.config format
             - name: Restore NuGet packages
               working-directory: ./src
+              shell: pwsh
               run: nuget restore
             
             - name: Build Solution
               working-directory: ./src
+              shell: pwsh
               run: msbuild -p:Configuration=Release -p:VERSIONED_BUILD=${{ steps.version.outputs.prop }}
 
+            - name: Get PR Commits
+              id: 'get-pr-commits'
+              uses: tim-actions/get-pr-commits@v1.2.0
+              with:
+                token: ${{ github.token }}
+                
             - name: Create Changelog
               id: changelog
-              uses: TriPSs/conventional-changelog-action@v3.15.0
+              uses: actions/github-script@v6.3.1
+              env:
+                COMMITS: ${{ steps.get-pr-commits.outputs.commits }}
               with:
-                github-token: ${{ github.token }}
-                skip-commit: 'true'
-                skip-version-file: 'true'
-                git-path: 'src/**/*'
-                git-push: 'false'
+                result-encoding: string
+                script: |
+                    const commits = JSON.parse(process.env.COMMITS);
+                    var lines = "## What’s Changed\n\n";
+                    for (const commit of commits) {
+                      lines += commit.commit.message + " (" + commit.sha + ") @" + commit.author.login + "\n"
+                    }
+                    return lines
                 
             - name: Create Release
               uses: svenstaro/upload-release-action@2.3.0
-              if: ${{ steps.changelog.outputs.skipped == 'false' }}
               with:
                 repo_token: ${{ github.token }}
                 # Using 'file_glob' disables 'asset_name' renaming.
@@ -92,4 +105,5 @@ jobs:
                 overwrite: true
                 tag: v${{ steps.version.outputs.prop }}
                 prerelease: false
-                body: ${{ steps.changelog.outputs.clean_changelog }}
+                release_name: 'v${{ steps.version.outputs.prop }}'
+                body: ${{ steps.changelog.outputs.result }}
