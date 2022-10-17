@@ -69,7 +69,8 @@ namespace Nekres.Chat_Shorts.UI.Views
                 Parent   = buildPanel,
                 Size     = new Point(buildPanel.ContentRegion.Width, buildPanel.ContentRegion.Height / 2 - 60),
                 Location = new Point(0,                              editTitle.Bottom                    + Panel.BOTTOM_PADDING),
-
+                ShowTint = true,
+                ShowBorder = true
             };
 
             foreach (string message in this.Presenter.Model.TextLines) {
@@ -158,7 +159,7 @@ namespace Nekres.Chat_Shorts.UI.Views
                 Width = buildPanel.ContentRegion.Width / 2,
                 Height = buildPanel.ContentRegion.Height - textFlowPanel.Height - 100,
                 Location = new Point(_mapsExclusionPanel.Right + 10, _mapsExclusionPanel.Location.Y),
-                ShowBorder = true
+                ShowBorder = false
             };
             _settingsPanel.Show(new SettingsView(settings));
 
