@@ -58,6 +58,7 @@ namespace Nekres.Chat_Shorts.UI.Models
                 if (_textLines != null && _textLines.Equals(value)) return;
                 _textLines = value;
                 _textLines.CollectionChanged += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
+                Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -70,6 +71,7 @@ namespace Nekres.Chat_Shorts.UI.Models
                 if (_mapIds != null && _mapIds.Equals(value)) return;
                 _mapIds = value;
                 _mapIds.CollectionChanged += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
+                Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -82,6 +84,7 @@ namespace Nekres.Chat_Shorts.UI.Models
                 if (_excludedMapIds != null && _excludedMapIds.Equals(value)) return;
                 _excludedMapIds = value;
                 _excludedMapIds.CollectionChanged += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
+                Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 

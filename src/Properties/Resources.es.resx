@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Unable to send message \&quot;{0}\&quot; which exceeds limit of {1} characters." xml:space="preserve">
-    <value>No se ha podido enviar el mensaje &quot;{0}\a&quot; que excede el límite de {1} caracteres.</value>
+  <data name="Message exceeds limit of {0} characters." xml:space="preserve">
+    <value>El mensaje excede el límite de {0} caracteres.</value>
   </data>
 </root>

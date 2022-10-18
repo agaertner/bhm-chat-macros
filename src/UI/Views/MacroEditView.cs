@@ -9,10 +9,13 @@ using Nekres.Chat_Shorts.UI.Models;
 using Nekres.Chat_Shorts.UI.Presenters;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Blish_HUD.Extended;
 using Blish_HUD.Settings;
 using Blish_HUD.Settings.UI.Views;
+using Nekres.Chat_Shorts.Properties;
 
 namespace Nekres.Chat_Shorts.UI.Views
 {
@@ -25,10 +28,15 @@ namespace Nekres.Chat_Shorts.UI.Views
         private FlowPanel _mapsExclusionPanel;
         private ViewContainer _settingsPanel;
 
+        private List<TextBox> _messages;
+
+        private string _prevTextLineSaved;
+
         public MacroEditView(MacroModel model)
         {
             this.WithPresenter(new MacroEditPresenter(this, model));
-            _maps = new List<Map>();
+            _maps     = new List<Map>();
+            _messages = new List<TextBox>();
         }
 
         protected override async Task<bool> Load(IProgress<string> progress)
@@ -66,22 +74,29 @@ namespace Nekres.Chat_Shorts.UI.Views
             editTitle.InputFocusChanged += EditTitle_InputFocusChanged;
 
             var textFlowPanel = new FlowPanel {
-                Parent   = buildPanel,
-                Size     = new Point(buildPanel.ContentRegion.Width, buildPanel.ContentRegion.Height / 2 - 60),
-                Location = new Point(0,                              editTitle.Bottom                    + Panel.BOTTOM_PADDING),
-                ShowTint = true,
-                ShowBorder = true
+                Parent         = buildPanel,
+                Size           = new Point(buildPanel.ContentRegion.Width, buildPanel.ContentRegion.Height / 2 - 60),
+                Location       = new Point(0,                              editTitle.Bottom                    + Panel.BOTTOM_PADDING),
+                ControlPadding = new Vector2(5, 5),
+                ShowBorder     = true
             };
 
-            foreach (string message in this.Presenter.Model.TextLines) {
+            for (int i = 0; i < 6; i++) {
                 var inputBox = new TextBox {
                     Parent          = textFlowPanel,
                     Size            = new Point(textFlowPanel.Width, 32),
-                    PlaceholderText = "/say Hello World!",
-                    Text = message
+                    PlaceholderText = string.Empty,
+                    Text = string.Empty,
+                    MaxLength = ChatUtil.MAX_MESSAGE_LENGTH
                 };
 
                 inputBox.InputFocusChanged += EditText_InputFocusChanged;
+                _messages.Add(inputBox);
+
+                if (!this.Presenter.Model.TextLines.TryGet(i, out var line)) {
+                    continue;
+                }
+                inputBox.Text = line;
             }
 
             // MapIds selection
@@ -195,9 +210,19 @@ namespace Nekres.Chat_Shorts.UI.Views
         {
             var ctrl = (TextBox)o;
             if (ctrl.Focused) {
+                _prevTextLineSaved = ctrl.Text;
                 return;
             }
-            this.Presenter.Model.TextLines.Add(ctrl.Text);
+
+            if (!ChatUtil.IsLengthValid(ctrl.Text)) {
+                ScreenNotification.ShowNotification(string.Format(Resources.Message_exceeds_limit_of__0__characters_, ChatUtil.MAX_MESSAGE_LENGTH), ScreenNotification.NotificationType.Error);
+                ctrl.Text = _prevTextLineSaved;
+                return;
+            }
+
+            ctrl.Text = ctrl.Text?.TrimEnd();
+
+            this.Presenter.Model.TextLines = new ObservableCollection<string>(_messages.Where(x => !string.IsNullOrEmpty(x.Text)).Select(x => x.Text));
         }
 
         private async void BtnIncludeMap_Click(object o, MouseEventArgs e)
@@ -212,7 +237,6 @@ namespace Nekres.Chat_Shorts.UI.Views
                                  if (t.IsFaulted) {
                                      return;
                                  }
-
                                  var map = t.Result;
                                  _maps.Add(map);
                                  this.Presenter.Model.MapIds.Add(map.Id);
