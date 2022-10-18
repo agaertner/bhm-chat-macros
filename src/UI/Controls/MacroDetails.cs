@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Input;
@@ -77,8 +78,8 @@ namespace Nekres.Chat_Shorts.UI.Controls
                 this.EditClick?.Invoke(this, e);
             }
 
-            if (_mouseOverSendButton) {
-                await ChatShorts.Instance.ChatService.Send(this.Model.Text, this.Model.SquadBroadcast);
+            if (_mouseOverSendButton) { 
+                await ChatShorts.Instance.ChatService.Send(this.Model.TextLines.ToArray(), this.Model.SquadBroadcast);
             }
 
             base.OnClick(e);

@@ -61,11 +61,11 @@ namespace Nekres.Chat_Shorts.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to send message \&quot;{0}\&quot; which exceeds limit of {1} characters..
+        ///   Looks up a localized string similar to Message exceeds limit of {0} characters..
         /// </summary>
-        internal static string Unable_to_send_message____0____which_exceeds_limit_of__1__characters_ {
+        internal static string Message_exceeds_limit_of__0__characters_ {
             get {
-                return ResourceManager.GetString("Unable to send message \\\"{0}\\\" which exceeds limit of {1} characters.", resourceCulture);
+                return ResourceManager.GetString("Message exceeds limit of {0} characters.", resourceCulture);
             }
         }
     }

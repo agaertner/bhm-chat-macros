@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Unable to send message \&quot;{0}\&quot; which exceeds limit of {1} characters." xml:space="preserve">
-    <value>{1}자 제한을 초과하는 \&quot;{0}\&quot; 메시지를 보낼 수 없습니다.</value>
+  <data name="Message exceeds limit of {0} characters." xml:space="preserve">
+    <value>메시지가 {0}자 한도를 초과했습니다.</value>
   </data>
 </root>
