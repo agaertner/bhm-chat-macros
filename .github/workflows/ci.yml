@@ -60,6 +60,13 @@ jobs:
                 git add -A
                 git commit -m "(skip): 🔖 bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
                 
+            - name: Push version changes
+              uses: ad-m/github-push-action@v0.6.0
+              with:
+                github_token: ${{ github.token }}
+                branch: ${{ github.ref }}
+                tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
+                
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v5-beta
               with:
