@@ -32,9 +32,7 @@ jobs:
               with:
                 submodules: 'true'
                 fetch-depth: 0
-              run:
-                git checkout -b actions/version-bump
-                git pull
+                ref: actions/version-bump
 
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
