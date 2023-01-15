@@ -1,9 +1,8 @@
 name: Staging
 
-on:
-  pull_request:
-    paths:
-      - 'src/**/*'
+on: [pull_request, pull_request_target]
+  paths:
+    - 'src/**/*'
 
 concurrency:
   group: test-pr-${{ github.head_ref }}
