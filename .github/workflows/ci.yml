@@ -46,7 +46,7 @@ jobs:
                 updateAssemblyInfoFilename: src/Properties/AssemblyInfo.cs
 
             - name: Bump version in manifest.json
-              uses: jossef/action-set-json-field@v2
+              uses: jossef/action-set-json-field@v2.1
               with:
                 file: src/manifest.json
                 field: version
@@ -61,7 +61,7 @@ jobs:
                 git commit -m "(skip): 🔖 bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
                 
             - name: Create Pull Request
-              uses: peter-evans/create-pull-request@v4.2.3
+              uses: peter-evans/create-pull-request@v5-beta
               with:
                 branch: dev
                 delete-branch: true
