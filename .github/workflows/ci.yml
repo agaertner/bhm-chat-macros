@@ -64,13 +64,14 @@ jobs:
               uses: ad-m/github-push-action@v0.6.0
               with:
                 github_token: ${{ github.token }}
-                branch: ${{ github.ref }}
+                branch: actions/version-bump-${{ github.sha }}
                 tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
                 
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v5-beta
               with:
                 branch: dev
+                base: actions/version-bump-${{ github.sha }}
                 delete-branch: true
                 title: "🔖 Bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
                 body: "Automated version bump by GitHub action."
