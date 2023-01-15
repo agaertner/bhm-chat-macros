@@ -35,7 +35,7 @@ jobs:
 
             - name: Create new branch to PR from
               run: 
-                git checkout -b actions/version-bump-${{ github.head_ref }}
+                git checkout -b actions/version-bump-${{ github.sha }}
                 git pull
                 
             - name: Bump version in AssemblyInfo.cs
