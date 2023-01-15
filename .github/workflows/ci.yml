@@ -26,16 +26,19 @@ jobs:
               uses: gittools/actions/gitversion/setup@v0.9.7
               with:
                 versionSpec: '5.x'
+
+            - name: Create new branch to PR from
+              continue-on-error: true
+              run: 
+                git checkout -b actions/version-bump origin/dev
+                git push -u origin actions/version-bump:actions/version-bump
                 
             - name: Checkout
               uses: actions/checkout@v3.3.0
               with:
-                submodules: 'true'
+                ref: actions/version-bump
+                submodules: 'false'
                 fetch-depth: 0
-
-            - name: Create new branch to PR from
-              run: 
-                git checkout -b actions/version-bump origin/dev
                 
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
