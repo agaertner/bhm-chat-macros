@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
     build-prerelease:
-        name: Bump Version / Build Pre-Release
+        name: Bump Version / Create Pull Request
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         runs-on: windows-latest
         steps:
@@ -28,12 +28,16 @@ jobs:
                 versionSpec: '5.x'
                 
             - name: Checkout
-              uses: actions/checkout@v3.0.2
+              uses: actions/checkout@v3.3.0
               with:
                 submodules: 'true'
                 fetch-depth: 0
-                ref: actions/version-bump
 
+            - name: Create new branch to PR from
+              run: 
+                git checkout -b actions/version-bump-
+                git pull
+                
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
               uses: gittools/actions/gitversion/execute@v0.9.7
@@ -58,4 +62,10 @@ jobs:
                 git commit -m "(skip): 🔖 bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
                 
             - name: Create Pull Request
-              run: gh pr create -B dev -H actions/version-bump --title 'Auto Version Bump' --body 'Bumped version to ${{ steps.gitversion.outputs.fullSemVer }}. Must **not** be merged if no release is being made yet.'
+              uses: peter-evans/create-pull-request@v4.2.3
+              branch: dev
+              delete-branch: true
+              title: "🔖 Bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
+              body: "Automated version bump by GitHub action."
+              labels: Version Bump
+              
