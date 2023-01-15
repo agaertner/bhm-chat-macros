@@ -1,13 +1,15 @@
 name: Deployment
 
-on: [pull_request, pull_request_target]
-  branches:
-    - main
-  paths:
-    - 'src/**/*'
-  tags-ignore:
-    - v*
-  types: [closed]
+on: 
+  - pull_request
+  - pull_request_target
+    branches:
+      - main
+    paths:
+      - 'src/**/*'
+    tags-ignore:
+      - v*
+    types: [closed]
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
