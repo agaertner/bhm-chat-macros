@@ -33,7 +33,7 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Create new branch to PR from
+            - name: Create branch 'actions/version-bump'
               continue-on-error: true
               run: 
                 git checkout -b actions/version-bump origin/dev
@@ -76,7 +76,7 @@ jobs:
                 branch: actions/version-bump
                 tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
                 
-            - name: Create Pull Request
+            - name: Create Pull Request 'dev ← actions/version-bump'
               uses: peter-evans/create-pull-request@v5-beta
               with:
                 branch: actions/version-bump
