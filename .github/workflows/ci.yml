@@ -64,7 +64,7 @@ jobs:
               uses: ad-m/github-push-action@v0.6.0
               with:
                 github_token: ${{ github.token }}
-                branch: actions/version-bump-${{ github.sha }}
+                branch: actions/version-bump
                 tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
                 
             - name: Create Pull Request
