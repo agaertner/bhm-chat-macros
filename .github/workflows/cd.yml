@@ -55,7 +55,7 @@ jobs:
 
             - name: Get manifest version
               id: version
-              uses: notiz-dev/github-action-json-property@v0.2.0
+              uses: notiz-dev/github-action-json-property@master
               with: 
                 path: 'src/manifest.json'
                 prop_path: 'version'
@@ -73,13 +73,13 @@ jobs:
 
             - name: Get PR Commits
               id: 'get-pr-commits'
-              uses: tim-actions/get-pr-commits@v1.2.0
+              uses: soimkim/get-pr-commits@master
               with:
                 token: ${{ github.token }}
                 
             - name: Create Changelog
               id: changelog
-              uses: actions/github-script@v6.3.1
+              uses: actions/github-script@v6.3.3
               env:
                 COMMITS: ${{ steps.get-pr-commits.outputs.commits }}
               with:
@@ -93,7 +93,7 @@ jobs:
                     return lines
                 
             - name: Create Release
-              uses: svenstaro/upload-release-action@2.3.0
+              uses: svenstaro/upload-release-action@2.4.0
               with:
                 repo_token: ${{ github.token }}
                 # Using 'file_glob' disables 'asset_name' renaming.
