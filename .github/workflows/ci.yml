@@ -35,7 +35,7 @@ jobs:
 
             - name: Create new branch to PR from
               run: 
-                git checkout -b actions/version-bump-${{ github.sha }} origin/dev
+                git checkout -b actions/version-bump origin/dev
                 
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
@@ -70,9 +70,8 @@ jobs:
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v5-beta
               with:
-                branch: actions/version-bump-${{ github.sha }} 
+                branch: actions/version-bump
                 base: dev
-                delete-branch: true
                 title: "🔖 Bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
                 body: "Automated version bump by GitHub action."
                 labels: Version Bump
