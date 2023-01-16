@@ -20,7 +20,7 @@ concurrency:
 jobs:
     build-prerelease:
         name: Bump Version / Create Pull Request
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }} && github.event_name != 'pull_request'
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }} && github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
         runs-on: windows-latest
         steps:
             - name: Install GitVersion
@@ -36,9 +36,9 @@ jobs:
                 
             - name: Verify or Create new branch 'actions/version-bump'
               continue-on-error: true
-              run: 
-                git checkout -b actions/version-bump origin/dev
-                git push
+              run: |
+                git checkout -b actions/version-bump
+                git push --set-upstream origin actions/version-bump
                 
             - name: Checkout 'actions/version-bump'
               uses: actions/checkout@v3.3.0
