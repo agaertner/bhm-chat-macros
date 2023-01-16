@@ -48,8 +48,8 @@ jobs:
                 
             - name: Fetch manifest.json
               run: |
-                git fetch ${{ github.head_ref }}
-                git reset --hard ${{ github.head_ref }}
+                git fetch origin/dev
+                git reset --hard origin/dev
                 git restore --source origin/dev -- src/manifest.json
                 
             - name: Bump version in AssemblyInfo.cs
