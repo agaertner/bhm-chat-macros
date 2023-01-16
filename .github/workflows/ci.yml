@@ -46,6 +46,12 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
+            - name: Fetch manifest.json
+              run: 
+                git fetch ${{ github.head_ref }} actions/version-bump
+                git reset --hard ${{ github.head_ref }}
+                git restore --source origin/dev -- src/manifest.json
+                
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
               uses: gittools/actions/gitversion/execute@v0.9.15

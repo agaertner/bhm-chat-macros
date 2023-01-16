@@ -49,7 +49,7 @@ jobs:
             # Used as prefix in module BHM naming scheme.
             - name: Get manifest namespace
               id: namespace
-              uses: notiz-dev/github-action-json-property@release
+              uses: notiz-dev/github-action-json-property@master
               with: 
                 path: 'src/manifest.json'
                 prop_path: 'namespace'
