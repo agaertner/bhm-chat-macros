@@ -157,11 +157,11 @@ namespace Nekres.Chat_Shorts
             {
                 var entry = new ContextMenuStripItemWithModel<MacroModel>(model)
                 {
-                    Text = model.Title,
-                    Parent = _moduleContextMenu,
-                    BasicTooltipText = model.Text
+                    Text             = model.Title,
+                    Parent           = _moduleContextMenu,
+                    BasicTooltipText = string.Join("\n", model.TextLines)
                 };
-                entry.Click += async (_, _) => await ChatService.Send(model.Text, model.SquadBroadcast);
+                entry.Click += async (_, _) => await ChatService.Send(model.TextLines.ToArray(), model.SquadBroadcast);
             }
 
             if (!prevVisible.GetValueOrDefault()) return;

@@ -1,19 +1,25 @@
 ﻿using Blish_HUD;
+using Blish_HUD.Controls;
 using Blish_HUD.Extended;
 using Nekres.Chat_Shorts.Core;
+using Nekres.Chat_Shorts.Properties;
 using Nekres.Chat_Shorts.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nekres.Chat_Shorts.Services
-{
+namespace Nekres.Chat_Shorts.Services {
     internal class ChatService : IDisposable
     {
         private DataService _dataService;
 
         private List<Macro> _activeMacros;
+
+        private bool isWorking;
+
+        private CancellationTokenSource workerToken;
 
         public ChatService(DataService dataService)
         {
@@ -76,23 +82,43 @@ namespace Nekres.Chat_Shorts.Services
         private async void OnMacroActivated(object o, EventArgs e)
         {
             var macro = (Macro)o;
-            foreach (string textLine in macro.Model.TextLines)
-            {
-                await this.Send(textLine, macro.Model.SquadBroadcast);
-            }
+            await this.Send(macro.Model.TextLines.ToArray(), macro.Model.SquadBroadcast);
         }
 
-        public async Task Send(string text, bool squadBroadcast = false)
-        {
+        public async Task Send(string[] textLines, bool squadBroadcast = false) {
+            if (isWorking) {
+                workerToken?.Cancel();
+                ScreenNotification.ShowNotification("Message sequence canceled.");
+                return;
+            }
             if (squadBroadcast && !GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
                 return;
             }
 
-            await ChatUtil.Send(text, squadBroadcast ? ChatShorts.Instance.SquadBroadcast.Value : ChatShorts.Instance.ChatMessage.Value);
+            isWorking   = true;
+            workerToken = new CancellationTokenSource();
+            var ct = workerToken.Token;
+            await Task.Factory.StartNew(() => {
+                if (ct.IsCancellationRequested) {
+                    isWorking = false;
+                    return;
+                };
+
+                foreach (string textLine in textLines) {
+                    ChatUtil.Send(textLine, squadBroadcast ? ChatShorts.Instance.SquadBroadcast.Value : ChatShorts.Instance.ChatMessage.Value);
+
+                    if (ct.IsCancellationRequested) {
+                        break;
+                    }
+                }
+                isWorking   = false;
+            }, ct, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         public void Dispose()
         {
+            workerToken?.Cancel();
+            workerToken?.Dispose();
             foreach (var macro in _activeMacros)
             {
                 macro.Activated -= OnMacroActivated;
