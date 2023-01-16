@@ -14,7 +14,7 @@ env:
   GITHUB_TOKEN: ${{ github.token }}
 
 concurrency:
-  group: versioned-release
+  group: version-bump
   cancel-in-progress: true
 
 jobs:
