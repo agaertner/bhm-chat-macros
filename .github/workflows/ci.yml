@@ -36,7 +36,7 @@ jobs:
                 
             - name: Verify or Create new branch 'actions/version-bump'
               continue-on-error: true
-              run: 
+              run: |
                 git checkout -b actions/version-bump origin/dev
                 git push
                 
