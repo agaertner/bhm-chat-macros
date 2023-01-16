@@ -89,7 +89,7 @@ jobs:
               with:
                 branch: actions/version-bump
                 base: dev
-                title: "🔖 Bump version to ${{ steps.gitversion.outputs.fullSemVer }}"
+                title: "🔖 Bump Version"
                 body: "Automated version bump by GitHub action."
                 labels: Version Bump
               
