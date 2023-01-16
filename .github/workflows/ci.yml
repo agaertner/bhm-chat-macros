@@ -81,6 +81,7 @@ jobs:
                 github_token: ${{ github.token }}
                 branch: actions/version-bump
                 tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
+                force: true
                 
             - name: Create Pull Request 'dev ← actions/version-bump'
               uses: peter-evans/create-pull-request@v5-beta
