@@ -48,7 +48,7 @@ jobs:
                 
             - name: Fetch manifest.json
               run: |
-                git fetch origin/dev
+                git fetch origin dev
                 git reset --hard origin/dev
                 git restore --source origin/dev -- src/manifest.json
                 
