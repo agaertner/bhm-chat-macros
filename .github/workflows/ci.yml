@@ -6,6 +6,7 @@ on:
       - dev
     paths:
       - 'src/**/*'
+      - 'submodules/**/*'
     tags-ignore:
       - v*
 
@@ -46,7 +47,7 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Fetch or Reset to latest 'dev'
+            - name: Fetch and Reset to latest 'dev'
               run: |
                 git fetch origin dev
                 git reset --hard origin/dev

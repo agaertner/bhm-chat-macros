@@ -5,6 +5,7 @@ on:
   pull_request_target:
     paths:
       - 'src/**/*'
+      - 'submodules/**/*'
 
 concurrency:
   group: test-pr-${{ github.head_ref }}
