@@ -2,6 +2,9 @@ name: Staging
 
 on: 
   pull_request:
+    paths:
+      - 'src/**/*'
+      - 'submodules/**/*'
   pull_request_target:
     paths:
       - 'src/**/*'
