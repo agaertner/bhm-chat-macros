@@ -47,7 +47,7 @@ jobs:
                 fetch-depth: 0
                 
             - name: Fetch manifest.json
-              run: 
+              run: |
                 git fetch ${{ github.head_ref }} actions/version-bump
                 git reset --hard ${{ github.head_ref }}
                 git restore --source origin/dev -- src/manifest.json
