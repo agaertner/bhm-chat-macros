@@ -33,7 +33,7 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Create branch 'actions/version-bump'
+            - name: Verify or Create new branch 'actions/version-bump'
               continue-on-error: true
               run: 
                 git checkout -b actions/version-bump origin/dev
@@ -46,7 +46,7 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Fetch manifest.json
+            - name: Fetch or Reset to latest 'dev'
               run: |
                 git fetch origin dev
                 git reset --hard origin/dev
@@ -83,7 +83,7 @@ jobs:
                 tags: ${{ env.REPO }}:latest,${{ env.REPO }}:v${{ steps.gitversion.outputs.fullSemVer }}
                 force: true
                 
-            - name: Create Pull Request 'dev ← actions/version-bump'
+            - name: Update or Create PR 'dev ← actions/version-bump'
               uses: peter-evans/create-pull-request@v5-beta
               with:
                 branch: actions/version-bump
