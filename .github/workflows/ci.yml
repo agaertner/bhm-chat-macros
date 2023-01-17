@@ -39,7 +39,7 @@ jobs:
               run: |
                 git push origin --delete actions/version-bump
                 git fetch origin --prune
-                git branch --delete --remotes origin/actions/version-bump
+                git branch --delete --remotes actions/version-bump
                 git checkout -b actions/version-bump
                 git push --set-upstream origin actions/version-bump
                 
