@@ -12,7 +12,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-
+  
 concurrency:
   group: version-bump
   cancel-in-progress: true
@@ -34,9 +34,12 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Verify or Create new branch 'actions/version-bump'
+            - name: Recreate new branch 'actions/version-bump'
               continue-on-error: true
               run: |
+                git push origin --delete actions/version-bump
+                git fetch origin --prune
+                git branch --delete --remotes origin/actions/version-bump
                 git checkout -b actions/version-bump
                 git push --set-upstream origin actions/version-bump
                 
@@ -47,11 +50,11 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
                 
-            - name: Fetch and Reset to latest 'dev'
-              run: |
-                git fetch origin dev
-                git reset --hard origin/dev
-                git restore --source origin/dev -- src/manifest.json
+            #- name: Fetch and Reset to latest 'dev'
+            #  run: |
+            #    git fetch origin dev
+            #    git reset --hard origin/dev
+            #    git restore --source origin/dev -- src/manifest.json
                 
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
