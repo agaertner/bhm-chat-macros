@@ -44,7 +44,7 @@ jobs:
               id: get_csproj
               working-directory: ./src
               shell: pwsh
-              run: Write-Output "name=$((Get-ChildItem $dir -File '*.csproj').Basename)" >> $GITHUB_OUTPUT
+              run: echo "name=$((Get-ChildItem $dir -File '*.csproj').Basename)" >> $env:GITHUB_OUTPUT
             
             # Used as prefix in module BHM naming scheme.
             - name: Get manifest namespace
