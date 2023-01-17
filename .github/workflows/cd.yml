@@ -10,15 +10,6 @@ on:
     tags-ignore:
       - v*
     types: [closed]
-  pull_request_target:
-    branches:
-      - main
-    paths:
-      - 'src/**/*'
-      - 'submodules/**/*'
-    tags-ignore:
-      - v*
-    types: [closed]
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
