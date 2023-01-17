@@ -34,14 +34,14 @@ jobs:
                 submodules: 'false'
                 fetch-depth: 0
 
-            #- name: (Re-)create branch 'actions/version-bump'
-            #  continue-on-error: true
-            #  run: |
-            #    git push origin --delete actions/version-bump
-            #    git branch --delete --remotes origin/actions/version-bump
-            #    git fetch origin --prune
-            #    git checkout -b actions/version-bump
-            #    git push --set-upstream origin actions/version-bump
+            - name: (Re-)create branch 'actions/version-bump'
+              continue-on-error: true
+              run: |
+                git push origin --delete actions/version-bump
+                git branch --delete --remotes origin/actions/version-bump
+                git fetch origin --prune
+                git checkout -b actions/version-bump
+                git push --set-upstream origin actions/version-bump
                 
             - name: Checkout 'actions/version-bump'
               uses: actions/checkout@v3.3.0
@@ -49,13 +49,6 @@ jobs:
                 ref: actions/version-bump
                 submodules: 'false'
                 fetch-depth: 0
-                
-            - name: Merge changes to version files from 'dev'
-              run: |
-                git fetch origin dev
-                git reset --hard origin/dev
-                git checkout dev src/manifest.json src/Properties/AssemblyInfo.cs
-                git status
                 
             - name: Bump version in AssemblyInfo.cs
               id: gitversion
