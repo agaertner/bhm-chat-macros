@@ -2,7 +2,7 @@
   "name": "Chat Shorts",
   "version": "0.4.38",
   "namespace": "Nekres.Chat_Shorts",
-  "package": "ChatShorts.dll",
+  "package": "ChatMacros.dll",
   "manifest_version": 1,
   "description": "Allows you to create shortcuts for recurring chat messages.",
   "dependencies": {

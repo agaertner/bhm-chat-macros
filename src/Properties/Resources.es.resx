@@ -120,4 +120,32 @@
   <data name="Message exceeds limit of {0} characters." xml:space="preserve">
     <value>El mensaje excede el límite de {0} caracteres.</value>
   </data>
+  <data name="/say" xml:space="preserve">
+    <value>/l</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/map" xml:space="preserve">
+    <value>/m</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/party" xml:space="preserve">
+    <value>/gr</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/squad" xml:space="preserve">
+    <value>/es</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/team" xml:space="preserve">
+    <value>/eq</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/reply" xml:space="preserve">
+    <value>/r</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild" xml:space="preserve">
+    <value>/c</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
 </root>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Nekres.Chat_Shorts.Properties {
+namespace Nekres.ChatMacros.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Nekres.Chat_Shorts.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Nekres.Chat_Shorts.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Nekres.ChatMacros.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,69 @@ namespace Nekres.Chat_Shorts.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /g.
+        /// </summary>
+        internal static string _guild {
+            get {
+                return ResourceManager.GetString("/guild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /m.
+        /// </summary>
+        internal static string _map {
+            get {
+                return ResourceManager.GetString("/map", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /p.
+        /// </summary>
+        internal static string _party {
+            get {
+                return ResourceManager.GetString("/party", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /r.
+        /// </summary>
+        internal static string _reply {
+            get {
+                return ResourceManager.GetString("/reply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /l.
+        /// </summary>
+        internal static string _say {
+            get {
+                return ResourceManager.GetString("/say", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /d.
+        /// </summary>
+        internal static string _squad {
+            get {
+                return ResourceManager.GetString("/squad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /t.
+        /// </summary>
+        internal static string _team {
+            get {
+                return ResourceManager.GetString("/team", resourceCulture);
             }
         }
         
