@@ -121,7 +121,7 @@ namespace Nekres.ChatMacros.Core.UI {
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(Point.Zero, _size), Color.Black);
 
                 int index = 0;
-                foreach (var item in _assocDropdown._items.Values) {
+                foreach (var item in _assocDropdown._items) {
                     if (index == this.HighlightedItemIndex) {
                         spriteBatch.DrawOnCtrl(this,
                                                ContentService.Textures.Pixel,
@@ -132,22 +132,26 @@ namespace Nekres.ChatMacros.Core.UI {
                                                new Color(45, 37, 25, 255));
 
                         spriteBatch.DrawStringOnCtrl(this,
-                                                     item,
+                                                     item.Value,
                                                      Content.DefaultFont14,
                                                      new Rectangle(8,
                                                                    _assocDropdown.Height * index,
                                                                    bounds.Width - 13 - _textureArrow.Width,
                                                                    _assocDropdown.Height),
-                                                     ContentService.Colors.Chardonnay);
+                                                     _assocDropdown._itemColors.TryGetValue(item.Key, out var color) ? 
+                                                         color : 
+                                                         ContentService.Colors.Chardonnay);
                     } else {
                         spriteBatch.DrawStringOnCtrl(this,
-                                                     item,
+                                                     item.Value,
                                                      Content.DefaultFont14,
                                                      new Rectangle(8,
                                                                    _assocDropdown.Height * index,
                                                                    bounds.Width - 13 - _textureArrow.Width,
                                                                    _assocDropdown.Height),
-                                                     Color.FromNonPremultiplied(239, 240, 239, 255));
+                                                     _assocDropdown._itemColors.TryGetValue(item.Key, out var color) ? 
+                                                         color * 0.95f : 
+                                                         Color.FromNonPremultiplied(239, 240, 239, 255));
                     }
 
                     index++;
@@ -192,7 +196,10 @@ namespace Nekres.ChatMacros.Core.UI {
 
         private readonly SortedList<T, string> _items;
 
+        private readonly SortedList<T, Color> _itemColors;
+
         private string _selectedItemText;
+        private Color  _selectedItemColor;
 
         private T _selectedItem;
         public T SelectedItem {
@@ -202,6 +209,7 @@ namespace Nekres.ChatMacros.Core.UI {
 
                 if (SetProperty(ref _selectedItem, value)) {
                     _selectedItemText = _items.TryGetValue(value, out var displayText) ? displayText : string.Empty;
+                    _selectedItemColor = _itemColors.TryGetValue(value, out var color) ? color : Color.White;
                     OnValueChanged(new ValueChangedEventArgs<T>(previousValue, _selectedItem));
                 }
             }
@@ -229,17 +237,19 @@ namespace Nekres.ChatMacros.Core.UI {
             _placeholderText = string.Empty;
             _selectedItemText = string.Empty;
             _items = new SortedList<T, string>();
-
+            _itemColors = new SortedList<T, Color>();
             this.Size = Dropdown.Standard.Size;
         }
 
-        public bool AddItem(T key, string value) {
+        public bool AddItem(T key, string value, Color color = default) {
             if (_items.ContainsKey(key)) {
                 return false;
             }
 
             _items.Add(key, value);
-
+            _itemColors.Add(key, color.Equals(default) ? 
+                                     Color.FromNonPremultiplied(239, 240, 239, 255) :
+                                     color);
             ItemsUpdated();
             Invalidate();
 
@@ -250,6 +260,8 @@ namespace Nekres.ChatMacros.Core.UI {
             if (!_items.Remove(key)) {
                 return false;
             }
+
+            _itemColors.Remove(key);
 
             ItemsUpdated();
             Invalidate();
@@ -289,7 +301,7 @@ namespace Nekres.ChatMacros.Core.UI {
         private void ItemsUpdated() {
             // Update text in case SelectedItem was set before the items were added (eg. object initializer syntax)
             _selectedItemText = _items.TryGetValue(SelectedItem, out var displayText) ? displayText : string.Empty;
-
+            _selectedItemColor = _itemColors.TryGetValue(SelectedItem, out var color) ? color : Color.White;
             if (Equals(SelectedItem, default)) {
                 this.SelectedItem = _items.FirstOrDefault().Key; // Change the selected item if we do not already have one
             }
@@ -338,7 +350,7 @@ namespace Nekres.ChatMacros.Core.UI {
                                                            _size.X - 10 - _textureArrow.Width,
                                                            _size.Y),
                                              (this.Enabled
-                                                  ? Color.FromNonPremultiplied(239, 240, 239, 255)
+                                                  ? _selectedItemColor
                                                   : Control.StandardColors.DisabledText));
             }
         }

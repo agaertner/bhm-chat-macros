@@ -148,4 +148,103 @@
     <value>/g</value>
     <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
+  <data name="Guild" xml:space="preserve">
+    <value>Guild</value>
+    <comment>Guild chat channel display name</comment>
+  </data>
+  <data name="Say" xml:space="preserve">
+    <value>Say</value>
+    <comment>Say channel display name</comment>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
+    <comment>Map chat channel display name</comment>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>Party</value>
+    <comment>Party chat channel display name</comment>
+  </data>
+  <data name="Squad" xml:space="preserve">
+    <value>Squad</value>
+    <comment>Squad chat channel display name</comment>
+  </data>
+  <data name="Team" xml:space="preserve">
+    <value>Team</value>
+    <comment>Team chat channel display name</comment>
+  </data>
+  <data name="Whisper" xml:space="preserve">
+    <value>Whisper</value>
+    <comment>Whisper chat channel display name</comment>
+  </data>
+  <data name="/guild{0}" xml:space="preserve">
+    <value>/g{0}</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="G{0}" xml:space="preserve">
+    <value>G{0}</value>
+    <comment>Guild indexed chat channel display name</comment>
+  </data>
+  <data name="Reply" xml:space="preserve">
+    <value>Reply</value>
+    <comment>Reply to last whisper</comment>
+  </data>
+  <data name="/whisper" xml:space="preserve">
+    <value>/w</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Voice Recognition" xml:space="preserve">
+    <value>Voice Recognition</value>
+  </data>
+  <data name="Microphone" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="Mic" xml:space="preserve">
+    <value>Mic</value>
+    <comment>Abbreviation of microphone</comment>
+  </data>
+  <data name="Listening" xml:space="preserve">
+    <value>Listening</value>
+    <comment>Voice recognition is actively listening for speech.</comment>
+  </data>
+  <data name="Input Device" xml:space="preserve">
+    <value>Input Device</value>
+  </data>
+  <data name="Voice Command" xml:space="preserve">
+    <value>Voice Command</value>
+  </data>
+  <data name="Push to Talk" xml:space="preserve">
+    <value>Push to Talk</value>
+  </data>
+  <data name="Hold to recognize voice commands." xml:space="preserve">
+    <value>Hold to recognize voice commands.</value>
+  </data>
+  <data name="Release to trigger an action." xml:space="preserve">
+    <value>Release to trigger an action.</value>
+  </data>
+  <data name="Select an input device..." xml:space="preserve">
+    <value>Select an input device…</value>
+  </data>
+  <data name="Select a command language..." xml:space="preserve">
+    <value>Select a command language…</value>
+  </data>
+  <data name="/emote" xml:space="preserve">
+    <value>/e</value>
+    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Emote" xml:space="preserve">
+    <value>Emote</value>
+    <comment>Emote chat message display name</comment>
+  </data>
+  <data name="Enter a message..." xml:space="preserve">
+    <value>Enter a message…</value>
+  </data>
+  <data name="Select a target channel..." xml:space="preserve">
+    <value>Select a target channel…</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="Whichever" xml:space="preserve">
+    <value>Whichever</value>
+  </data>
 </root>

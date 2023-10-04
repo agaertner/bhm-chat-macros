@@ -180,6 +180,7 @@
     <Compile Include="Core\ObservableDictionary.cs" />
     <Compile Include="Core\Services\DataService.cs" />
     <Compile Include="Core\Services\Data\ChatMacro.cs" />
+    <Compile Include="Core\Services\ResourceService.cs" />
     <Compile Include="Core\Services\SpeechService.cs" />
     <Compile Include="Core\Services\Speech\ISpeechRecognitionProvider.cs" />
     <Compile Include="Core\Services\Speech\SpeechStream.cs" />

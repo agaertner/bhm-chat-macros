@@ -42,8 +42,9 @@ namespace Nekres.ChatMacros {
         internal SettingEntry<KeyBinding> ChatMessage;
         internal SettingEntry<InputConfig> InputConfig;
 
-        internal DataService   Data;
-        internal SpeechService Speech;
+        internal ResourceService Resources;
+        internal DataService     Data;
+        internal SpeechService   Speech;
 
         [ImportingConstructor]
         public ChatMacros([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters)
@@ -74,10 +75,10 @@ namespace Nekres.ChatMacros {
             ChatMessage.Value.Enabled    = false;
         }
 
-        protected override void OnModuleLoaded(EventArgs e)
-        {
-            Data   = new DataService();
-            Speech = new SpeechService();
+        protected override void OnModuleLoaded(EventArgs e) {
+            Resources = new ResourceService();
+            Data      = new DataService();
+            Speech    = new SpeechService();
 
             var windowRegion  = new Rectangle(40, 26, 913, 691);
             _moduleWindow = new TabbedWindow2(GameService.Content.DatAssetCache.GetTextureFromAssetId(155985),
@@ -104,9 +105,8 @@ namespace Nekres.ChatMacros {
             var macrosTab   = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052), () => new LibraryView(), "Library");
             _moduleWindow.Tabs.Add(macrosTab);
             _moduleWindow.Tabs.Add(settingsTab);
-            _moduleWindow.TabChanged += OnTabChanged;
-
-            _moduleWindow.SelectedTab = settingsTab;
+            _moduleWindow.TabChanged  += OnTabChanged;
+            _moduleWindow.SelectedTab =  settingsTab;
             // Base handler must be called
             base.OnModuleLoaded(e);
         }

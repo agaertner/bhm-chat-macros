@@ -5,9 +5,12 @@ using System.Globalization;
 namespace Nekres.ChatMacros.Core.Services.Speech {
     internal interface ISpeechRecognitionProvider : IDisposable {
 
+        event EventHandler<EventArgs>              SpeechDetected; 
         event EventHandler<ValueEventArgs<string>> PartialResult; 
         event EventHandler<ValueEventArgs<string>> FinalResult;
 
-        void Reset(CultureInfo lang, params string[] grammar);
+        void Reset(CultureInfo lang, bool freeDictation, params string[] grammar);
+
+        void ChangeGrammar(bool freeDictation, params string[] grammar);
     }
 }

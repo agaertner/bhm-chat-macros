@@ -4,8 +4,10 @@ using Blish_HUD.Extended;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using NAudio.Wave;
+using Nekres.ChatMacros.Core.Services.Data;
 using Nekres.ChatMacros.Core.Services.Speech;
 using Nekres.ChatMacros.Core.UI.Configs;
+using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +15,8 @@ using System.Linq;
 
 namespace Nekres.ChatMacros.Core.Services {
     internal class SpeechService : IDisposable {
+
+        public event EventHandler<ValueEventArgs<bool>> InputDetected; 
 
         public event EventHandler<ValueEventArgs<Stream>> InputDeviceChanged;
         public event EventHandler<EventArgs>              StartRecording;
@@ -35,31 +39,47 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private SpeechRecognizerDisplay _display;
 
-        private string[] _testGrammar = new []{"aufbauen", "töten", "benutzen", "besiegen", "säubern", "einnehmen", "erobern"};
+        private DateTime _lastSpeechDetected;
+
+        private List<ChatMacro> _activeMacros;
 
         public SpeechService() {
-            
+            _recognizer                =  new WindowsSpeech(this);
 
-            _recognizer = new WindowsSpeech(this);
 
+            _activeMacros              =  ChatMacros.Instance.Data.GetActiveMacros();
             StartRecognizer();
 
             ChatMacros.Instance.InputConfig.SettingChanged += OnInputConfigChanged;
+
+            _recognizer.PartialResult  += OnPartialResultReceived;
+            _recognizer.FinalResult    += OnFinalResultReceived;
+            _recognizer.SpeechDetected += OnSpeechDetected;
+        }
+
+        public void UpdateGrammar() {
+            _activeMacros = ChatMacros.Instance.Data.GetActiveMacros();
+            _recognizer.ChangeGrammar(false, BaseMacro.GetCommands(_activeMacros));
         }
 
         private void StartRecognizer() {
             _display?.Dispose();
-            _display = new SpeechRecognizerDisplay {
+            _display = new SpeechRecognizerDisplay(this) {
                 Visible = false
             };
 
-            _recognizer.Reset(ChatMacros.Instance.InputConfig.Value.VoiceLanguage.Culture(),
-                                         _testGrammar);
+            _recognizer.Reset(ChatMacros.Instance.InputConfig.Value.VoiceLanguage.Culture(), 
+                              false,
+                              BaseMacro.GetCommands(_activeMacros));
 
             ChangeDevice(ChatMacros.Instance.InputConfig.Value.InputDevice);
+        }
 
-            _recognizer.PartialResult += OnPartialResultReceived;
-            _recognizer.FinalResult += OnFinalResultReceived;
+        private void OnSpeechDetected(object sender, EventArgs e) {
+            if (DateTime.UtcNow.Subtract(_lastSpeechDetected).TotalSeconds > 2) {
+                _lastSpeechDetected = DateTime.UtcNow;
+                InputDetected?.Invoke(this, new ValueEventArgs<bool>(true));
+            }
         }
 
         private void OnPartialResultReceived(object sender, ValueEventArgs<string> e) {
@@ -67,8 +87,15 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
-            var phrase = FastenshteinUtil.FindClosestMatch(e.Value, _testGrammar);
-            ChatUtil.Send(phrase, ChatMacros.Instance.ChatMessage.Value);
+            var macro = FastenshteinUtil.FindClosestMatchBy(e.Value, _activeMacros, m => m.VoiceCommands);
+
+            if (macro == null) {
+                return;
+            }
+
+            foreach (var msg in macro.ToChatMessage()) {
+                ChatUtil.Send(msg, ChatMacros.Instance.ChatMessage.Value);
+            }
         }
 
         private void OnInputConfigChanged(object sender, ValueChangedEventArgs<InputConfig> e) {
@@ -87,6 +114,11 @@ namespace Nekres.ChatMacros.Core.Services {
             // Rate limit update
             if (gameTime.TotalGameTime.TotalMilliseconds - _lastRun < 10) {
                 return;
+            }
+
+            if (DateTime.UtcNow.Subtract(_lastSpeechDetected).TotalSeconds > 30) {
+                _lastSpeechDetected = DateTime.UtcNow;
+                InputDetected?.Invoke(this, new ValueEventArgs<bool>(false));
             }
 
             if (ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
@@ -119,6 +151,8 @@ namespace Nekres.ChatMacros.Core.Services {
             _audioStream?.Dispose();
             _audioStream = new SpeechStream(4096 * 2);
 
+            InputDetected?.Invoke(this, new ValueEventArgs<bool>(false));
+
             _audioSource.DataAvailable += OnDataAvailable;
             _audioSource.StartRecording();
 
@@ -148,6 +182,10 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
+            _recognizer.PartialResult  -= OnPartialResultReceived;
+            _recognizer.FinalResult    -= OnFinalResultReceived;
+            _recognizer.SpeechDetected -= OnSpeechDetected;
+            _recognizer?.Dispose();
             _audioSource?.Dispose();
             _audioStream?.Dispose();
         }
@@ -165,14 +203,24 @@ namespace Nekres.ChatMacros.Core.Services {
             private DateTime _lastTextCursorBlink;
             private DateTime _lastEllipsisBlink;
 
-            private string   _listeningText = "Listening…";
+            private string ListeningText => Resources.Listening;
 
-            public SpeechRecognizerDisplay() {
-                _font  = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 60);
-                Parent = GameService.Graphics.SpriteScreen;
-                Size   = GameService.Graphics.SpriteScreen.ContentRegion.Size;
+            private bool   _inputDetected;
+            private string _noInput = "No input is being detected. Verify your settings.";
 
+            private SpeechService _speech;
+            public SpeechRecognizerDisplay(SpeechService speech) {
+                _speech = speech;
+                _font   = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 60);
+                Parent  = GameService.Graphics.SpriteScreen;
+                Size    = GameService.Graphics.SpriteScreen.ContentRegion.Size;
+
+                _speech.InputDetected += OnInputDetected;
                 Parent.ContentResized += OnParentResized;
+            }
+
+            private void OnInputDetected(object sender, ValueEventArgs<bool> e) {
+                _inputDetected = e.Value;
             }
 
             protected override void OnShown(EventArgs e) {
@@ -188,6 +236,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 if (Parent != null) {
                     Parent.ContentResized -= OnParentResized;
                 }
+                _speech.InputDetected -= OnInputDetected;
                 _font?.Dispose();
                 base.DisposeControl();
             }
@@ -197,12 +246,17 @@ namespace Nekres.ChatMacros.Core.Services {
             }
 
             protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds) {
-                var listenSize   = _font.MeasureString(_listeningText);
+                var listenSize   = _font.MeasureString(this.ListeningText);
                 var listenBounds = new Rectangle(bounds.X, bounds.Y - (int)Math.Round(listenSize.Height), bounds.Width, bounds.Height);
-                spriteBatch.DrawStringOnCtrl(this, _listeningText, _font, listenBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
-                DrawEllipsisCursor(spriteBatch, listenBounds, _listeningText, _font, ref _lastEllipsisBlink, Color.White, true, 2, HorizontalAlignment.Center);
+                spriteBatch.DrawStringOnCtrl(this, this.ListeningText, _font, listenBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
+                DrawEllipsisCursor(spriteBatch, listenBounds, this.ListeningText, _font, ref _lastEllipsisBlink, Color.White, true, 2, HorizontalAlignment.Center);
 
-
+                if (!_inputDetected) {
+                    var inputDetectedSize   = _font.MeasureString(_noInput);
+                    var inputDetectedBounds = new Rectangle(bounds.X, listenBounds.Y - (int)Math.Round(listenSize.Height), bounds.Width, bounds.Height);
+                    spriteBatch.DrawStringOnCtrl(this, _noInput, _font, inputDetectedBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
+                }
+                
                 if (string.IsNullOrWhiteSpace(_text)) {
                     return;
                 }

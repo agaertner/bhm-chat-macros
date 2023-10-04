@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 namespace Nekres.ChatMacros.Core.Services {
     internal class WindowsSpeech : ISpeechRecognitionProvider {
 
+        public event EventHandler<EventArgs>              SpeechDetected; 
         public event EventHandler<ValueEventArgs<string>> FinalResult;
         public event EventHandler<ValueEventArgs<string>> PartialResult;
         
@@ -22,17 +23,12 @@ namespace Nekres.ChatMacros.Core.Services {
         private CultureInfo _voiceCulture;
         private Grammar     _grammar;
 
+        private bool               _isListening;
+        private int                _processing;
         private (float, string)    _lastResult;
-
         private AudioSignalProblem _lastAudioSignalProblem;
 
         private readonly SpeechService _speech;
-
-        private DateTime _lastProcess;
-        private bool     _awaitingResult;
-        private bool     _isRecording;
-
-        private int _processing;
 
         public WindowsSpeech(SpeechService speech) {
             _speech = speech;
@@ -44,22 +40,27 @@ namespace Nekres.ChatMacros.Core.Services {
             _recognizer.RecognizeAsync(RecognizeMode.Multiple);
         }
 
-        public void Reset(CultureInfo lang, params string[] grammar) {
+        public void Reset(CultureInfo lang, bool freeDictation, params string[] grammar) {
             _speech.StartRecording     -= OnStartRecording;
             _speech.StopRecording      -= OnStopRecording;
             _speech.InputDeviceChanged -= OnInputDeviceChanged;
 
             ChangeModel(lang);
             Refresh();
-            ChangeGrammar(false, grammar);
+            ChangeGrammar(freeDictation, grammar);
             _recognizer.SpeechHypothesized         += OnSpeechRecorded;
             _recognizer.SpeechRecognized           += OnSpeechRecorded;
             _recognizer.SpeechRecognitionRejected  += OnSpeechRecorded;
             _recognizer.AudioSignalProblemOccurred += OnAudioSignalProblemOccurred;
+            _recognizer.SpeechDetected             += OnSpeechDetected;
 
             _speech.StartRecording     += OnStartRecording;
             _speech.StopRecording      += OnStopRecording;
             _speech.InputDeviceChanged += OnInputDeviceChanged;
+        }
+
+        private void OnSpeechDetected(object sender, SpeechDetectedEventArgs e) {
+            SpeechDetected?.Invoke(this, EventArgs.Empty);
         }
 
         private void Refresh() {
@@ -72,8 +73,10 @@ namespace Nekres.ChatMacros.Core.Services {
             _voiceCulture = lang;
         }
 
-        private void ChangeGrammar(bool freeDictation, params string[] grammar) {
-            if (freeDictation) {
+        public void ChangeGrammar(bool freeDictation, params string[] grammar) {
+            _recognizer.UnloadAllGrammars();
+
+            if (grammar == null || grammar.Length == 0 || freeDictation) {
                 _grammar = new DictationGrammar();
             } else {
                 _grammar = new Grammar(new GrammarBuilder(new Choices(grammar)) {
@@ -104,13 +107,14 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            if (word.Confidence < 0.35f) {
+            if (word.Confidence < 0.2f) {
                 return;
             }
 
-            if (_lastResult.Item1 > word.Confidence) {
+            // The confidence will eventually max out and never be beaten unless the listener is reset.
+            /*if (_lastResult.Item1 > word.Confidence) {
                 return;
-            }
+            }*/
 
             _lastResult = (word.Confidence, word.LexicalForm);
             PartialResult?.Invoke(this, new ValueEventArgs<string>(_lastResult.Item2));
@@ -121,15 +125,10 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void InvokeResultAvailable() {
-            if (_isRecording || !_awaitingResult) {
-                return;
-            }
-            _awaitingResult = false;
-
             var bestResult = _lastResult.Item2;
             _lastResult = default;
 
-            if (!string.IsNullOrEmpty(bestResult)) {
+            if (!string.IsNullOrEmpty(bestResult) && _isListening) {
                 FinalResult?.Invoke(this, new ValueEventArgs<string>(bestResult));
                 return;
             }
@@ -140,17 +139,16 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private async void OnStopRecording(object sender, EventArgs e) {
-            _isRecording = false;
             do {
                 await Task.Delay(650);
             } while (Interlocked.CompareExchange(ref _processing, 0, 0) > 0);
             InvokeResultAvailable();
+            _isListening = false;
         }
 
         private void OnStartRecording(object sender, EventArgs e) {
             _lastAudioSignalProblem = AudioSignalProblem.None;
-            _isRecording            = true;
-            _awaitingResult         = true;
+            _isListening = true;
         }
 
         public void Dispose() {

@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Speech.Recognition;
 using System.Threading;
 
 namespace Nekres.ChatMacros.Core.Services.Speech {
+    /// <summary>
+    /// Sets up a circular buffer so that the <see cref="SpeechRecognitionEngine"/>
+    /// continuously listens unless manually stopped.
+    /// </summary>
     internal class SpeechStream : Stream {
         private AutoResetEvent _writeEvent;
         private List<byte> _buffer;

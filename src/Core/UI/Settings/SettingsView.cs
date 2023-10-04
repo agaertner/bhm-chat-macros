@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Blish_HUD;
 using Microsoft.Xna.Framework;
+using Nekres.ChatMacros.Properties;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class SettingsView : View {
@@ -25,13 +26,14 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 OuterControlPadding = new Vector2(5, 5),
                 ControlPadding      = new Vector2(5, 5),
                 CanCollapse         = true,
-                Title               = "Voice Recognition"
+                Title               = Resources.Voice_Recognition
             };
 
             var inputDevice = new KeyValueDropdown<Guid> {
                 Parent          = flowBody,
-                PlaceholderText = "Select an input device…",
-                SelectedItem = _config.InputDevice
+                PlaceholderText = Resources.Select_an_input_device___,
+                SelectedItem = _config.InputDevice,
+                BasicTooltipText = Resources.Select_an_input_device___
             };
 
             foreach (var device in ChatMacros.Instance.Speech.InputDevices) {
@@ -40,8 +42,9 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             var voiceLanguage = new KeyValueDropdown<VoiceLanguage> {
                 Parent          = flowBody,
-                PlaceholderText = "Select a voice language…",
-                SelectedItem    = _config.VoiceLanguage
+                PlaceholderText = Resources.Select_a_command_language___,
+                SelectedItem    = _config.VoiceLanguage,
+                BasicTooltipText = Resources.Select_a_command_language___
             };
 
             foreach (var lang in Enum.GetValues(typeof(VoiceLanguage)).Cast<VoiceLanguage>()) {
@@ -50,8 +53,8 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             var pttKeybinding = new KeybindingAssigner(_config.PushToTalk) {
                 Parent           = flowBody,
-                KeyBindingName   = "Push to Talk",
-                BasicTooltipText = "Hold to recognize voice commands and release to trigger an action."
+                KeyBindingName   = Resources.Push_to_Talk,
+                BasicTooltipText = $"{Resources.Hold_to_recognize_voice_commands_}\n{Resources.Release_to_trigger_an_action_}"
             };
 
             inputDevice.ValueChanged   += OnInputDeviceChanged;

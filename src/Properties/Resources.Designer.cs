@@ -61,11 +61,29 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /e.
+        /// </summary>
+        internal static string _emote {
+            get {
+                return ResourceManager.GetString("/emote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /g.
         /// </summary>
         internal static string _guild {
             get {
                 return ResourceManager.GetString("/guild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /g{0}.
+        /// </summary>
+        internal static string _guild_0_ {
+            get {
+                return ResourceManager.GetString("/guild{0}", resourceCulture);
             }
         }
         
@@ -124,11 +142,245 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /w.
+        /// </summary>
+        internal static string _whisper {
+            get {
+                return ResourceManager.GetString("/whisper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Emote.
+        /// </summary>
+        internal static string Emote {
+            get {
+                return ResourceManager.GetString("Emote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a message….
+        /// </summary>
+        internal static string Enter_a_message___ {
+            get {
+                return ResourceManager.GetString("Enter a message...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to G{0}.
+        /// </summary>
+        internal static string G_0_ {
+            get {
+                return ResourceManager.GetString("G{0}", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guild.
+        /// </summary>
+        internal static string Guild {
+            get {
+                return ResourceManager.GetString("Guild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hold to recognize voice commands..
+        /// </summary>
+        internal static string Hold_to_recognize_voice_commands_ {
+            get {
+                return ResourceManager.GetString("Hold to recognize voice commands.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input Device.
+        /// </summary>
+        internal static string Input_Device {
+            get {
+                return ResourceManager.GetString("Input Device", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Listening.
+        /// </summary>
+        internal static string Listening {
+            get {
+                return ResourceManager.GetString("Listening", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Map.
+        /// </summary>
+        internal static string Map {
+            get {
+                return ResourceManager.GetString("Map", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message exceeds limit of {0} characters..
         /// </summary>
         internal static string Message_exceeds_limit_of__0__characters_ {
             get {
                 return ResourceManager.GetString("Message exceeds limit of {0} characters.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mic.
+        /// </summary>
+        internal static string Mic {
+            get {
+                return ResourceManager.GetString("Mic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Microphone.
+        /// </summary>
+        internal static string Microphone {
+            get {
+                return ResourceManager.GetString("Microphone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Party.
+        /// </summary>
+        internal static string Party {
+            get {
+                return ResourceManager.GetString("Party", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Push to Talk.
+        /// </summary>
+        internal static string Push_to_Talk {
+            get {
+                return ResourceManager.GetString("Push to Talk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Release to trigger an action..
+        /// </summary>
+        internal static string Release_to_trigger_an_action_ {
+            get {
+                return ResourceManager.GetString("Release to trigger an action.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reply.
+        /// </summary>
+        internal static string Reply {
+            get {
+                return ResourceManager.GetString("Reply", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Say.
+        /// </summary>
+        internal static string Say {
+            get {
+                return ResourceManager.GetString("Say", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a command language….
+        /// </summary>
+        internal static string Select_a_command_language___ {
+            get {
+                return ResourceManager.GetString("Select a command language...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a target channel….
+        /// </summary>
+        internal static string Select_a_target_channel___ {
+            get {
+                return ResourceManager.GetString("Select a target channel...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select an input device….
+        /// </summary>
+        internal static string Select_an_input_device___ {
+            get {
+                return ResourceManager.GetString("Select an input device...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Selected.
+        /// </summary>
+        internal static string Selected {
+            get {
+                return ResourceManager.GetString("Selected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Squad.
+        /// </summary>
+        internal static string Squad {
+            get {
+                return ResourceManager.GetString("Squad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Team.
+        /// </summary>
+        internal static string Team {
+            get {
+                return ResourceManager.GetString("Team", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Voice Command.
+        /// </summary>
+        internal static string Voice_Command {
+            get {
+                return ResourceManager.GetString("Voice Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Voice Recognition.
+        /// </summary>
+        internal static string Voice_Recognition {
+            get {
+                return ResourceManager.GetString("Voice Recognition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Whichever.
+        /// </summary>
+        internal static string Whichever {
+            get {
+                return ResourceManager.GetString("Whichever", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Whisper.
+        /// </summary>
+        internal static string Whisper {
+            get {
+                return ResourceManager.GetString("Whisper", resourceCulture);
             }
         }
     }
