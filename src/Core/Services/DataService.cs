@@ -58,8 +58,8 @@ namespace Nekres.ChatMacros.Core.Services {
             try {
                 using var db = new LiteDatabase(_connectionString);
                 var collection = db.GetCollection<ChatMacro>(TBL_CHATMACROS);
-                return collection.Include(x => x.Lines).Find(x => (x.GameMode == GameMode.All || 
-                                             x.GameMode == MapUtil.GetCurrentGameMode()) && 
+                return collection.Include(x => x.Lines).Find(x => (x.GameModes == GameMode.None || 
+                                             (x.GameModes & MapUtil.GetCurrentGameMode()) == 0) && 
                                              (x.MapIds == null || !x.MapIds.Any() || 
                                              x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id))).ToList();
             } catch (Exception e) {

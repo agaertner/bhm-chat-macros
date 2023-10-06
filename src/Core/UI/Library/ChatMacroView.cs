@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Blish_HUD;
+﻿using Blish_HUD;
 using Blish_HUD.Controls;
-using Blish_HUD.Controls.Intern;
-using Blish_HUD.Extended;
 using Blish_HUD.Graphics.UI;
-using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Nekres.ChatMacros.Core.Services.Data;
 using Nekres.ChatMacros.Properties;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nekres.ChatMacros.Core.UI.Library {
     internal class LibraryView : View {
@@ -84,24 +79,26 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
         private void AddMacroEntry(Menu parent, ChatMacro macro) {
             var menuEntry = new MenuItem<ChatMacro>(macro) {
-                Parent = parent,
-                Width = parent.Width,
-                Height = 50,
-                Text = macro.Title
+                Parent           = parent,
+                Width            = parent.Width,
+                Height           = 50,
+                Text             = AssetUtil.Truncate(macro.Title, 260, GameService.Content.DefaultFont16),
+                BasicTooltipText = macro.Title
             };
 
             menuEntry.Click += (_, _) => {
                 MacroConfig.Show(new MacroView(macro));
             };
 
-            void OnMacroOnTitleChanged(object _, ValueEventArgs<string> e) {
-                menuEntry.Text = e.Value;
+            void OnMacroTitleChanged(object _, ValueEventArgs<string> e) {
+                menuEntry.Text = AssetUtil.Truncate(e.Value, 260, GameService.Content.DefaultFont16);
+                menuEntry.BasicTooltipText = e.Value;
             }
 
-            macro.TitleChanged += OnMacroOnTitleChanged;
+            macro.TitleChanged += OnMacroTitleChanged;
 
             menuEntry.Disposed += (_, _) => {
-                macro.TitleChanged -= OnMacroOnTitleChanged;
+                macro.TitleChanged -= OnMacroTitleChanged;
             };
         }
 
@@ -122,11 +119,35 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             protected override void Build(Container buildPanel) {
 
+                var titleField = new TextBox {
+                    Parent           = buildPanel,
+                    PlaceholderText  = "Enter a title...",
+                    Text             = _macro.Title,
+                    Width            = buildPanel.ContentRegion.Width - Panel.RIGHT_PADDING * 2,
+                    Height           = 35,
+                    Left             = Panel.RIGHT_PADDING,
+                    BasicTooltipText = "Enter a title...",
+                    MaxLength        = 100
+                };
+
+                titleField.InputFocusChanged += (_, e) => {
+                    if (e.Value) {
+                        return;
+                    }
+                    _macro.Title = titleField.Text;
+                    ChatMacros.Instance.Data.Upsert(_macro);
+                };
+
                 var linesPanel = new FlowPanel {
-                    Parent = buildPanel,
-                    Width = buildPanel.ContentRegion.Width,
-                    Height = buildPanel.ContentRegion.Height - 50,
-                    FlowDirection = ControlFlowDirection.SingleTopToBottom,
+                    Parent              = buildPanel,
+                    Width               = buildPanel.ContentRegion.Width,
+                    Height              = buildPanel.ContentRegion.Height - 50 - titleField.Bottom - Panel.BOTTOM_PADDING,
+                    Top                 = titleField.Bottom               + Panel.BOTTOM_PADDING,
+                    FlowDirection       = ControlFlowDirection.SingleTopToBottom,
+                    ShowBorder          = true,
+                    ControlPadding      = new Vector2(0,                  4),
+                    OuterControlPadding = new Vector2(Panel.LEFT_PADDING, Panel.TOP_PADDING),
+                    CanScroll           = true
                 };
 
                 foreach (var line in _macro.Lines) {
@@ -150,7 +171,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             private void AddLine(Container parent, ChatLine line) {
                 var lineDisplay = new ViewContainer {
                     Parent = parent,
-                    Width  = parent.ContentRegion.Width,
+                    Width  = parent.ContentRegion.Width - 18,
                     Height = 50
                 };
 
@@ -199,11 +220,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 protected override void Build(Container buildPanel) {
 
                     var targetChannelDd = new KeyValueDropdown<ChatChannel> {
-                        Parent = buildPanel,
-                        PlaceholderText = Resources.Select_a_target_channel___,
-                        SelectedItem = Line.Channel,
-                        Width = 90,
-                        BasicTooltipText = Resources.Select_a_target_channel___
+                        Parent           = buildPanel,
+                        PlaceholderText  = Resources.Select_a_target_channel___,
+                        SelectedItem     = Line.Channel,
+                        BasicTooltipText = Resources.Select_a_target_channel___,
+                        AutoSizeWidth    = true
                     };
 
                     foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
@@ -218,6 +239,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
                         ForeColor = Line.Channel.GetMessageColor(),
                         BasicTooltipText = Resources.Enter_a_message___
+                    };
+
+                    targetChannelDd.Resized += (_, _) => {
+                        messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Width - Panel.RIGHT_PADDING * 2 - 32;
+                        messageInput.Left  = targetChannelDd.Right + Panel.RIGHT_PADDING;
                     };
 
                     var dragReorder = new Image(ChatMacros.Instance.Resources.DragReorderIcon) {

@@ -33,10 +33,8 @@ namespace Nekres.ChatMacros {
         public string ModuleDirectory { get; private set; }
 
         private TabbedWindow2 _moduleWindow;
-        private CornerIcon _cornerIcon;
-        private ContextMenuStrip _moduleContextMenu;
-
-        private Texture2D _cornerTexture;
+        private CornerIcon    _cornerIcon;
+        private Texture2D     _cornerTexture;
 
         internal SettingEntry<KeyBinding> SquadBroadcast;
         internal SettingEntry<KeyBinding> ChatMessage;
@@ -101,12 +99,11 @@ namespace Nekres.ChatMacros {
             };
             _cornerIcon.Click += OnModuleIconClick;
 
-            var settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052), () => new SettingsView(InputConfig.Value), "Settings");
-            var macrosTab   = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052), () => new LibraryView(), "Library");
-            _moduleWindow.Tabs.Add(macrosTab);
-            _moduleWindow.Tabs.Add(settingsTab);
+            _moduleWindow.Tabs.Add(new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
+                                           () => new LibraryView(), "Library"));
+            _moduleWindow.Tabs.Add(new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052), 
+                                           () => new SettingsView(InputConfig.Value), "Settings"));
             _moduleWindow.TabChanged  += OnTabChanged;
-            _moduleWindow.SelectedTab =  settingsTab;
             // Base handler must be called
             base.OnModuleLoaded(e);
         }
@@ -129,7 +126,6 @@ namespace Nekres.ChatMacros {
         {
             // Unload here
             Data?.Dispose();
-            _moduleContextMenu?.Dispose();
             if (_cornerIcon != null)
             {
                 _cornerIcon.Click -= OnModuleIconClick;
@@ -138,6 +134,7 @@ namespace Nekres.ChatMacros {
             _moduleWindow?.Dispose();
             _cornerTexture?.Dispose();
             // All static members must be manually unset
+            Instance = null;
         }
     }
 }

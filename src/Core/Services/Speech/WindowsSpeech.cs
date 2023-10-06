@@ -46,7 +46,11 @@ namespace Nekres.ChatMacros.Core.Services {
             _speech.InputDeviceChanged -= OnInputDeviceChanged;
 
             ChangeModel(lang);
-            Refresh();
+
+            if (!Refresh()) {
+                return;
+            }
+
             ChangeGrammar(freeDictation, grammar);
             _recognizer.SpeechHypothesized         += OnSpeechRecorded;
             _recognizer.SpeechRecognized           += OnSpeechRecorded;
@@ -63,10 +67,19 @@ namespace Nekres.ChatMacros.Core.Services {
             SpeechDetected?.Invoke(this, EventArgs.Empty);
         }
 
-        private void Refresh() {
+        private bool Refresh() {
             _recognizer?.Dispose();
-            _recognizer               = new SpeechRecognitionEngine(_voiceCulture);
-            _recognizer.MaxAlternates = 1;
+            try {
+                _recognizer = new SpeechRecognitionEngine(_voiceCulture);
+                _recognizer.MaxAlternates = 1;
+                return true;
+            } catch (Exception e) {
+                var err = $"Speech component for '{_voiceCulture.DisplayName}' is not installed on your system.";
+                ChatMacros.Logger.Warn(e, err);
+                ScreenNotification.ShowNotification(err, ScreenNotification.NotificationType.Error);
+                GameService.Content.PlaySoundEffectByName("error");
+                return false;
+            }
         }
 
         private void ChangeModel(CultureInfo lang) {

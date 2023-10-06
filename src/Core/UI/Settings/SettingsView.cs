@@ -41,9 +41,9 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
             }
 
             var voiceLanguage = new KeyValueDropdown<VoiceLanguage> {
-                Parent          = flowBody,
-                PlaceholderText = Resources.Select_a_command_language___,
-                SelectedItem    = _config.VoiceLanguage,
+                Parent           = flowBody,
+                PlaceholderText  = Resources.Select_a_command_language___,
+                SelectedItem     = _config.VoiceLanguage,
                 BasicTooltipText = Resources.Select_a_command_language___
             };
 

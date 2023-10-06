@@ -117,7 +117,14 @@ namespace Nekres.ChatMacros.Core.UI {
                 Dispose();
             }
 
+            private int GetMinimumWidth() {
+                var maxWidth = (int)Math.Round(_assocDropdown._items.Max(i => Content.DefaultFont14.MeasureString(i.Value).Width));
+                return maxWidth + 10 + (_assocDropdown.AutoSizeWidth ? 0 : _textureArrow.Width);
+            }
+
             protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds) {
+                this.Width = GetMinimumWidth();
+                
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(Point.Zero, _size), Color.Black);
 
                 int index = 0;
@@ -127,14 +134,14 @@ namespace Nekres.ChatMacros.Core.UI {
                                                ContentService.Textures.Pixel,
                                                new Rectangle(2,
                                                              2 + _assocDropdown.Height * index,
-                                                             _size.X - 12 - _textureArrow.Width,
+                                                             this.Width - 4,
                                                              _assocDropdown.Height - 4),
                                                new Color(45, 37, 25, 255));
 
                         spriteBatch.DrawStringOnCtrl(this,
                                                      item.Value,
                                                      Content.DefaultFont14,
-                                                     new Rectangle(8,
+                                                     new Rectangle(6,
                                                                    _assocDropdown.Height * index,
                                                                    bounds.Width - 13 - _textureArrow.Width,
                                                                    _assocDropdown.Height),
@@ -145,7 +152,7 @@ namespace Nekres.ChatMacros.Core.UI {
                         spriteBatch.DrawStringOnCtrl(this,
                                                      item.Value,
                                                      Content.DefaultFont14,
-                                                     new Rectangle(8,
+                                                     new Rectangle(6,
                                                                    _assocDropdown.Height * index,
                                                                    bounds.Width - 13 - _textureArrow.Width,
                                                                    _assocDropdown.Height),
@@ -195,11 +202,10 @@ namespace Nekres.ChatMacros.Core.UI {
         #endregion
 
         private readonly SortedList<T, string> _items;
+        private readonly SortedList<T, Color>  _itemColors;
 
-        private readonly SortedList<T, Color> _itemColors;
-
-        private string _selectedItemText;
         private Color  _selectedItemColor;
+        private string _selectedItemText;
 
         private T _selectedItem;
         public T SelectedItem {
@@ -208,8 +214,7 @@ namespace Nekres.ChatMacros.Core.UI {
                 T previousValue = _selectedItem;
 
                 if (SetProperty(ref _selectedItem, value)) {
-                    _selectedItemText = _items.TryGetValue(value, out var displayText) ? displayText : string.Empty;
-                    _selectedItemColor = _itemColors.TryGetValue(value, out var color) ? color : Color.White;
+                    ItemsUpdated();
                     OnValueChanged(new ValueChangedEventArgs<T>(previousValue, _selectedItem));
                 }
             }
@@ -218,17 +223,31 @@ namespace Nekres.ChatMacros.Core.UI {
         private string _placeholderText;
         public string PlaceholderText {
             get => _placeholderText;
-            set => SetProperty(ref _placeholderText, value);
+            set {
+                if (SetProperty(ref _placeholderText, value)) {
+                    ItemsUpdated();
+                }
+            }
+        }
+
+        private bool _autoSizeWidth;
+        public bool AutoSizeWidth {
+            get => _autoSizeWidth;
+            set {
+                if (SetProperty(ref _autoSizeWidth, value)) {
+                    ItemsUpdated();
+                }
+            }
         }
 
         /// <summary>
-        /// Returns <c>true</c> if this <see cref="Dropdown"/> is actively
+        /// Returns <see langword="true"/> if this <see cref="Dropdown"/> is actively
         /// showing the dropdown panel of options.
         /// </summary>
         public bool PanelOpen => _lastPanel != null;
 
-        private DropdownPanel _lastPanel = null;
-        private bool _hadPanel = false;
+        private DropdownPanel _lastPanel;
+        private bool _hadPanel;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Dropdown"/> class.
@@ -302,8 +321,15 @@ namespace Nekres.ChatMacros.Core.UI {
             // Update text in case SelectedItem was set before the items were added (eg. object initializer syntax)
             _selectedItemText = _items.TryGetValue(SelectedItem, out var displayText) ? displayText : string.Empty;
             _selectedItemColor = _itemColors.TryGetValue(SelectedItem, out var color) ? color : Color.White;
-            if (Equals(SelectedItem, default)) {
-                this.SelectedItem = _items.FirstOrDefault().Key; // Change the selected item if we do not already have one
+
+            if (AutoSizeWidth) {
+                int width = this.Width;
+                if (!string.IsNullOrEmpty(_selectedItemText)) {
+                    width = (int)Math.Round(Content.DefaultFont14.MeasureString(_selectedItemText).Width);
+                } else if (!string.IsNullOrEmpty(_placeholderText)) {
+                    width = (int)Math.Round(Content.DefaultFont14.MeasureString(_placeholderText).Width);
+                }
+                this.Width = width + 13 + _textureArrow.Width;
             }
         }
 

@@ -191,6 +191,7 @@
     <Compile Include="Core\UI\KeyValueDropdown[T].cs" />
     <Compile Include="Core\UI\Library\ChatMacroView.cs" />
     <Compile Include="Core\UI\Settings\SettingsView.cs" />
+    <Compile Include="Core\Utils\AssetUtil.cs" />
     <Compile Include="Core\Utils\BitmapFont.cs" />
     <Compile Include="Core\Utils\FastenshteinUtil.cs" />
     <Compile Include="Core\Utils\LockUtil.cs" />

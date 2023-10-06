@@ -26,7 +26,7 @@ namespace Nekres.ChatMacros.Core {
                 case MapType.WvwLounge:
                 case MapType.JumpPuzzle:
                     return GameMode.WvW;
-                default: return GameMode.All;
+                default: return GameMode.None;
             }
         }
     }
