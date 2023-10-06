@@ -24,6 +24,9 @@ namespace Nekres.ChatMacros {
         }
 
         public static string Truncate(string text, int maxWidth, BitmapFont font) {
+            if (string.IsNullOrEmpty(text)) {
+                return text;
+            }
             var result = text;
             var width  = (int)font.MeasureString(result).Width;
             while (width > maxWidth) {

@@ -48,7 +48,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Width  = panel.Width,
                 Top    = panel.Bottom,
                 Height = 50,
-                Text   = "Create New"
+                Text   = Resources.Create_Macro
             };
 
             var macros = ChatMacros.Instance.Data.GetActiveMacros();
@@ -59,13 +59,13 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             createNewBttn.Click += (_,_) => {
                 var newMacro = new ChatMacro {
-                    Title = "New Macro",
+                    Title = Resources.New_Macro,
                     Lines = new List<ChatLine>(),
                     VoiceCommands = new List<string>()
                 };
 
                 if (!ChatMacros.Instance.Data.Upsert(newMacro)) {
-                    ScreenNotification.ShowNotification("Something went wrong. Please try again", ScreenNotification.NotificationType.Error);
+                    ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                     return;
                 }
 
@@ -121,12 +121,12 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                 var titleField = new TextBox {
                     Parent           = buildPanel,
-                    PlaceholderText  = "Enter a title...",
+                    PlaceholderText  = Resources.Enter_a_title___,
                     Text             = _macro.Title,
                     Width            = buildPanel.ContentRegion.Width - Panel.RIGHT_PADDING * 2,
                     Height           = 35,
                     Left             = Panel.RIGHT_PADDING,
-                    BasicTooltipText = "Enter a title...",
+                    BasicTooltipText = Resources.Enter_a_title___,
                     MaxLength        = 100
                 };
 
@@ -158,7 +158,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     Parent = buildPanel,
                     Width  = buildPanel.ContentRegion.Width,
                     Height = 50,
-                    Text   = "Add Line",
+                    Text   = Resources.Add_Line,
                     Top = linesPanel.Bottom
                 };
 
@@ -194,7 +194,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             }
 
             private void CreateLine(Container parent) {
-                var line = new ChatLine();
+                var line = new ChatLine {
+                    Channel = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel
+                };
 
                 ChatMacros.Instance.Data.Upsert(line);
 
@@ -277,7 +279,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                 private void Save() {
                     if (!ChatMacros.Instance.Data.Upsert(Line)) {
-                        ScreenNotification.ShowNotification("Something went wrong. Please try again", ScreenNotification.NotificationType.Error);
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                     }
                 }
             }

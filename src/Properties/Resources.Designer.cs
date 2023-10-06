@@ -151,6 +151,42 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Line.
+        /// </summary>
+        internal static string Add_Line {
+            get {
+                return ResourceManager.GetString("Add Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Message.
+        /// </summary>
+        internal static string Add_Message {
+            get {
+                return ResourceManager.GetString("Add Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Any.
+        /// </summary>
+        internal static string Any {
+            get {
+                return ResourceManager.GetString("Any", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create Macro.
+        /// </summary>
+        internal static string Create_Macro {
+            get {
+                return ResourceManager.GetString("Create Macro", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Emote.
         /// </summary>
         internal static string Emote {
@@ -165,6 +201,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Enter_a_message___ {
             get {
                 return ResourceManager.GetString("Enter a message...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a title….
+        /// </summary>
+        internal static string Enter_a_title___ {
+            get {
+                return ResourceManager.GetString("Enter a title...", resourceCulture);
             }
         }
         
@@ -250,6 +295,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Macro.
+        /// </summary>
+        internal static string New_Macro {
+            get {
+                return ResourceManager.GetString("New Macro", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Party.
         /// </summary>
         internal static string Party {
@@ -331,6 +385,24 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Something went wrong. Please try again..
+        /// </summary>
+        internal static string Something_went_wrong__Please_try_again_ {
+            get {
+                return ResourceManager.GetString("Something went wrong. Please try again.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Speech recognition for {0} is not installed..
+        /// </summary>
+        internal static string Speech_recognition_for__0__is_not_installed_ {
+            get {
+                return ResourceManager.GetString("Speech recognition for {0} is not installed.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Squad.
         /// </summary>
         internal static string Squad {
@@ -345,6 +417,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Team {
             get {
                 return ResourceManager.GetString("Team", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unset.
+        /// </summary>
+        internal static string Unset {
+            get {
+                return ResourceManager.GetString("Unset", resourceCulture);
             }
         }
         

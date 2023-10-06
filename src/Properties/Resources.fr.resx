@@ -247,4 +247,31 @@
   <data name="Whichever" xml:space="preserve">
     <value>Indifférent</value>
   </data>
+  <data name="Any" xml:space="preserve">
+    <value>Au Choix</value>
+  </data>
+  <data name="Unset" xml:space="preserve">
+    <value>Non Défini</value>
+  </data>
+  <data name="Add Line" xml:space="preserve">
+    <value>Ajouter une ligne</value>
+  </data>
+  <data name="Add Message" xml:space="preserve">
+    <value>Ajouter un message</value>
+  </data>
+  <data name="Create Macro" xml:space="preserve">
+    <value>Créer une macro</value>
+  </data>
+  <data name="New Macro" xml:space="preserve">
+    <value>Nouveau Macro</value>
+  </data>
+  <data name="Something went wrong. Please try again." xml:space="preserve">
+    <value>Algo ha ido mal. Por favor, inténtelo de nuevo.</value>
+  </data>
+  <data name="Speech recognition for {0} is not installed." xml:space="preserve">
+    <value>La reconnaissance vocale pour {0} n&apos;est pas installée.</value>
+  </data>
+  <data name="Enter a title..." xml:space="preserve">
+    <value>Saisir un titre…</value>
+  </data>
 </root>

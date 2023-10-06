@@ -1,6 +1,7 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
 using Nekres.ChatMacros.Core.Services.Speech;
+using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Speech.AudioFormat;
 using System.Speech.Recognition;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -74,10 +76,18 @@ namespace Nekres.ChatMacros.Core.Services {
                 _recognizer.MaxAlternates = 1;
                 return true;
             } catch (Exception e) {
-                var err = $"Speech component for '{_voiceCulture.DisplayName}' is not installed on your system.";
-                ChatMacros.Logger.Warn(e, err);
-                ScreenNotification.ShowNotification(err, ScreenNotification.NotificationType.Error);
+                ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{_voiceCulture.DisplayName}'"), ScreenNotification.NotificationType.Error);
                 GameService.Content.PlaySoundEffectByName("error");
+                ChatMacros.Logger.Warn(e, $"Speech recognition for '{_voiceCulture.EnglishName}' is not installed on the system.");
+                return false;
+            }
+        }
+
+        public static bool TestVoiceLanguage(CultureInfo culture) {
+            try {
+                using var tempRecognizer = new SpeechRecognitionEngine(culture);
+                return true;
+            } catch (Exception) {
                 return false;
             }
         }

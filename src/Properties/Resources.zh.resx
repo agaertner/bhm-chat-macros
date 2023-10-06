@@ -247,4 +247,31 @@
   <data name="Whichever" xml:space="preserve">
     <value>Whichever</value>
   </data>
+  <data name="Any" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="Unset" xml:space="preserve">
+    <value>Unset</value>
+  </data>
+  <data name="Add Line" xml:space="preserve">
+    <value>Add Line</value>
+  </data>
+  <data name="Add Message" xml:space="preserve">
+    <value>Add Message</value>
+  </data>
+  <data name="Create Macro" xml:space="preserve">
+    <value>Create Macro</value>
+  </data>
+  <data name="New Macro" xml:space="preserve">
+    <value>New Macro</value>
+  </data>
+  <data name="Something went wrong. Please try again." xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="Speech recognition for {0} is not installed." xml:space="preserve">
+    <value>Speech recognition for {0} is not installed.</value>
+  </data>
+  <data name="Enter a title..." xml:space="preserve">
+    <value>Enter a title…</value>
+  </data>
 </root>

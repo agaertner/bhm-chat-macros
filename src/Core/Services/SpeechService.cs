@@ -44,10 +44,9 @@ namespace Nekres.ChatMacros.Core.Services {
         private List<ChatMacro> _activeMacros;
 
         public SpeechService() {
-            _recognizer                =  new WindowsSpeech(this);
+            _recognizer   = new WindowsSpeech(this);
+            _activeMacros = ChatMacros.Instance.Data.GetActiveMacros();
 
-
-            _activeMacros              =  ChatMacros.Instance.Data.GetActiveMacros();
             StartRecognizer();
 
             ChatMacros.Instance.InputConfig.SettingChanged += OnInputConfigChanged;

@@ -1,11 +1,13 @@
-﻿using Blish_HUD.Controls;
+﻿using Blish_HUD;
+using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
-using Nekres.ChatMacros.Core.UI.Configs;
-using System;
-using System.Linq;
-using Blish_HUD;
 using Microsoft.Xna.Framework;
+using Nekres.ChatMacros.Core.Services;
+using Nekres.ChatMacros.Core.UI.Configs;
 using Nekres.ChatMacros.Properties;
+using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class SettingsView : View {
@@ -64,6 +66,13 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
         }
 
         private void OnVoiceLanguageChanged(object sender, ValueChangedEventArgs<VoiceLanguage> e) {
+            var culture = e.NewValue.Culture();
+            if (!WindowsSpeech.TestVoiceLanguage(culture)) {
+                GameService.Content.PlaySoundEffectByName("error");
+                ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{culture.DisplayName}'"), ScreenNotification.NotificationType.Error);
+                Process.Start("ms-settings:speech");
+                return;
+            }
             _config.VoiceLanguage = e.NewValue;
         }
 
