@@ -1,10 +1,9 @@
 ﻿using Blish_HUD.Input;
 using Microsoft.Xna.Framework.Input;
+using Nekres.ChatMacros.Properties;
 using Newtonsoft.Json;
 using System;
 using System.Globalization;
-using Blish_HUD;
-using Gw2Sharp.WebApi;
 
 namespace Nekres.ChatMacros.Core.UI.Configs {
     public enum VoiceLanguage {
@@ -21,7 +20,17 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
                 VoiceLanguage.German  => CultureInfo.GetCultureInfo(7),
                 VoiceLanguage.French  => CultureInfo.GetCultureInfo(12),
                 VoiceLanguage.Spanish => CultureInfo.GetCultureInfo(10),
-                _                     => throw new NotImplementedException()
+                _                     => default
+            };
+        }
+
+        public static string ToDisplayString(this VoiceLanguage lang) {
+            return lang switch {
+                VoiceLanguage.English => Resources.English,
+                VoiceLanguage.German  => Resources.German,
+                VoiceLanguage.French  => Resources.French,
+                VoiceLanguage.Spanish => Resources.Spanish,
+                _                     => string.Empty
             };
         }
     }
@@ -29,8 +38,10 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
     internal class InputConfig : ConfigBase {
 
         public static InputConfig Default => new() {
-            _inputDevice = Guid.Empty,
-            _pushToTalk  = new KeyBinding(Keys.Y)
+            _inputDevice        = Guid.Empty,
+            _voiceLang          = VoiceLanguage.English,
+            _secondaryVoiceLang = VoiceLanguage.English,
+            _pushToTalk         = new KeyBinding(Keys.Y)
         };
 
         private Guid _inputDevice;
@@ -49,6 +60,16 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             get => _voiceLang;
             set {
                 _voiceLang = value;
+                this.SaveConfig(ChatMacros.Instance.InputConfig);
+            }
+        }
+
+        private VoiceLanguage _secondaryVoiceLang;
+        [JsonProperty("secondary_voice_lang")]
+        public VoiceLanguage SecondaryVoiceLanguage {
+            get => _secondaryVoiceLang;
+            set {
+                _secondaryVoiceLang = value;
                 this.SaveConfig(ChatMacros.Instance.InputConfig);
             }
         }

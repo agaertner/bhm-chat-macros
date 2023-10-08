@@ -61,6 +61,24 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} already added..
+        /// </summary>
+        internal static string _0__already_added_ {
+            get {
+                return ResourceManager.GetString("{0} already added.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} not found. Check your spelling..
+        /// </summary>
+        internal static string _0__not_found__Check_your_spelling_ {
+            get {
+                return ResourceManager.GetString("{0} not found. Check your spelling.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /e.
         /// </summary>
         internal static string _emote {
@@ -151,6 +169,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Active Areas.
+        /// </summary>
+        internal static string Active_Areas {
+            get {
+                return ResourceManager.GetString("Active Areas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Line.
         /// </summary>
         internal static string Add_Line {
@@ -160,11 +187,29 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Map….
+        /// </summary>
+        internal static string Add_Map___ {
+            get {
+                return ResourceManager.GetString("Add Map...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Message.
         /// </summary>
         internal static string Add_Message {
             get {
                 return ResourceManager.GetString("Add Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Voice Command….
+        /// </summary>
+        internal static string Add_Voice_Command___ {
+            get {
+                return ResourceManager.GetString("Add Voice Command...", resourceCulture);
             }
         }
         
@@ -196,6 +241,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to English.
+        /// </summary>
+        internal static string English {
+            get {
+                return ResourceManager.GetString("English", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter a message….
         /// </summary>
         internal static string Enter_a_message___ {
@@ -214,11 +268,29 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to French.
+        /// </summary>
+        internal static string French {
+            get {
+                return ResourceManager.GetString("French", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to G{0}.
         /// </summary>
         internal static string G_0_ {
             get {
                 return ResourceManager.GetString("G{0}", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to German.
+        /// </summary>
+        internal static string German {
+            get {
+                return ResourceManager.GetString("German", resourceCulture);
             }
         }
         
@@ -250,6 +322,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Library.
+        /// </summary>
+        internal static string Library {
+            get {
+                return ResourceManager.GetString("Library", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Listening.
         /// </summary>
         internal static string Listening {
@@ -273,6 +354,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Message_exceeds_limit_of__0__characters_ {
             get {
                 return ResourceManager.GetString("Message exceeds limit of {0} characters.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message Sequence.
+        /// </summary>
+        internal static string Message_Sequence {
+            get {
+                return ResourceManager.GetString("Message Sequence", resourceCulture);
             }
         }
         
@@ -304,6 +394,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Non-Voice Trigger.
+        /// </summary>
+        internal static string Non_Voice_Trigger {
+            get {
+                return ResourceManager.GetString("Non-Voice Trigger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Party.
         /// </summary>
         internal static string Party {
@@ -313,11 +412,47 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Player vs. Environment.
+        /// </summary>
+        internal static string Player_vs__Environment {
+            get {
+                return ResourceManager.GetString("Player vs. Environment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player vs. Player.
+        /// </summary>
+        internal static string Player_vs__Player {
+            get {
+                return ResourceManager.GetString("Player vs. Player", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Push to Talk.
         /// </summary>
         internal static string Push_to_Talk {
             get {
                 return ResourceManager.GetString("Push to Talk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PvE.
+        /// </summary>
+        internal static string PvE {
+            get {
+                return ResourceManager.GetString("PvE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PvP.
+        /// </summary>
+        internal static string PvP {
+            get {
+                return ResourceManager.GetString("PvP", resourceCulture);
             }
         }
         
@@ -358,6 +493,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select a secondary command language….
+        /// </summary>
+        internal static string Select_a_secondary_command_language___ {
+            get {
+                return ResourceManager.GetString("Select a secondary command language...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select a target channel….
         /// </summary>
         internal static string Select_a_target_channel___ {
@@ -376,6 +520,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select your primary command language….
+        /// </summary>
+        internal static string Select_your_primary_command_language___ {
+            get {
+                return ResourceManager.GetString("Select your primary command language...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Selected.
         /// </summary>
         internal static string Selected {
@@ -385,11 +538,29 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        internal static string Settings {
+            get {
+                return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Something went wrong. Please try again..
         /// </summary>
         internal static string Something_went_wrong__Please_try_again_ {
             get {
                 return ResourceManager.GetString("Something went wrong. Please try again.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spanish.
+        /// </summary>
+        internal static string Spanish {
+            get {
+                return ResourceManager.GetString("Spanish", resourceCulture);
             }
         }
         
@@ -417,6 +588,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Team {
             get {
                 return ResourceManager.GetString("Team", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trigger Options.
+        /// </summary>
+        internal static string Trigger_Options {
+            get {
+                return ResourceManager.GetString("Trigger Options", resourceCulture);
             }
         }
         
@@ -462,6 +642,24 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Whisper {
             get {
                 return ResourceManager.GetString("Whisper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to World vs. World.
+        /// </summary>
+        internal static string World_vs__World {
+            get {
+                return ResourceManager.GetString("World vs. World", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WvW.
+        /// </summary>
+        internal static string WvW {
+            get {
+                return ResourceManager.GetString("WvW", resourceCulture);
             }
         }
     }

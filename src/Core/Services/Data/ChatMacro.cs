@@ -1,8 +1,10 @@
-﻿using LiteDB;
+﻿using Blish_HUD.Extended;
+using LiteDB;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services.Data {
 
@@ -115,8 +117,28 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonRef(DataService.TBL_CHATLINES), BsonField("lines")]
         public List<ChatLine> Lines { get; set; }
 
+        public ChatMacro() {
+            Lines = new List<ChatLine>();
+        }
+
         public List<string> ToChatMessage() {
             return Lines.Select(line => line.ToChatMessage()).ToList();
+        }
+
+        public override async Task Fire() {
+            var messages = new List<string>();
+            int i = 1;
+            foreach (var line in ToChatMessage()) {
+                var message = await ChatMacros.Instance.Macro.ReplaceCommands(line);
+                if (string.IsNullOrWhiteSpace(message)) {
+                    return;
+                }
+                ++i;
+                messages.Add(message);
+            }
+            foreach (var msg in messages) {
+                ChatUtil.Send(msg, ChatMacros.Instance.ChatMessage.Value);
+            }
         }
     }
 

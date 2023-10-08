@@ -274,4 +274,70 @@
   <data name="Enter a title..." xml:space="preserve">
     <value>Introduzca un título…</value>
   </data>
+  <data name="Message Sequence" xml:space="preserve">
+    <value>Secuencia de mensajes</value>
+  </data>
+  <data name="World vs. World" xml:space="preserve">
+    <value>Mundo contra Mundo</value>
+  </data>
+  <data name="Player vs. Player" xml:space="preserve">
+    <value>Jugador contra Jugador</value>
+  </data>
+  <data name="Player vs. Environment" xml:space="preserve">
+    <value>Jugador contra Entorno</value>
+  </data>
+  <data name="Active Areas" xml:space="preserve">
+    <value>Zonas activas</value>
+  </data>
+  <data name="Add Map..." xml:space="preserve">
+    <value>Añadir mapa…</value>
+  </data>
+  <data name="Trigger Options" xml:space="preserve">
+    <value>Opciones de activación</value>
+  </data>
+  <data name="Non-Voice Trigger" xml:space="preserve">
+    <value>Gatillo sin habla</value>
+  </data>
+  <data name="Select your primary command language..." xml:space="preserve">
+    <value>Seleccione su idioma de mando principal…</value>
+  </data>
+  <data name="Select a secondary command language..." xml:space="preserve">
+    <value>Seleccionar un idioma de mando secundario…</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Library" xml:space="preserve">
+    <value>Biblioteca</value>
+  </data>
+  <data name="Add Voice Command..." xml:space="preserve">
+    <value>Añadir comando de voz</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Inglés</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>Alemán</value>
+  </data>
+  <data name="French" xml:space="preserve">
+    <value>Francés</value>
+  </data>
+  <data name="Spanish" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>JcJ</value>
+  </data>
+  <data name="WvW" xml:space="preserve">
+    <value>McM</value>
+  </data>
+  <data name="PvE" xml:space="preserve">
+    <value>JcE</value>
+  </data>
+  <data name="{0} already added." xml:space="preserve">
+    <value>{0} ya añadido.</value>
+  </data>
+  <data name="{0} not found. Check your spelling." xml:space="preserve">
+    <value>{0} no encontrado. Revise su ortografía.</value>
+  </data>
 </root>

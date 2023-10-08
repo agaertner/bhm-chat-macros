@@ -49,8 +49,16 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 BasicTooltipText = Resources.Select_a_command_language___
             };
 
+            var secondaryVoiceLanguage = new KeyValueDropdown<VoiceLanguage> {
+                Parent           = flowBody,
+                PlaceholderText  = Resources.Select_a_command_language___,
+                SelectedItem     = _config.SecondaryVoiceLanguage,
+                BasicTooltipText = Resources.Select_a_command_language___
+            };
+
             foreach (var lang in Enum.GetValues(typeof(VoiceLanguage)).Cast<VoiceLanguage>()) {
-                voiceLanguage.AddItem(lang, lang.ToString());
+                voiceLanguage.AddItem(lang, lang.ToDisplayString());
+                secondaryVoiceLanguage.AddItem(lang, lang.ToDisplayString());
             }
 
             var pttKeybinding = new KeybindingAssigner(_config.PushToTalk) {
@@ -61,19 +69,31 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             inputDevice.ValueChanged   += OnInputDeviceChanged;
             voiceLanguage.ValueChanged += OnVoiceLanguageChanged;
+            secondaryVoiceLanguage.ValueChanged += OnSecondaryVoiceLanguageChanged;
 
             base.Build(buildPanel);
         }
 
         private void OnVoiceLanguageChanged(object sender, ValueChangedEventArgs<VoiceLanguage> e) {
-            var culture = e.NewValue.Culture();
+            if (IsInstalled(e.NewValue)) {
+                _config.VoiceLanguage = e.NewValue;
+            }
+        }
+        private void OnSecondaryVoiceLanguageChanged(object sender, ValueChangedEventArgs<VoiceLanguage> e) {
+            if (IsInstalled(e.NewValue)) {
+                _config.SecondaryVoiceLanguage = e.NewValue;
+            }
+        }
+
+        private bool IsInstalled(VoiceLanguage lang) {
+            var culture = lang.Culture();
             if (!WindowsSpeech.TestVoiceLanguage(culture)) {
                 GameService.Content.PlaySoundEffectByName("error");
                 ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{culture.DisplayName}'"), ScreenNotification.NotificationType.Error);
                 Process.Start("ms-settings:speech");
-                return;
+                return false;
             }
-            _config.VoiceLanguage = e.NewValue;
+            return true;
         }
 
         private void OnInputDeviceChanged(object o, ValueChangedEventArgs<Guid> e) {

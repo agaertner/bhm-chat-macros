@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Speech.AudioFormat;
 using System.Speech.Recognition;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,8 +20,10 @@ namespace Nekres.ChatMacros.Core.Services {
         public event EventHandler<ValueEventArgs<string>> PartialResult;
         
         private SpeechRecognitionEngine _recognizer;
+        private SpeechRecognitionEngine _secondaryLanguageRecognizer;
 
         private CultureInfo _voiceCulture;
+        private CultureInfo _secondaryVoiceCulture;
         private Grammar     _grammar;
 
         private bool               _isListening;
@@ -36,33 +37,52 @@ namespace Nekres.ChatMacros.Core.Services {
             _speech = speech;
         }
 
-        private void OnInputDeviceChanged(object sender, ValueEventArgs<Stream> e) {
-            _recognizer.RecognizeAsyncCancel();
-            _recognizer.SetInputToAudioStream(e.Value, new SpeechAudioFormatInfo(SpeechService.SAMPLE_RATE, AudioBitsPerSample.Sixteen, (AudioChannel)SpeechService.CHANNELS));
-            _recognizer.RecognizeAsync(RecognizeMode.Multiple);
+        private void OnVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
+            ChangeDevice(_recognizer,                  e.Value);
         }
 
-        public void Reset(CultureInfo lang, bool freeDictation, params string[] grammar) {
-            _speech.StartRecording     -= OnStartRecording;
-            _speech.StopRecording      -= OnStopRecording;
-            _speech.InputDeviceChanged -= OnInputDeviceChanged;
+        private void OnSecondaryVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
+            ChangeDevice(_secondaryLanguageRecognizer, e.Value);
+        }
 
-            ChangeModel(lang);
+        private void ChangeDevice(SpeechRecognitionEngine recognizer, Stream stream) {
+            recognizer.RecognizeAsyncCancel();
+            recognizer.SetInputToAudioStream(stream, new SpeechAudioFormatInfo(SpeechService.SAMPLE_RATE, AudioBitsPerSample.Sixteen, (AudioChannel)SpeechService.CHANNELS));
+            recognizer.RecognizeAsync(RecognizeMode.Multiple);
+        }
+
+        public void Reset(CultureInfo lang, CultureInfo secondaryLanguage, bool freeDictation, params string[] grammar) {
+            _speech.StartRecording              -= OnStartRecording;
+            _speech.StopRecording               -= OnStopRecording;
+            _speech.VoiceStreamChanged          -= OnVoiceStreamChanged;
+            _speech.SecondaryVoiceStreamChanged -= OnSecondaryVoiceStreamChanged;
+
+            ChangeModel(lang, secondaryLanguage);
 
             if (!Refresh()) {
                 return;
             }
 
             ChangeGrammar(freeDictation, grammar);
-            _recognizer.SpeechHypothesized         += OnSpeechRecorded;
-            _recognizer.SpeechRecognized           += OnSpeechRecorded;
-            _recognizer.SpeechRecognitionRejected  += OnSpeechRecorded;
-            _recognizer.AudioSignalProblemOccurred += OnAudioSignalProblemOccurred;
-            _recognizer.SpeechDetected             += OnSpeechDetected;
 
-            _speech.StartRecording     += OnStartRecording;
-            _speech.StopRecording      += OnStopRecording;
-            _speech.InputDeviceChanged += OnInputDeviceChanged;
+            RegisterDelegates(_recognizer);
+            RegisterDelegates(_secondaryLanguageRecognizer);
+
+            _speech.StartRecording              += OnStartRecording;
+            _speech.StopRecording               += OnStopRecording;
+            _speech.VoiceStreamChanged          += OnVoiceStreamChanged;
+            _speech.SecondaryVoiceStreamChanged += OnSecondaryVoiceStreamChanged;
+        }
+
+        private void RegisterDelegates(SpeechRecognitionEngine recognizer) {
+            if (recognizer == null) {
+                return;
+            }
+            recognizer.SpeechHypothesized         += OnSpeechRecorded;
+            recognizer.SpeechRecognized           += OnSpeechRecorded;
+            recognizer.SpeechRecognitionRejected  += OnSpeechRecorded;
+            recognizer.AudioSignalProblemOccurred += OnAudioSignalProblemOccurred;
+            recognizer.SpeechDetected             += OnSpeechDetected;
         }
 
         private void OnSpeechDetected(object sender, SpeechDetectedEventArgs e) {
@@ -71,16 +91,33 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private bool Refresh() {
             _recognizer?.Dispose();
+            _recognizer = null;
+            _secondaryLanguageRecognizer?.Dispose();
+            _secondaryLanguageRecognizer = null;
             try {
-                _recognizer = new SpeechRecognitionEngine(_voiceCulture);
-                _recognizer.MaxAlternates = 1;
-                return true;
+                _recognizer                  = new SpeechRecognitionEngine(_voiceCulture);
+                _recognizer.MaxAlternates    = 1;
             } catch (Exception e) {
                 ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{_voiceCulture.DisplayName}'"), ScreenNotification.NotificationType.Error);
                 GameService.Content.PlaySoundEffectByName("error");
                 ChatMacros.Logger.Warn(e, $"Speech recognition for '{_voiceCulture.EnglishName}' is not installed on the system.");
                 return false;
             }
+
+            if (_voiceCulture.Equals(_secondaryVoiceCulture)) {
+                return true;
+            }
+
+            try {
+                _secondaryLanguageRecognizer = new SpeechRecognitionEngine(_secondaryVoiceCulture);
+                _recognizer.MaxAlternates    = 1;
+            } catch (Exception e) {
+                ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{_secondaryVoiceCulture.DisplayName}'"), ScreenNotification.NotificationType.Error);
+                GameService.Content.PlaySoundEffectByName("error");
+                ChatMacros.Logger.Warn(e, $"Speech recognition for '{_secondaryVoiceCulture.EnglishName}' is not installed on the system.");
+                return false;
+            }
+            return true;
         }
 
         public static bool TestVoiceLanguage(CultureInfo culture) {
@@ -92,23 +129,31 @@ namespace Nekres.ChatMacros.Core.Services {
             }
         }
 
-        private void ChangeModel(CultureInfo lang) {
-            _voiceCulture = lang;
+        private void ChangeModel(CultureInfo lang, CultureInfo secondaryLang) {
+            _voiceCulture          = lang;
+            _secondaryVoiceCulture = secondaryLang;
         }
 
-        public void ChangeGrammar(bool freeDictation, params string[] grammar) {
-            _recognizer.UnloadAllGrammars();
-
+        private void ChangeGrammar(SpeechRecognitionEngine recognizer, bool freeDictation, params string[] grammar) {
+            if (recognizer == null) {
+                return;
+            }
+            recognizer.UnloadAllGrammars();
             if (grammar == null || grammar.Length == 0 || freeDictation) {
                 _grammar = new DictationGrammar();
             } else {
                 _grammar = new Grammar(new GrammarBuilder(new Choices(grammar)) {
-                    Culture = _recognizer.RecognizerInfo.Culture
+                    Culture = recognizer.RecognizerInfo.Culture
                 }) {
                     Name = Guid.NewGuid().ToString("n"),
                 };
             }
-            _recognizer.LoadGrammar(_grammar);
+            recognizer.LoadGrammar(_grammar);
+        }
+
+        public void ChangeGrammar(bool freeDictation, params string[] grammar) {
+            ChangeGrammar(_recognizer, freeDictation, grammar);
+            ChangeGrammar(_secondaryLanguageRecognizer, freeDictation, grammar);
         }
 
         private void OnSpeechRecorded(object sender, RecognitionEventArgs e) {
@@ -130,7 +175,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            if (word.Confidence < 0.2f) {
+            if (word.Confidence < 0.3f) {
                 return;
             }
 
@@ -175,10 +220,12 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
-            _speech.InputDeviceChanged -= OnInputDeviceChanged;
-            _speech.StartRecording     -= OnStartRecording;
-            _speech.StopRecording      -= OnStopRecording;
+            _speech.SecondaryVoiceStreamChanged -= OnSecondaryVoiceStreamChanged;
+            _speech.VoiceStreamChanged          -= OnVoiceStreamChanged;
+            _speech.StartRecording              -= OnStartRecording;
+            _speech.StopRecording               -= OnStopRecording;
             _recognizer?.Dispose();
+            _secondaryLanguageRecognizer?.Dispose();
         }
     }
 }

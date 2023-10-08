@@ -118,6 +118,9 @@ namespace Nekres.ChatMacros.Core.UI {
             }
 
             private int GetMinimumWidth() {
+                if (_assocDropdown._items == null || _assocDropdown._items.Count == 0) {
+                    return 0;
+                }
                 var maxWidth = (int)Math.Round(_assocDropdown._items.Max(i => Content.DefaultFont14.MeasureString(i.Value).Width));
                 return maxWidth + 10 + (_assocDropdown.AutoSizeWidth ? 0 : _textureArrow.Width);
             }

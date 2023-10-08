@@ -9,7 +9,7 @@ namespace Nekres.ChatMacros.Core.Services.Speech {
         event EventHandler<ValueEventArgs<string>> PartialResult; 
         event EventHandler<ValueEventArgs<string>> FinalResult;
 
-        void Reset(CultureInfo lang, bool freeDictation, params string[] grammar);
+        void Reset(CultureInfo lang, CultureInfo secondaryLang, bool freeDictation, params string[] grammar);
 
         void ChangeGrammar(bool freeDictation, params string[] grammar);
     }

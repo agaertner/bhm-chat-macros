@@ -1,9 +1,10 @@
-﻿using LiteDB;
-using Microsoft.Xna.Framework.Input;
+﻿using Blish_HUD;
+using Blish_HUD.Input;
+using LiteDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Blish_HUD;
+using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services.Data {
 
@@ -16,7 +17,6 @@ namespace Nekres.ChatMacros.Core.Services.Data {
     }
 
     internal abstract class BaseMacro {
-
         public event EventHandler<ValueEventArgs<string>> TitleChanged;
         
         [BsonId(true)]
@@ -35,17 +35,38 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonField("voice_commands")]
         public List<string> VoiceCommands { get; set; }
 
-        [BsonField("modifier_key")]
-        public ModifierKeys ModifierKey { get; set; }
-
-        [BsonField("primary_key")]
-        public Keys PrimaryKey { get; set; }
+        [BsonField("key_binding")]
+        public KeyBinding KeyBinding { get; set; }
 
         [BsonField("game_mode")]
         public GameMode GameModes { get; set; }
 
         [BsonField("map_ids")]
         public List<int> MapIds { get; set; }
+
+        protected BaseMacro() {
+            _title = string.Empty;
+            KeyBinding = new KeyBinding();
+            MapIds     = new List<int>();
+            VoiceCommands = new List<string>();
+            GameModes = GameMode.PvE | GameMode.WvW | GameMode.PvP;
+        }
+
+        public abstract Task Fire();
+
+        public void Toggle(bool enable) {
+            KeyBinding.Enabled = enable;
+
+            if (enable) {
+                KeyBinding.Activated += OnKeyBindingActivated;
+            } else {
+                KeyBinding.Activated -= OnKeyBindingActivated;
+            }
+        }
+
+        private async void OnKeyBindingActivated(object sender, EventArgs e) {
+            await Fire();
+        }
 
         public bool HasGameMode(GameMode mode) {
             return (this.GameModes & mode) == mode;
@@ -55,7 +76,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
             return (!this.MapIds?.Any() ?? true) || this.MapIds.Contains(id); // Enable on all maps if no map ids are specified.
         }
 
-        public static string[] GetCommands<T>(List<T> macros) where T : BaseMacro {
+        public static string[] GetCommands<T>(IEnumerable<T> macros) where T : BaseMacro {
             return macros?.Where(x => x.VoiceCommands != null)
                           .SelectMany(x => x.VoiceCommands).ToArray() ?? Array.Empty<string>();
         }

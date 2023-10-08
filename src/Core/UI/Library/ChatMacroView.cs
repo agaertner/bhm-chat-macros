@@ -43,7 +43,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Height = panel.ContentRegion.Height
             };
 
-            var createNewBttn = new StandardButton {
+            var createNewBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
                 Parent = buildPanel,
                 Width  = panel.Width,
                 Top    = panel.Bottom,
@@ -51,7 +51,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Text   = Resources.Create_Macro
             };
 
-            var macros = ChatMacros.Instance.Data.GetActiveMacros();
+            var macros = ChatMacros.Instance.Data.GetAllMacros();
 
             foreach (var macro in macros) {
                 AddMacroEntry(MacroEntries, macro);
@@ -82,7 +82,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Parent           = parent,
                 Width            = parent.Width,
                 Height           = 50,
-                Text             = AssetUtil.Truncate(macro.Title, 260, GameService.Content.DefaultFont16),
+                Text             = string.IsNullOrEmpty(macro.Title) ? 
+                                       Resources.Enter_a_title___ : 
+                                       AssetUtil.Truncate(macro.Title, 260, GameService.Content.DefaultFont16),
                 BasicTooltipText = macro.Title
             };
 
@@ -91,7 +93,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             };
 
             void OnMacroTitleChanged(object _, ValueEventArgs<string> e) {
-                menuEntry.Text = AssetUtil.Truncate(e.Value, 260, GameService.Content.DefaultFont16);
+                menuEntry.Text = string.IsNullOrEmpty(macro.Title) ?
+                                     Resources.Enter_a_title___ :
+                                     AssetUtil.Truncate(e.Value, 260, GameService.Content.DefaultFont16);
                 menuEntry.BasicTooltipText = e.Value;
             }
 
@@ -123,26 +127,45 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     Parent           = buildPanel,
                     PlaceholderText  = Resources.Enter_a_title___,
                     Text             = _macro.Title,
-                    Width            = buildPanel.ContentRegion.Width - Panel.RIGHT_PADDING * 2,
+                    Width            = buildPanel.ContentRegion.Width,
                     Height           = 35,
-                    Left             = Panel.RIGHT_PADDING,
                     BasicTooltipText = Resources.Enter_a_title___,
-                    MaxLength        = 100
+                    MaxLength        = 100,
+                    Font             = GameService.Content.DefaultFont18,
+                    ForeColor        = ChatMacros.Instance.Resources.BrightGold,
+                    HorizontalAlignment = HorizontalAlignment.Center
                 };
 
                 titleField.InputFocusChanged += (_, e) => {
                     if (e.Value) {
                         return;
                     }
-                    _macro.Title = titleField.Text;
+                    _macro.Title = titleField.Text.Trim();
                     ChatMacros.Instance.Data.Upsert(_macro);
                 };
 
+                var macroConfig = new ViewContainer {
+                    Parent = buildPanel,
+                    Width  = buildPanel.ContentRegion.Width,
+                    Height = 200,
+                    Top    = titleField.Bottom + Panel.TOP_PADDING
+                };
+                macroConfig.Show(new BaseMacroSettings(_macro, () => ChatMacros.Instance.Data.Upsert(_macro)));
+
+                var linesBttnWrap = new FlowPanel {
+                    Parent        = buildPanel,
+                    Width         = buildPanel.ContentRegion.Width,
+                    Height        = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING,
+                    FlowDirection = ControlFlowDirection.SingleTopToBottom,
+                    Top           = macroConfig.Bottom,
+                    Title         = Resources.Message_Sequence
+                };
+
+                #region linesBttnWrap children
                 var linesPanel = new FlowPanel {
-                    Parent              = buildPanel,
-                    Width               = buildPanel.ContentRegion.Width,
-                    Height              = buildPanel.ContentRegion.Height - 50 - titleField.Bottom - Panel.BOTTOM_PADDING,
-                    Top                 = titleField.Bottom               + Panel.BOTTOM_PADDING,
+                    Parent              = linesBttnWrap,
+                    Width               = linesBttnWrap.ContentRegion.Width,
+                    Height              = linesBttnWrap.ContentRegion.Height - 50,
                     FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                     ShowBorder          = true,
                     ControlPadding      = new Vector2(0,                  4),
@@ -154,17 +177,18 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     AddLine(linesPanel, line);
                 }
                 
-                var addLineBttn = new StandardButton {
-                    Parent = buildPanel,
-                    Width  = buildPanel.ContentRegion.Width,
+                var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
+                    Parent = linesBttnWrap,
+                    Width  = linesBttnWrap.ContentRegion.Width,
                     Height = 50,
-                    Text   = Resources.Add_Line,
-                    Top = linesPanel.Bottom
+                    Text   = Resources.Add_Line
                 };
 
                 addLineBttn.Click += (_, _) => {
                     CreateLine(linesPanel);
                 };
+                #endregion linesBttnWrap children
+
                 base.Build(buildPanel);
             }
 
@@ -190,6 +214,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     _macro.Lines.Remove(line);
                     _macro.Lines.Insert(dropIndex, line);
                     ChatMacros.Instance.Data.Upsert(_macro);
+
+                    ChatMacros.Instance.Macro.UpdateMacros();
                 };
             }
 
@@ -198,15 +224,18 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     Channel = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel
                 };
 
-                ChatMacros.Instance.Data.Upsert(line);
+                if (!ChatMacros.Instance.Data.Upsert(line)) {
+                    return;
+                }
 
                 _macro.Lines.Add(line);
 
-                ChatMacros.Instance.Data.Upsert(_macro);
+                if (ChatMacros.Instance.Data.Upsert(_macro)) {
+                    ChatMacros.Instance.Speech.UpdateGrammar();
+                }
 
                 AddLine(parent, line);
             }
-
             private class LineView : View {
 
                 public event EventHandler<EventArgs> DragEnd;
@@ -230,7 +259,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
-                        targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
+                        if (channel != ChatChannel.Whisper) {
+                            targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
+                        }
                     }
 
                     var messageInput = new TextBox {
@@ -240,7 +271,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Width = buildPanel.ContentRegion.Width - targetChannelDd.Width - Panel.RIGHT_PADDING * 2 - 32,
                         Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
                         ForeColor = Line.Channel.GetMessageColor(),
-                        BasicTooltipText = Resources.Enter_a_message___
+                        BasicTooltipText = string.IsNullOrWhiteSpace(Line.Message) ? Resources.Enter_a_message___ : Line.Message,
+                        Font = ChatMacros.Instance.Resources.Menomonia24
                     };
 
                     targetChannelDd.Resized += (_, _) => {
@@ -265,7 +297,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     messageInput.TextChanged += (_, _) => {
-                        Line.Message = messageInput.Text;
+                        Line.Message                  = messageInput.Text.TrimEnd();
+                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(Line.Message) ? Resources.Enter_a_message___ : Line.Message;
                         Save();
                     };
 
@@ -280,7 +313,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 private void Save() {
                     if (!ChatMacros.Instance.Data.Upsert(Line)) {
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        return;
                     }
+
+                    ChatMacros.Instance.Macro.UpdateMacros();
                 }
             }
         }

@@ -18,7 +18,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public event EventHandler<ValueEventArgs<bool>> InputDetected; 
 
-        public event EventHandler<ValueEventArgs<Stream>> InputDeviceChanged;
+        public event EventHandler<ValueEventArgs<Stream>> SecondaryVoiceStreamChanged;
+        public event EventHandler<ValueEventArgs<Stream>> VoiceStreamChanged;
         public event EventHandler<EventArgs>              StartRecording;
         public event EventHandler<EventArgs>              StopRecording;
 
@@ -26,6 +27,7 @@ namespace Nekres.ChatMacros.Core.Services {
         public const int CHANNELS    = 1;
 
         private Stream _audioStream;
+        private Stream _secondaryAudioStream;
 
         private WaveInEvent _audioSource;
 
@@ -35,17 +37,14 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private ISpeechRecognitionProvider _recognizer;
 
-        private double   _lastRun;
-
         private SpeechRecognizerDisplay _display;
 
         private DateTime _lastSpeechDetected;
 
-        private List<ChatMacro> _activeMacros;
+        
 
         public SpeechService() {
             _recognizer   = new WindowsSpeech(this);
-            _activeMacros = ChatMacros.Instance.Data.GetActiveMacros();
 
             StartRecognizer();
 
@@ -57,8 +56,8 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void UpdateGrammar() {
-            _activeMacros = ChatMacros.Instance.Data.GetActiveMacros();
-            _recognizer.ChangeGrammar(false, BaseMacro.GetCommands(_activeMacros));
+            ChatMacros.Instance.Macro.UpdateMacros();
+            _recognizer.ChangeGrammar(false, BaseMacro.GetCommands(ChatMacros.Instance.Macro.ActiveMacros));
         }
 
         private void StartRecognizer() {
@@ -68,8 +67,9 @@ namespace Nekres.ChatMacros.Core.Services {
             };
 
             _recognizer.Reset(ChatMacros.Instance.InputConfig.Value.VoiceLanguage.Culture(), 
+                              ChatMacros.Instance.InputConfig.Value.SecondaryVoiceLanguage.Culture(),
                               false,
-                              BaseMacro.GetCommands(_activeMacros));
+                              BaseMacro.GetCommands(ChatMacros.Instance.Macro.ActiveMacros));
 
             ChangeDevice(ChatMacros.Instance.InputConfig.Value.InputDevice);
         }
@@ -85,15 +85,11 @@ namespace Nekres.ChatMacros.Core.Services {
             _display.Text = e.Value;
         }
 
-        private void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
-            var macro = FastenshteinUtil.FindClosestMatchBy(e.Value, _activeMacros, m => m.VoiceCommands);
+        private async void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
+            var macro = FastenshteinUtil.FindClosestMatchBy(e.Value, ChatMacros.Instance.Macro.ActiveMacros, m => m.VoiceCommands);
 
-            if (macro == null) {
-                return;
-            }
-
-            foreach (var msg in macro.ToChatMessage()) {
-                ChatUtil.Send(msg, ChatMacros.Instance.ChatMessage.Value);
+            if (macro != null) {
+                await macro.Fire();
             }
         }
 
@@ -110,11 +106,6 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            // Rate limit update
-            if (gameTime.TotalGameTime.TotalMilliseconds - _lastRun < 10) {
-                return;
-            }
-
             if (DateTime.UtcNow.Subtract(_lastSpeechDetected).TotalSeconds > 30) {
                 _lastSpeechDetected = DateTime.UtcNow;
                 InputDetected?.Invoke(this, new ValueEventArgs<bool>(false));
@@ -125,8 +116,6 @@ namespace Nekres.ChatMacros.Core.Services {
             } else {
                 Stop();
             }
-
-            _lastRun = gameTime.ElapsedGameTime.TotalMilliseconds;
         }
 
         public IEnumerable<(int DeviceNumber, string ProductName, int Channels, Guid DeviceNameGuid, Guid ProductNameGuid, Guid ManufacturerGuid)> InputDevices {
@@ -150,12 +139,15 @@ namespace Nekres.ChatMacros.Core.Services {
             _audioStream?.Dispose();
             _audioStream = new SpeechStream(4096 * 2);
 
+            _secondaryAudioStream?.Dispose();
+            _secondaryAudioStream = new SpeechStream(4096 * 2);
+
             InputDetected?.Invoke(this, new ValueEventArgs<bool>(false));
 
             _audioSource.DataAvailable += OnDataAvailable;
             _audioSource.StartRecording();
 
-            InputDeviceChanged?.Invoke(this, new ValueEventArgs<Stream>(_audioStream));
+            this.VoiceStreamChanged?.Invoke(this, new ValueEventArgs<Stream>(_audioStream));
         }
 
         public void Stop() {
@@ -178,6 +170,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private void OnDataAvailable(object sender, WaveInEventArgs e) {
             _audioStream.Write(e.Buffer, 0, e.BytesRecorded);
+            _secondaryAudioStream.Write(e.Buffer, 0, e.BytesRecorded);
         }
 
         public void Dispose() {
@@ -187,6 +180,7 @@ namespace Nekres.ChatMacros.Core.Services {
             _recognizer?.Dispose();
             _audioSource?.Dispose();
             _audioStream?.Dispose();
+            _secondaryAudioStream?.Dispose();
         }
 
         private class SpeechRecognizerDisplay : Control {
