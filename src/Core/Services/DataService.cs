@@ -98,13 +98,13 @@ namespace Nekres.ChatMacros.Core.Services {
             return Enumerable.Empty<ChatMacro>().ToList();
         }
 
-        private T Get<T>(BsonValue id, string table) {
+        public ChatMacro GetChatMacro(BsonValue id) {
             LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
 
             try {
                 using var db         = new LiteDatabase(_connectionString);
-                var       collection = db.GetCollection<T>(table);
-                return collection.FindById(id);
+                var       collection = db.GetCollection<ChatMacro>(TBL_CHATMACROS);
+                return collection.Include(macro => macro.Lines).FindById(id);
             } catch (Exception e) {
                 ChatMacros.Logger.Warn(e, e.Message);
             } finally {
@@ -112,10 +112,6 @@ namespace Nekres.ChatMacros.Core.Services {
             }
 
             return default;
-        }
-
-        public ChatMacro GetChatMacro(BsonValue id) {
-            return Get<ChatMacro>(id, TBL_CHATMACROS);
         }
 
         private bool Delete<T>(BsonValue id, string table) {
