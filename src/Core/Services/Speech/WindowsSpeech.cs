@@ -1,5 +1,6 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Input;
 using Nekres.ChatMacros.Core.Services.Speech;
 using Nekres.ChatMacros.Properties;
 using System;
@@ -11,8 +12,6 @@ using System.Speech.AudioFormat;
 using System.Speech.Recognition;
 using System.Threading;
 using System.Threading.Tasks;
-using Blish_HUD.Controls.Intern;
-using Blish_HUD.Input;
 
 namespace Nekres.ChatMacros.Core.Services {
     internal class WindowsSpeech : ISpeechRecognitionProvider {
@@ -104,30 +103,32 @@ namespace Nekres.ChatMacros.Core.Services {
             _recognizer = null;
             _secondaryLanguageRecognizer?.Dispose();
             _secondaryLanguageRecognizer = null;
+
+            var recognizers = 0;
             try {
-                _recognizer                  = new SpeechRecognitionEngine(_voiceCulture);
-                _recognizer.MaxAlternates    = 1;
+                _recognizer = new SpeechRecognitionEngine(_voiceCulture);
+                _recognizer.MaxAlternates = 1;
+                ++recognizers;
             } catch (Exception e) {
                 ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{_voiceCulture.DisplayName}'"), ScreenNotification.NotificationType.Error);
                 GameService.Content.PlaySoundEffectByName("error");
                 ChatMacros.Logger.Warn(e, $"Speech recognition for '{_voiceCulture.EnglishName}' is not installed on the system.");
-                return false;
             }
 
             if (_voiceCulture.Equals(_secondaryVoiceCulture)) {
-                return true;
+                return recognizers > 0;
             }
 
             try {
                 _secondaryLanguageRecognizer = new SpeechRecognitionEngine(_secondaryVoiceCulture);
-                _recognizer.MaxAlternates    = 1;
+                _secondaryLanguageRecognizer.MaxAlternates = 1;
+                ++recognizers;
             } catch (Exception e) {
                 ScreenNotification.ShowNotification(string.Format(Resources.Speech_recognition_for__0__is_not_installed_, $"'{_secondaryVoiceCulture.DisplayName}'"), ScreenNotification.NotificationType.Error);
                 GameService.Content.PlaySoundEffectByName("error");
                 ChatMacros.Logger.Warn(e, $"Speech recognition for '{_secondaryVoiceCulture.EnglishName}' is not installed on the system.");
-                return false;
             }
-            return true;
+            return recognizers > 0;
         }
 
         public static bool TestVoiceLanguage(CultureInfo culture) {
