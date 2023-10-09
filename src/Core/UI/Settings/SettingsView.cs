@@ -44,16 +44,16 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             var voiceLanguage = new KeyValueDropdown<VoiceLanguage> {
                 Parent           = flowBody,
-                PlaceholderText  = Resources.Select_a_command_language___,
+                PlaceholderText  = Resources.Select_your_primary_command_language___,
                 SelectedItem     = _config.VoiceLanguage,
-                BasicTooltipText = Resources.Select_a_command_language___
+                BasicTooltipText = Resources.Select_your_primary_command_language___
             };
 
             var secondaryVoiceLanguage = new KeyValueDropdown<VoiceLanguage> {
                 Parent           = flowBody,
-                PlaceholderText  = Resources.Select_a_command_language___,
+                PlaceholderText  = Resources.Select_a_secondary_command_language___,
                 SelectedItem     = _config.SecondaryVoiceLanguage,
-                BasicTooltipText = Resources.Select_a_command_language___
+                BasicTooltipText = Resources.Select_a_secondary_command_language___
             };
 
             foreach (var lang in Enum.GetValues(typeof(VoiceLanguage)).Cast<VoiceLanguage>()) {

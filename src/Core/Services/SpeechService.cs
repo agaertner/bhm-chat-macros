@@ -197,9 +197,9 @@ namespace Nekres.ChatMacros.Core.Services {
             private DateTime _lastEllipsisBlink;
 
             private string ListeningText => Resources.Listening;
+            private string NoInput       => Resources.No_input_is_being_detected__Verify_your_settings_;
 
-            private bool   _inputDetected;
-            private string _noInput = "No input is being detected. Verify your settings.";
+            private bool _inputDetected;
 
             private SpeechService _speech;
             public SpeechRecognizerDisplay(SpeechService speech) {
@@ -245,9 +245,9 @@ namespace Nekres.ChatMacros.Core.Services {
                 DrawEllipsisCursor(spriteBatch, listenBounds, this.ListeningText, _font, ref _lastEllipsisBlink, Color.White, true, 2, HorizontalAlignment.Center);
 
                 if (!_inputDetected) {
-                    var inputDetectedSize   = _font.MeasureString(_noInput);
+                    var inputDetectedSize   = _font.MeasureString(this.NoInput);
                     var inputDetectedBounds = new Rectangle(bounds.X, listenBounds.Y - (int)Math.Round(listenSize.Height), bounds.Width, bounds.Height);
-                    spriteBatch.DrawStringOnCtrl(this, _noInput, _font, inputDetectedBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
+                    spriteBatch.DrawStringOnCtrl(this, this.NoInput, _font, inputDetectedBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
                 }
                 
                 if (string.IsNullOrWhiteSpace(_text)) {

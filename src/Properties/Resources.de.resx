@@ -299,10 +299,10 @@
     <value>Sprachloser Auslöser</value>
   </data>
   <data name="Select your primary command language..." xml:space="preserve">
-    <value>Wähle deine primäre Befehlssprache</value>
+    <value>Wähle deine primäre Befehlssprache…</value>
   </data>
   <data name="Select a secondary command language..." xml:space="preserve">
-    <value>Wähle eine sekundäre Befehlssprache</value>
+    <value>Wähle eine sekundäre Befehlssprache…</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Einstellungen</value>
@@ -339,5 +339,20 @@
   </data>
   <data name="{0} not found. Check your spelling." xml:space="preserve">
     <value>{0} nicht gefunden. Prüfe deine Rechtschreibung.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="No input is being detected. Verify your settings." xml:space="preserve">
+    <value>Kein Audiosignal wird erkannt. Prüfe deine Einstellungen.</value>
+  </data>
+  <data name="Show Actives Only" xml:space="preserve">
+    <value>Nur Aktive anzeigen</value>
+  </data>
+  <data name="Search..." xml:space="preserve">
+    <value>Suche…</value>
   </data>
 </root>

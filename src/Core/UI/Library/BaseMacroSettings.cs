@@ -104,11 +104,12 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             foreach (var mode in Enum.GetValues(typeof(GameMode)).Cast<GameMode>().Skip(1)) {
                 var cb = new Checkbox {
-                    Parent  = activeGameModes,
-                    Width   = 50,
-                    Height  = activeGameModes.ContentRegion.Height,
-                    Text    = mode.ToString(),
-                    Checked = _macro.HasGameMode(mode)
+                    Parent           = activeGameModes,
+                    Width            = 50,
+                    Height           = activeGameModes.ContentRegion.Height,
+                    Checked          = _macro.HasGameMode(mode),
+                    Text             = mode.ToShortDisplayString(),
+                    BasicTooltipText = mode.ToDisplayString()
                 };
 
                 cb.CheckedChanged += (_, e) => {
@@ -288,7 +289,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     Width = 24,
                     Height = 24,
                     Left = title.Right + 3,
-                    Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782)
+                    Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782),
+                    BasicTooltipText = Resources.Remove
                 };
 
                 delete.MouseEntered += (_, _) => {
@@ -300,6 +302,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
 
                 delete.LeftMouseButtonPressed += (_, _) => {
+                    GameService.Content.PlaySoundEffectByName("button-click");
                     delete.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175783);
                 };
 

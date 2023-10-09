@@ -11,6 +11,8 @@ using System.Speech.AudioFormat;
 using System.Speech.Recognition;
 using System.Threading;
 using System.Threading.Tasks;
+using Blish_HUD.Controls.Intern;
+using Blish_HUD.Input;
 
 namespace Nekres.ChatMacros.Core.Services {
     internal class WindowsSpeech : ISpeechRecognitionProvider {
@@ -34,15 +36,23 @@ namespace Nekres.ChatMacros.Core.Services {
         private readonly SpeechService _speech;
 
         public WindowsSpeech(SpeechService speech) {
-            _speech = speech;
+            _speech =  speech;
+
+            GameService.Input.Mouse.LeftMouseButtonPressed += OnLeftMouseButtonPressed;
         }
 
         private void OnVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
-            ChangeDevice(_recognizer,                  e.Value);
+            ChangeDevice(_recognizer, e.Value);
         }
 
         private void OnSecondaryVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
             ChangeDevice(_secondaryLanguageRecognizer, e.Value);
+        }
+
+        private void OnLeftMouseButtonPressed(object sender, MouseEventArgs e) {
+            _lastResult = default;
+            _lastAudioSignalProblem = AudioSignalProblem.None;
+            PartialResult?.Invoke(this, new ValueEventArgs<string>(string.Empty));
         }
 
         private void ChangeDevice(SpeechRecognitionEngine recognizer, Stream stream) {
@@ -220,10 +230,11 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
-            _speech.SecondaryVoiceStreamChanged -= OnSecondaryVoiceStreamChanged;
-            _speech.VoiceStreamChanged          -= OnVoiceStreamChanged;
-            _speech.StartRecording              -= OnStartRecording;
-            _speech.StopRecording               -= OnStopRecording;
+            GameService.Input.Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
+            _speech.SecondaryVoiceStreamChanged            -= OnSecondaryVoiceStreamChanged;
+            _speech.VoiceStreamChanged                     -= OnVoiceStreamChanged;
+            _speech.StartRecording                         -= OnStartRecording;
+            _speech.StopRecording                          -= OnStopRecording;
             _recognizer?.Dispose();
             _secondaryLanguageRecognizer?.Dispose();
         }

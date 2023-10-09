@@ -41,6 +41,7 @@ namespace Nekres.ChatMacros {
         internal SettingEntry<KeyBinding> SquadBroadcast;
         internal SettingEntry<KeyBinding> ChatMessage;
         internal SettingEntry<InputConfig> InputConfig;
+        internal SettingEntry<LibraryConfig> LibraryConfig;
 
         internal Gw2WebApiService Gw2Api;
         internal ResourceService  Resources;
@@ -71,6 +72,7 @@ namespace Nekres.ChatMacros {
 
             var selfManaged = settings.AddSubCollection("configs", false, false);
             InputConfig = selfManaged.DefineSetting("input_config", Core.UI.Configs.InputConfig.Default);
+            LibraryConfig = selfManaged.DefineSetting("library_config", Core.UI.Configs.LibraryConfig.Default);
         }
 
         protected override void Initialize() {
@@ -110,7 +112,7 @@ namespace Nekres.ChatMacros {
             _cornerIcon.Click += OnModuleIconClick;
 
             _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
-                                  () => new LibraryView(), Properties.Resources.Library);
+                                  () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
 
             _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
                                    () => new SettingsView(InputConfig.Value), Properties.Resources.Settings);

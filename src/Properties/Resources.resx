@@ -340,4 +340,19 @@
   <data name="{0} not found. Check your spelling." xml:space="preserve">
     <value>{0} not found. Check your spelling.</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="No input is being detected. Verify your settings." xml:space="preserve">
+    <value>No input is being detected. Verify your settings.</value>
+  </data>
+  <data name="Show Actives Only" xml:space="preserve">
+    <value>Show Actives Only</value>
+  </data>
+  <data name="Search..." xml:space="preserve">
+    <value>Search…</value>
+  </data>
 </root>

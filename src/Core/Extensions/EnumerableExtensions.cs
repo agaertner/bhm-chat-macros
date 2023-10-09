@@ -49,5 +49,28 @@ namespace Nekres.ChatMacros.Core {
             var result = most;
             return result;
         }
+
+        public static void Move<T>(this IList<T> list, int oldIndex, int newIndex) {
+            if (oldIndex == newIndex || 0 > oldIndex || oldIndex >= list.Count || 0 > newIndex ||
+                newIndex >= list.Count) {
+                return;
+            }
+
+            int i;
+            var tmp = list[oldIndex];
+            if (oldIndex < newIndex) {
+                // Nove element down and shift other elements up.
+                for (i = oldIndex; i < newIndex; i++) {
+                    list[i] = list[i + 1];
+                }
+            } else {
+                // Move element up and shift other elements down.
+                for (i = oldIndex; i > newIndex; i--) {
+                    list[i] = list[i - 1];
+                }
+            }
+            // Put element from position 1 to destination.
+            list[newIndex] = tmp;
+        }
     }
 }

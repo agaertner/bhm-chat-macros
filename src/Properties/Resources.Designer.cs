@@ -232,6 +232,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Emote.
         /// </summary>
         internal static string Emote {
@@ -394,6 +403,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No input is being detected. Verify your settings..
+        /// </summary>
+        internal static string No_input_is_being_detected__Verify_your_settings_ {
+            get {
+                return ResourceManager.GetString("No input is being detected. Verify your settings.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Non-Voice Trigger.
         /// </summary>
         internal static string Non_Voice_Trigger {
@@ -466,6 +484,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        internal static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reply.
         /// </summary>
         internal static string Reply {
@@ -480,6 +507,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Say {
             get {
                 return ResourceManager.GetString("Say", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search….
+        /// </summary>
+        internal static string Search___ {
+            get {
+                return ResourceManager.GetString("Search...", resourceCulture);
             }
         }
         
@@ -543,6 +579,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Settings {
             get {
                 return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Actives Only.
+        /// </summary>
+        internal static string Show_Actives_Only {
+            get {
+                return ResourceManager.GetString("Show Actives Only", resourceCulture);
             }
         }
         

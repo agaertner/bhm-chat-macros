@@ -1,6 +1,7 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Input;
 using LiteDB;
+using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,21 +17,31 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         PvP   = 1 << 2,
     }
 
+    internal static class GameModeExtensions {
+        public static string ToShortDisplayString(this GameMode mode) {
+            return mode switch {
+                GameMode.PvE => Resources.PvE,
+                GameMode.WvW => Resources.WvW,
+                GameMode.PvP => Resources.PvP,
+                _            => string.Empty
+            };
+        }
+        public static string ToDisplayString(this GameMode mode) {
+            return mode switch {
+                GameMode.PvE => Resources.Player_vs__Environment,
+                GameMode.WvW => Resources.World_vs__World,
+                GameMode.PvP => Resources.Player_vs__Player,
+                _            => string.Empty
+            };
+        }
+    }
+
     internal abstract class BaseMacro {
-        public event EventHandler<ValueEventArgs<string>> TitleChanged;
-        
         [BsonId(true)]
         public ObjectId Id { get; set; }
 
-        private string _title;
         [BsonField("title")]
-        public string Title { 
-            get => _title;
-            set {
-                _title = value;
-                TitleChanged?.Invoke(this, new ValueEventArgs<string>(value));
-            }
-        }
+        public string Title { get; set; }
 
         [BsonField("voice_commands")]
         public List<string> VoiceCommands { get; set; }
@@ -45,11 +56,11 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         public List<int> MapIds { get; set; }
 
         protected BaseMacro() {
-            _title = string.Empty;
-            KeyBinding = new KeyBinding();
-            MapIds     = new List<int>();
+            Title         = string.Empty;
+            KeyBinding    = new KeyBinding();
+            MapIds        = new List<int>();
             VoiceCommands = new List<string>();
-            GameModes = GameMode.PvE | GameMode.WvW | GameMode.PvP;
+            GameModes     = GameMode.PvE | GameMode.WvW | GameMode.PvP;
         }
 
         public abstract Task Fire();
