@@ -241,6 +241,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Drag to Reorder.
+        /// </summary>
+        internal static string Drag_to_Reorder {
+            get {
+                return ResourceManager.GetString("Drag to Reorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Emote.
         /// </summary>
         internal static string Emote {

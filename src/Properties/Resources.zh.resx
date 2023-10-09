@@ -355,4 +355,7 @@
   <data name="Search..." xml:space="preserve">
     <value>Search…</value>
   </data>
+  <data name="Drag to Reorder" xml:space="preserve">
+    <value>Drag to Reorder</value>
+  </data>
 </root>

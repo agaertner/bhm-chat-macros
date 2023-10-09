@@ -567,6 +567,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Width = 25,
                         Height = 25,
                         Left = remove.Right + Panel.RIGHT_PADDING,
+                        BasicTooltipText = Resources.Drag_to_Reorder
                     };
 
                     dragReorder.LeftMouseButtonPressed += (_, _) => {
