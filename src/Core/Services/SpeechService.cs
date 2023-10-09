@@ -148,6 +148,7 @@ namespace Nekres.ChatMacros.Core.Services {
             _audioSource.StartRecording();
 
             this.VoiceStreamChanged?.Invoke(this, new ValueEventArgs<Stream>(_audioStream));
+            this.SecondaryVoiceStreamChanged?.Invoke(this, new ValueEventArgs<Stream>(_secondaryAudioStream));
         }
 
         public void Stop() {
@@ -183,7 +184,7 @@ namespace Nekres.ChatMacros.Core.Services {
             _secondaryAudioStream?.Dispose();
         }
 
-        private class SpeechRecognizerDisplay : Control {
+        private sealed class SpeechRecognizerDisplay : Control {
 
             private string _text = string.Empty;
             public string Text {
@@ -207,6 +208,8 @@ namespace Nekres.ChatMacros.Core.Services {
                 _font   = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 60);
                 Parent  = GameService.Graphics.SpriteScreen;
                 Size    = GameService.Graphics.SpriteScreen.ContentRegion.Size;
+
+                ZIndex =  2147483600;
 
                 _speech.InputDetected += OnInputDetected;
                 Parent.ContentResized += OnParentResized;

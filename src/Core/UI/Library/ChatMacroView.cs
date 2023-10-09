@@ -200,6 +200,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             menuEntry.DeleteClick += (_, _) => {
                 if (ChatMacros.Instance.Data.Delete(macro)) {
                     menuEntry.Dispose();
+                    MacroConfig.Clear();
                     ChatMacros.Instance.Speech.UpdateGrammar();
                 }
             };
@@ -405,14 +406,6 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 lineDisplay.Show(lineView);
 
                 lineView.RemoveClick += (_, _) => {
-                    var oldLines = _macro.Lines.ToList();
-
-                    if (_macro.Lines.RemoveAll(l => l.Id.Equals(line.Id)) < 1 || !ChatMacros.Instance.Data.Upsert(_macro)) {
-                        _macro.Lines = oldLines;
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        return;
-                    }
-                    ;
                     if (ChatMacros.Instance.Data.Delete(line)) {
                         lineDisplay.Dispose();
                         ChatMacros.Instance.Speech.UpdateGrammar();
