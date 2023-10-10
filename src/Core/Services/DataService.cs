@@ -66,12 +66,15 @@ namespace Nekres.ChatMacros.Core.Services {
                 var collection = db.GetCollection<ChatMacro>(TBL_CHATMACROS);
 
                 var mapMacros = collection.Include(x => x.Lines)
-                                           .Find(x => x.MapIds == null || !x.MapIds.Any() ||
-                                                      x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id));
+                                           .Find(x => (x.MapIds == null || !x.MapIds.Any() ||
+                                                       x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id)) && 
+                                                      x.Lines != null && x.Lines.Any());
 
-                // Do gamemode query locally because bitwise operators cannot be converted by LiteDB to a valid query.
+                // Locally because bitwise operators and foreign methods cannot be converted by LiteDB to a valid query.
                 var mode = MapUtil.GetCurrentGameMode();
-                return mapMacros.Where(x => x.GameModes == GameMode.None || (x.GameModes & mode) == mode).ToList();
+                return mapMacros.Where(x => (x.GameModes     == GameMode.None || (x.GameModes & mode) == mode) && 
+                                            x.VoiceCommands != null && x.VoiceCommands.Any() || 
+                                            x.KeyBinding != null && !x.KeyBinding.GetBindingDisplayText().Equals(string.Empty)).ToList();
             } catch (Exception e) {
                 ChatMacros.Logger.Warn(e, e.Message);
             } finally {

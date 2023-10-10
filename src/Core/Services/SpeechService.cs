@@ -25,6 +25,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public const int SAMPLE_RATE = 16000;
         public const int CHANNELS    = 1;
+        public const int PARTIAL_RESULT_EXPIRE_MS = 1000;
 
         private Stream _audioStream;
         private Stream _secondaryAudioStream;
@@ -40,8 +41,7 @@ namespace Nekres.ChatMacros.Core.Services {
         private SpeechRecognizerDisplay _display;
 
         private DateTime _lastSpeechDetected;
-
-        
+        private DateTime _partialResultExpiresAt;
 
         public SpeechService() {
             _recognizer   = new WindowsSpeech(this);
@@ -82,7 +82,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void OnPartialResultReceived(object sender, ValueEventArgs<string> e) {
-            _display.Text = e.Value;
+            _display.Text           = e.Value;
+            _partialResultExpiresAt = DateTime.UtcNow.AddMilliseconds(PARTIAL_RESULT_EXPIRE_MS);
+            _display.TextExpiresAt  = _partialResultExpiresAt;
         }
 
         private async void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
@@ -103,6 +105,11 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public void Update(GameTime gameTime) {
             if (ChatMacros.Instance.InputConfig.Value.PushToTalk == null) {
+                return;
+            }
+
+            if (DateTime.UtcNow > _partialResultExpiresAt) {
+                _display.Text = string.Empty;
                 return;
             }
 
@@ -192,6 +199,12 @@ namespace Nekres.ChatMacros.Core.Services {
                 set => SetProperty(ref _text, value);
             }
 
+            private DateTime _textExpiresAt;
+            public DateTime TextExpiresAt {
+                get => _textExpiresAt;
+                set => SetProperty(ref _textExpiresAt, value);
+            }
+
             private readonly BitmapFont _font;
 
             private DateTime _lastTextCursorBlink;
@@ -200,14 +213,16 @@ namespace Nekres.ChatMacros.Core.Services {
             private string ListeningText => Resources.Listening;
             private string NoInput       => Resources.No_input_is_being_detected__Verify_your_settings_;
 
-            private bool _inputDetected;
-
+            private bool          _inputDetected;
+            private Color         _redShift;
             private SpeechService _speech;
+
             public SpeechRecognizerDisplay(SpeechService speech) {
-                _speech = speech;
-                _font   = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 60);
-                Parent  = GameService.Graphics.SpriteScreen;
-                Size    = GameService.Graphics.SpriteScreen.ContentRegion.Size;
+                _speech   = speech;
+                _redShift = new Color(255, 57, 57);
+                _font     = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 60);
+                Parent    = GameService.Graphics.SpriteScreen;
+                Size      = GameService.Graphics.SpriteScreen.ContentRegion.Size;
 
                 ZIndex =  2147483600;
 
@@ -249,7 +264,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
                 if (!_inputDetected) {
                     var inputDetectedSize   = _font.MeasureString(this.NoInput);
-                    var inputDetectedBounds = new Rectangle(bounds.X, listenBounds.Y - (int)Math.Round(listenSize.Height), bounds.Width, bounds.Height);
+                    var inputDetectedBounds = new Rectangle(bounds.X, listenBounds.Y - (int)Math.Round(inputDetectedSize.Height), bounds.Width, bounds.Height);
                     spriteBatch.DrawStringOnCtrl(this, this.NoInput, _font, inputDetectedBounds, Color.White, false, true, 2, HorizontalAlignment.Center);
                 }
                 
@@ -260,6 +275,15 @@ namespace Nekres.ChatMacros.Core.Services {
                 spriteBatch.DrawStringOnCtrl(this, _text, _font, bounds, Color.White, false, true, 2, HorizontalAlignment.Center);
 
                 DrawTextCursor(spriteBatch, _text, _font, bounds, ref _lastTextCursorBlink, Color.White, true, 2, HorizontalAlignment.Center);
+
+                if (DateTime.UtcNow < _textExpiresAt) {
+                    var expiresIn    = DateTime.UtcNow.Subtract(_textExpiresAt);
+                    var expireText   = expiresIn.ToString(expiresIn.TotalSeconds > -1 ? @"\.ff" : expiresIn.TotalMinutes > -1 ? @"ss\.ff" : @"m\:ss").TrimStart('0');
+                    var expireColor  = Color.Lerp(Color.White, _redShift, 1 + (float)expiresIn.TotalMilliseconds / PARTIAL_RESULT_EXPIRE_MS);
+                    var textSize     = _font.MeasureString(expireText);
+                    var expireBounds = new Rectangle(bounds.X + (int)Math.Round(textSize.Width) * 2 + Panel.RIGHT_PADDING, bounds.Y, bounds.Width, bounds.Height);
+                    spriteBatch.DrawStringOnCtrl(this, expireText, _font, expireBounds, expireColor, false, true, 2, HorizontalAlignment.Center);
+                }
             }
             
             private void DrawTextCursor(SpriteBatch         spriteBatch, string text, BitmapFont font, Rectangle bounds, ref DateTime lastTextCursorBlink, Color color,

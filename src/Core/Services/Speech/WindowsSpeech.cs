@@ -40,6 +40,11 @@ namespace Nekres.ChatMacros.Core.Services {
             GameService.Input.Mouse.LeftMouseButtonPressed += OnLeftMouseButtonPressed;
         }
 
+        public void DiscardResult() {
+            _lastResult             = default;
+            _lastAudioSignalProblem = AudioSignalProblem.None;
+        }
+
         private void OnVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
             ChangeDevice(_recognizer, e.Value);
         }

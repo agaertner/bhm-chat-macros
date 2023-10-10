@@ -166,6 +166,16 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 GameService.Content.PlaySoundEffectByName("color-change");
             };
 
+            void OnMacroOnActiveMacrosChange(object o, ValueEventArgs<IReadOnlyList<BaseMacro>> valueEventArgs) {
+                UpdateFilter(searchBar.Text, showActivesOnly.Checked);
+            }
+
+            ChatMacros.Instance.Macro.ActiveMacrosChange += OnMacroOnActiveMacrosChange;
+
+            MacroEntries.Disposed += (_, _) => {
+                ChatMacros.Instance.Macro.ActiveMacrosChange -= OnMacroOnActiveMacrosChange;
+            };
+
             UpdateFilter(searchBar.Text, showActivesOnly.Checked);
 
             base.Build(buildPanel);
@@ -177,9 +187,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             var filtered = FastenshteinUtil.FindMatchesBy(searchKey, entries, entry => entry.Item.Title).ToList();
 
             foreach (var entry in entries) {
-                entry.Visible = filtered.IsNullOrEmpty() || filtered.Contains(entry);
+                entry.Visible  = filtered.IsNullOrEmpty() || filtered.Contains(entry);
+                entry.IsActive = ChatMacros.Instance.Macro.ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
                 if (showActives) {
-                    entry.Visible = ChatMacros.Instance.Macro.ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
+                    entry.Visible = entry.IsActive;
                 }
             }
 
@@ -235,9 +246,18 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             public T Item;
 
+            private bool _isActive;
+            public bool IsActive {
+                get => _isActive;
+                set => SetProperty(ref _isActive, value, true);
+            }
+
             private Func<T, string> _basicTooltipText;
             private bool            _mouseOverDelete;
             private Rectangle       _deleteBounds;
+
+            private bool      _mouseOverActive;
+            private Rectangle _activeBounds;
 
             private AsyncTexture2D _currentDeleteTexture;
             private AsyncTexture2D _deleteHoverTexture;
@@ -263,9 +283,13 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     _currentDeleteTexture = _deleteHoverTexture;
                     _mouseOverDelete      = true;
                     BasicTooltipText      = Resources.Delete;
+                } else if (_activeBounds.Contains(RelativeMousePosition)) {
+                    BasicTooltipText = "Active";
+                    _mouseOverActive = true;
                 } else {
                     _currentDeleteTexture = _deleteTexture;
                     _mouseOverDelete      = false;
+                    _mouseOverActive      = false;
                     BasicTooltipText      = _basicTooltipText(Item);
                 }
                 base.OnMouseMoved(e);
@@ -298,9 +322,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 _deleteBounds = new Rectangle(this.Width - height - Panel.RIGHT_PADDING - 15, (_menuItemHeight - height) / 2, height, height);
                 spriteBatch.DrawOnCtrl(this, _currentDeleteTexture, _deleteBounds);
 
-                if (this.Parent is Menu menu && menu.SelectedMenuItem == this) {
-                    height += 4;
-                    spriteBatch.DrawOnCtrl(this, ChatMacros.Instance.Resources.EditIcon, new Rectangle(_deleteBounds.Left - height - Panel.RIGHT_PADDING, _deleteBounds.Y, height, height));
+                if (_isActive) {
+                    height        += 4;
+                    _activeBounds =  new Rectangle(_deleteBounds.Left - height - Panel.RIGHT_PADDING, _deleteBounds.Y, height, height);
+                    spriteBatch.DrawOnCtrl(this, ChatMacros.Instance.Resources.EditIcon, _activeBounds);
                 }
             }
         }

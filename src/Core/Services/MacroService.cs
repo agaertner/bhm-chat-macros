@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 namespace Nekres.ChatMacros.Core.Services {
     internal class MacroService : IDisposable {
 
+        public event EventHandler<ValueEventArgs<IReadOnlyList<BaseMacro>>> ActiveMacrosChange;
+
         private const char  COMMAND_START = '{';
         private const char  COMMAND_END   = '}';
         private const char  PARAM_CHAR    = ' ';
@@ -43,6 +45,7 @@ namespace Nekres.ChatMacros.Core.Services {
         public void UpdateMacros() {
             ToggleMacros(false);
             ActiveMacros = ChatMacros.Instance.Data.GetActiveMacros();
+            ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros));
             ToggleMacros(true);
         }
 

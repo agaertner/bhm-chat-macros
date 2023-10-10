@@ -12,5 +12,7 @@ namespace Nekres.ChatMacros.Core.Services.Speech {
         void Reset(CultureInfo lang, CultureInfo secondaryLang, bool freeDictation, params string[] grammar);
 
         void ChangeGrammar(bool freeDictation, params string[] grammar);
+
+        void DiscardResult();
     }
 }
