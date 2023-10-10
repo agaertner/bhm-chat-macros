@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Nekres.ChatMacros.Core {
@@ -20,6 +21,11 @@ namespace Nekres.ChatMacros.Core {
         public static bool IsWebLink(this string uri) {
             return Uri.TryCreate(uri, UriKind.Absolute, out var uriResult)
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        }
+
+        public static bool IsPathFullyQualified(this string path) {
+            var root = Path.GetPathRoot(path);
+            return root.StartsWith(@"\\") || root.EndsWith(@"\") && root != @"\";
         }
     }
 }

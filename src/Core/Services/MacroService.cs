@@ -1,4 +1,5 @@
 ﻿using Blish_HUD;
+using Blish_HUD.Controls;
 using Flurl.Http;
 using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
@@ -6,6 +7,7 @@ using Nekres.ChatMacros.Core.Services.Data;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -158,10 +160,35 @@ namespace Nekres.ChatMacros.Core.Services {
                 return string.Empty;
             }
 
-            var path = args[0].Replace("%20", " ");
+            var relativePath = args[0] ?? string.Empty;
+            relativePath = relativePath.Replace("%20", " ");
 
             try {
-                if (!System.IO.File.Exists(path)) {
+                var basePaths = new [] {
+                    ChatMacros.Instance.ModuleDirectory,
+                    AppDomain.CurrentDomain.BaseDirectory
+                };
+
+                string path = string.Empty;
+                if (relativePath.IsPathFullyQualified()) {
+                    path = System.IO.File.Exists(relativePath) ? relativePath : path;
+                } else {
+                    relativePath = relativePath.TrimStart('/');
+                    relativePath = relativePath.TrimStart('\\');
+                    relativePath = relativePath.Replace("/", "\\");
+                    foreach (var basePath in basePaths) {
+                        var testPath = Path.Combine(basePath, relativePath);
+                        testPath = Path.GetFullPath(testPath);
+                        if (System.IO.File.Exists(testPath)) {
+                            path = testPath;
+                            break;
+                        }
+                    }
+                }
+                
+                // File not found
+                if (string.IsNullOrEmpty(path)) {
+                    ChatMacros.Logger.Info($"File Not Found: {relativePath}", ScreenNotification.NotificationType.Error);
                     return string.Empty;
                 }
 
@@ -178,7 +205,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 }
                 return lines[line];
             } catch (Exception e) {
-                ChatMacros.Logger.Error(e, e.Message);
+                ChatMacros.Logger.Info(e, e.Message);
                 return string.Empty;
             }
         }
