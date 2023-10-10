@@ -136,6 +136,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         return;
                     }
 
+                    ChatMacros.Instance.Macro.UpdateMacros();
                     GameService.Content.PlaySoundEffectByName("color-change");
                 };
             }
