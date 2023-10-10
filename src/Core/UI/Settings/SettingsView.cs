@@ -8,6 +8,7 @@ using Nekres.ChatMacros.Properties;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using Nekres.ChatMacros.Core.UI.Credits;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class SettingsView : View {
@@ -22,7 +23,7 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             var flowBody = new FlowPanel {
                 Parent              = buildPanel,
-                Width               = buildPanel.ContentRegion.Width,
+                Width               = buildPanel.ContentRegion.Width / 2,
                 Height              = buildPanel.ContentRegion.Height,
                 FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                 OuterControlPadding = new Vector2(5, 5),
@@ -70,6 +71,14 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
             inputDevice.ValueChanged   += OnInputDeviceChanged;
             voiceLanguage.ValueChanged += OnVoiceLanguageChanged;
             secondaryVoiceLanguage.ValueChanged += OnSecondaryVoiceLanguageChanged;
+
+            var donors = new ViewContainer {
+                Parent = buildPanel,
+                Width  = buildPanel.ContentRegion.Width / 2,
+                Height = buildPanel.ContentRegion.Height,
+                Left = flowBody.Right
+            };
+            donors.Show(new CreditsView());
 
             base.Build(buildPanel);
         }

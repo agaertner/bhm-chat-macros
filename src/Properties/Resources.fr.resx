@@ -361,4 +361,16 @@
   <data name="This macro is currently active and can be triggered." xml:space="preserve">
     <value>Cette macro est actuellement active et peut être déclenchée.</value>
   </data>
+  <data name="Supporter since {0}" xml:space="preserve">
+    <value>Supporter puisque {0}</value>
+  </data>
+  <data name="Thanks to my awesome supporters who keep me motivated!" xml:space="preserve">
+    <value>Merci à tous ceux qui me soutiennent et me motivent!</value>
+  </data>
+  <data name="Support Me on Ko-fi" xml:space="preserve">
+    <value>Soutenez-moi sur Ko-fi</value>
+  </data>
+  <data name="Buy Me a Coffee!" xml:space="preserve">
+    <value>Offrez-moi un café!</value>
+  </data>
 </root>

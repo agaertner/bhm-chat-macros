@@ -10,18 +10,28 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public Color      BrightGold = new (223, 194, 149, 255);
         public Texture2D  DragReorderIcon { get; private set; }
+        public Texture2D  TwitchLogo      { get; private set; }
+        public Texture2D  YoutubeLogo     { get; private set; }
+        public Texture2D  KofiButton        { get; private set; }
         public Texture2D  EditIcon        { get; private set; }
         public BitmapFont Menomonia24     { get; private set; }
         public BitmapFont RubikRegular26  { get; private set; }
+        public BitmapFont LatoRegular24   { get; private set; }
 
         private IReadOnlyList<SoundEffect> _menuClicks;
         private SoundEffect                _menuItemClickSfx;
 
         public ResourceService() {
-            DragReorderIcon = ChatMacros.Instance.ContentsManager.GetTexture("icons/drag-reorder.png");
-            EditIcon        = ChatMacros.Instance.ContentsManager.GetTexture("icons/edit_icon.png");
+            LoadTextures();
             LoadFonts();
             LoadSounds();
+        }
+
+        public void LoadTextures() {
+            DragReorderIcon = ChatMacros.Instance.ContentsManager.GetTexture("icons/drag-reorder.png");
+            EditIcon        = ChatMacros.Instance.ContentsManager.GetTexture("icons/edit_icon.png");
+            TwitchLogo      = ChatMacros.Instance.ContentsManager.GetTexture("socials/twitch_logo.png");
+            YoutubeLogo     = ChatMacros.Instance.ContentsManager.GetTexture("socials/youtube_logo.png");
         }
 
         public void PlayMenuItemClick() {
@@ -34,7 +44,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private void LoadFonts() {
             this.Menomonia24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/menomonia.ttf", 24);
-            this.RubikRegular26 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/rubik-regular.ttf", 26);
+            this.RubikRegular26 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Rubik-Regular.ttf", 26);
+            this.LatoRegular24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 24);
         }
 
         private void LoadSounds() {
@@ -50,8 +61,11 @@ namespace Nekres.ChatMacros.Core.Services {
         public void Dispose() {
             this.Menomonia24?.Dispose();
             this.RubikRegular26?.Dispose();
+            this.LatoRegular24?.Dispose();
             this.DragReorderIcon?.Dispose();
             this.EditIcon?.Dispose();
+            this.TwitchLogo?.Dispose();
+            this.YoutubeLogo?.Dispose();
         }
 
     }

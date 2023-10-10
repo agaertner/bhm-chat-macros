@@ -223,6 +223,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Buy Me a Coffee!.
+        /// </summary>
+        internal static string Buy_Me_a_Coffee_ {
+            get {
+                return ResourceManager.GetString("Buy Me a Coffee!", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create Macro.
         /// </summary>
         internal static string Create_Macro {
@@ -637,11 +646,38 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Support Me on Ko-fi.
+        /// </summary>
+        internal static string Support_Me_on_Ko_fi {
+            get {
+                return ResourceManager.GetString("Support Me on Ko-fi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supporter since {0}.
+        /// </summary>
+        internal static string Supporter_since__0_ {
+            get {
+                return ResourceManager.GetString("Supporter since {0}", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Team.
         /// </summary>
         internal static string Team {
             get {
                 return ResourceManager.GetString("Team", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thanks to my awesome supporters who keep me motivated!.
+        /// </summary>
+        internal static string Thanks_to_my_awesome_supporters_who_keep_me_motivated_ {
+            get {
+                return ResourceManager.GetString("Thanks to my awesome supporters who keep me motivated!", resourceCulture);
             }
         }
         
