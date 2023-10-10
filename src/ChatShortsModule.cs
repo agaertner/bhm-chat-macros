@@ -139,15 +139,14 @@ namespace Nekres.ChatMacros {
         }
 
         protected override void Update(GameTime gameTime) {
+            Speech?.Update(gameTime);
+
             // Rate limit update
             if (gameTime.TotalGameTime.TotalMilliseconds - _lastRun < 10) {
                 return;
             }
             _lastRun = gameTime.ElapsedGameTime.TotalMilliseconds;
-
-            Speech?.Update(gameTime);
             Macro?.Update(gameTime);
-            base.Update(gameTime);
         }
 
         /// <inheritdoc />
