@@ -24,7 +24,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public const int SAMPLE_RATE = 16000;
         public const int CHANNELS    = 1;
-        public const int PARTIAL_RESULT_EXPIRE_MS = 1000;
+        public const int PARTIAL_RESULT_EXPIRE_MS = 1500;
 
         private Stream _audioStream;
         private Stream _secondaryAudioStream;

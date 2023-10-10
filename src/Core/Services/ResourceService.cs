@@ -12,9 +12,7 @@ namespace Nekres.ChatMacros.Core.Services {
         public Texture2D  DragReorderIcon { get; private set; }
         public Texture2D  TwitchLogo      { get; private set; }
         public Texture2D  YoutubeLogo     { get; private set; }
-        public Texture2D  KofiButton        { get; private set; }
         public Texture2D  EditIcon        { get; private set; }
-        public BitmapFont Menomonia24     { get; private set; }
         public BitmapFont RubikRegular26  { get; private set; }
         public BitmapFont LatoRegular24   { get; private set; }
 
@@ -43,7 +41,6 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void LoadFonts() {
-            this.Menomonia24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/menomonia.ttf", 24);
             this.RubikRegular26 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Rubik-Regular.ttf", 26);
             this.LatoRegular24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 24);
         }
@@ -59,7 +56,6 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
-            this.Menomonia24?.Dispose();
             this.RubikRegular26?.Dispose();
             this.LatoRegular24?.Dispose();
             this.DragReorderIcon?.Dispose();

@@ -140,7 +140,19 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
+            // Wait for the lock to be released
+            if (_lockAcquired) {
+                _lockReleased.WaitOne(500);
+            }
 
+            _lockReleased.Dispose();
+
+            // Dispose the lock
+            try {
+                _rwLock.Dispose();
+            } catch (Exception ex) {
+                ChatMacros.Logger.Debug(ex, ex.Message);
+            }
         }
     }
 }
