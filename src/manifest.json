@@ -1,8 +1,8 @@
 {
   "name": "Chat Shorts",
-  "version": "0.4.38",
+  "version": "0.9.12",
   "namespace": "Nekres.Chat_Shorts",
-  "package": "ChatShorts.dll",
+  "package": "ChatMacros.dll",
   "manifest_version": 1,
   "description": "Allows you to create shortcuts for recurring chat messages.",
   "dependencies": {
@@ -17,5 +17,27 @@
       "name": "Nekres",
       "username": "Nekres.1943"
     }
-  ]
+  ],
+  "api_permissions": {
+    "account": {
+      "optional": false,
+      "details": "Always required if any other permission is present."
+    },
+    "progression": {
+      "optional": true,
+      "details": "Required for replacing placeholders with progress info."
+    },
+    "inventories": {
+      "optional": true,
+      "details": "Required for replacing placeholders with item info."
+    },
+    "characters": {
+      "optional": true,
+      "details": "Required for replacing placeholders with character info."
+    },
+    "builds": {
+      "optional": true,
+      "details": "Required for replacing placeholders with build info."
+    }
+  }
 }

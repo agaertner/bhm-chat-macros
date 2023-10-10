@@ -120,4 +120,260 @@
   <data name="Message exceeds limit of {0} characters." xml:space="preserve">
     <value>Le message dépasse la limite de {0} caractères.</value>
   </data>
+  <data name="/say" xml:space="preserve">
+    <value>/l</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/map" xml:space="preserve">
+    <value>/ca</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/party" xml:space="preserve">
+    <value>/gr</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/squad" xml:space="preserve">
+    <value>/es</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/team" xml:space="preserve">
+    <value>/eq</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/reply" xml:space="preserve">
+    <value>/r</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild" xml:space="preserve">
+    <value>/g</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Guild" xml:space="preserve">
+    <value>Guilde</value>
+    <comment>Guild chat channel display name</comment>
+  </data>
+  <data name="Say" xml:space="preserve">
+    <value>Dire</value>
+    <comment>Say channel display name</comment>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Carte</value>
+    <comment>Map chat channel display name</comment>
+  </data>
+  <data name="Party" xml:space="preserve">
+    <value>Groupe</value>
+    <comment>Party chat channel display name</comment>
+  </data>
+  <data name="Squad" xml:space="preserve">
+    <value>Escouade</value>
+    <comment>Squad chat channel display name</comment>
+  </data>
+  <data name="Team" xml:space="preserve">
+    <value>Équipe</value>
+    <comment>Team chat channel display name</comment>
+  </data>
+  <data name="Whisper" xml:space="preserve">
+    <value>Chuchoter</value>
+    <comment>Whisper chat channel display name</comment>
+  </data>
+  <data name="/guild{0}" xml:space="preserve">
+    <value>/g{0}</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="G{0}" xml:space="preserve">
+    <value>G{0}</value>
+    <comment>Guild indexed chat channel display name</comment>
+  </data>
+  <data name="Reply" xml:space="preserve">
+    <value>Répondre</value>
+    <comment>Reply to last whisper</comment>
+  </data>
+  <data name="/whisper" xml:space="preserve">
+    <value>/ch</value>
+    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Voice Recognition" xml:space="preserve">
+    <value>Reconnaissance vocale</value>
+  </data>
+  <data name="Microphone" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="Mic" xml:space="preserve">
+    <value>Mic</value>
+    <comment>Abbreviation of microphone</comment>
+  </data>
+  <data name="Listening" xml:space="preserve">
+    <value>Entendre</value>
+    <comment>Voice recognition is actively listening for speech.</comment>
+  </data>
+  <data name="Input Device" xml:space="preserve">
+    <value>Périphérique d&apos;entrée</value>
+  </data>
+  <data name="Voice Command" xml:space="preserve">
+    <value>Commande vocale</value>
+  </data>
+  <data name="Push to Talk" xml:space="preserve">
+    <value>Push-to-Talk</value>
+  </data>
+  <data name="Hold to recognize voice commands." xml:space="preserve">
+    <value>Maintenir pour reconnaître les commandes vocales.</value>
+  </data>
+  <data name="Release to trigger an action." xml:space="preserve">
+    <value>Relâcher pour déclencher une action.</value>
+  </data>
+  <data name="Select an input device..." xml:space="preserve">
+    <value>Sélectionner un périphérique d&apos;entrée…</value>
+  </data>
+  <data name="Select a command language..." xml:space="preserve">
+    <value>Sélectionner une langue de commande…</value>
+  </data>
+  <data name="/emote" xml:space="preserve">
+    <value>/e</value>
+    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Emote" xml:space="preserve">
+    <value>Émote</value>
+    <comment>Emote chat message display name</comment>
+  </data>
+  <data name="Enter a message..." xml:space="preserve">
+    <value>Saisis un message…</value>
+  </data>
+  <data name="Select a target channel..." xml:space="preserve">
+    <value>Choisis un canal cible…</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>Sélectionné</value>
+  </data>
+  <data name="Whichever" xml:space="preserve">
+    <value>Indifférent</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Au Choix</value>
+  </data>
+  <data name="Unset" xml:space="preserve">
+    <value>Non Défini</value>
+  </data>
+  <data name="Add Line" xml:space="preserve">
+    <value>Ajouter une ligne</value>
+  </data>
+  <data name="Add Message" xml:space="preserve">
+    <value>Ajouter un message</value>
+  </data>
+  <data name="Create Macro" xml:space="preserve">
+    <value>Créer une macro</value>
+  </data>
+  <data name="New Macro" xml:space="preserve">
+    <value>Nouveau Macro</value>
+  </data>
+  <data name="Something went wrong. Please try again." xml:space="preserve">
+    <value>Algo ha ido mal. Por favor, inténtelo de nuevo.</value>
+  </data>
+  <data name="Speech recognition for {0} is not installed." xml:space="preserve">
+    <value>La reconnaissance vocale pour {0} n&apos;est pas installée.</value>
+  </data>
+  <data name="Enter a title..." xml:space="preserve">
+    <value>Saisir un titre…</value>
+  </data>
+  <data name="Message Sequence" xml:space="preserve">
+    <value>Séquence de messages</value>
+  </data>
+  <data name="World vs. World" xml:space="preserve">
+    <value>Monde contre Monde</value>
+  </data>
+  <data name="Player vs. Player" xml:space="preserve">
+    <value>Joueur contre Joueur</value>
+  </data>
+  <data name="Player vs. Environment" xml:space="preserve">
+    <value>Joueur contre Environnement</value>
+  </data>
+  <data name="Active Areas" xml:space="preserve">
+    <value>Zones actives</value>
+  </data>
+  <data name="Add Map..." xml:space="preserve">
+    <value>Ajouter une carte…</value>
+  </data>
+  <data name="Trigger Options" xml:space="preserve">
+    <value>Options de déclenchement</value>
+  </data>
+  <data name="Non-Voice Trigger" xml:space="preserve">
+    <value>Déclencheur sans voix</value>
+  </data>
+  <data name="Select your primary command language..." xml:space="preserve">
+    <value>Sélectionnez votre langue de commande principale…</value>
+  </data>
+  <data name="Select a secondary command language..." xml:space="preserve">
+    <value>Sélectionner une langue de commande secondaire…</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Library" xml:space="preserve">
+    <value>Bibliothèque</value>
+  </data>
+  <data name="Add Voice Command..." xml:space="preserve">
+    <value>Ajouter une commande vocale…</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Anglais</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>Allemand</value>
+  </data>
+  <data name="French" xml:space="preserve">
+    <value>Français</value>
+  </data>
+  <data name="Spanish" xml:space="preserve">
+    <value>Espagnol</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>JcJ</value>
+  </data>
+  <data name="WvW" xml:space="preserve">
+    <value>McM</value>
+  </data>
+  <data name="PvE" xml:space="preserve">
+    <value>JcE</value>
+  </data>
+  <data name="{0} already added." xml:space="preserve">
+    <value>{0} déjà ajouté.</value>
+  </data>
+  <data name="{0} not found. Check your spelling." xml:space="preserve">
+    <value>{0} introuvable. Vérifiez votre orthographe.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="No input is being detected. Verify your settings." xml:space="preserve">
+    <value>Aucun signal audio n&apos;est détecté. Vérifie tes paramètres.</value>
+  </data>
+  <data name="Show Actives Only" xml:space="preserve">
+    <value>Afficher les actifs uniquement</value>
+  </data>
+  <data name="Search..." xml:space="preserve">
+    <value>Recherche…</value>
+  </data>
+  <data name="Drag to Reorder" xml:space="preserve">
+    <value>Glisser pour réorganiser</value>
+  </data>
+  <data name="This macro is currently active and can be triggered." xml:space="preserve">
+    <value>Cette macro est actuellement active et peut être déclenchée.</value>
+  </data>
+  <data name="Supporter since {0}" xml:space="preserve">
+    <value>Supporter puisque {0}</value>
+  </data>
+  <data name="Thanks to my awesome supporters who keep me motivated!" xml:space="preserve">
+    <value>Merci à tous ceux qui me soutiennent et me motivent!</value>
+  </data>
+  <data name="Support Me on Ko-fi" xml:space="preserve">
+    <value>Soutenez-moi sur Ko-fi</value>
+  </data>
+  <data name="Buy Me a Coffee!" xml:space="preserve">
+    <value>Offrez-moi un café!</value>
+  </data>
+  <data name="Credits and Thanks" xml:space="preserve">
+    <value>Crédits et remerciements</value>
+  </data>
 </root>

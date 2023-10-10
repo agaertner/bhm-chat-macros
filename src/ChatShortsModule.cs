@@ -7,25 +7,23 @@ using Blish_HUD.Settings;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Nekres.Chat_Shorts.Services;
-using Nekres.Chat_Shorts.UI.Controls;
-using Nekres.Chat_Shorts.UI.Models;
-using Nekres.Chat_Shorts.UI.Views;
+using Nekres.ChatMacros.Core.Services;
+using Nekres.ChatMacros.Core.UI.Configs;
+using Nekres.ChatMacros.Core.UI.Library;
+using Nekres.ChatMacros.Core.UI.Settings;
 using System;
 using System.ComponentModel.Composition;
-using System.Linq;
-using Blish_HUD.Extended.Core.Views;
-using Blish_HUD.Graphics.UI;
+using System.Globalization;
+using Gw2WebApiService = Nekres.ChatMacros.Core.Services.Gw2WebApiService;
 
-namespace Nekres.Chat_Shorts
-{
+namespace Nekres.ChatMacros {
     [Export(typeof(Module))]
-    public class ChatShorts : Module
+    public class ChatMacros : Module
     {
 
-        internal static readonly Logger Logger = Logger.GetLogger<ChatShorts>();
+        internal static readonly Logger Logger = Logger.GetLogger<ChatMacros>();
 
-        internal static ChatShorts Instance;
+        internal static ChatMacros Instance;
 
         #region Service Managers
         internal SettingsManager SettingsManager => this.ModuleParameters.SettingsManager;
@@ -34,23 +32,29 @@ namespace Nekres.Chat_Shorts
         internal Gw2ApiManager Gw2ApiManager => this.ModuleParameters.Gw2ApiManager;
         #endregion
 
-        internal DataService DataService { get; set; }
-        internal ChatService ChatService { get; set; }
+        public string ModuleDirectory { get; private set; }
 
-        private StandardWindow _moduleWindow;
-        private CornerIcon _cornerIcon;
-        private ContextMenuStrip _moduleContextMenu;
-
-        // Textures
-        internal Texture2D EditTexture;
-        private Texture2D _cornerTexture;
-        private Texture2D _backgroundTexture;
+        private TabbedWindow2 _moduleWindow;
+        private CornerIcon    _cornerIcon;
+        private Texture2D     _cornerTexture;
 
         internal SettingEntry<KeyBinding> SquadBroadcast;
         internal SettingEntry<KeyBinding> ChatMessage;
+        internal SettingEntry<InputConfig> InputConfig;
+        internal SettingEntry<LibraryConfig> LibraryConfig;
 
+        internal Gw2WebApiService Gw2Api;
+        internal ResourceService  Resources;
+        internal DataService      Data;
+        internal MacroService     Macro;
+        internal SpeechService    Speech;
+
+        private Tab    _libraryTab;
+        private Tab    _settingsTab;
+        private double _lastRun;
+        
         [ImportingConstructor]
-        public ChatShorts([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters)
+        public ChatMacros([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters)
         {
             Instance = this;
         }
@@ -65,31 +69,40 @@ namespace Nekres.Chat_Shorts
             SquadBroadcast = controlSettings.DefineSetting("squadBroadcastKeyBinding", new KeyBinding(ModifierKeys.Shift, Keys.Enter),
                 () => "Squad Broadcast Message", 
                 () => "Give focus to the chat edit box.");
+
+            var selfManaged = settings.AddSubCollection("configs", false, false);
+            InputConfig = selfManaged.DefineSetting("input_config", Core.UI.Configs.InputConfig.Default);
+            LibraryConfig = selfManaged.DefineSetting("library_config", Core.UI.Configs.LibraryConfig.Default);
         }
 
-        protected override void Initialize()
-        {
-            DataService = new DataService(this.DirectoriesManager.GetFullDirectoryPath("chat_shorts"));
-            _cornerTexture = ContentsManager.GetTexture("corner_icon.png");
-            _backgroundTexture = ContentsManager.GetTexture("background.png");
-            EditTexture = ContentsManager.GetTexture("edit_icon.png");
-            ChatService = new ChatService(this.DataService);
+        protected override void Initialize() {
+            ModuleDirectory              = DirectoriesManager.GetFullDirectoryPath("chat_shorts");
+
+            _cornerTexture               = ContentsManager.GetTexture("corner_icon.png");
             SquadBroadcast.Value.Enabled = false;
-            ChatMessage.Value.Enabled = false;
+            ChatMessage.Value.Enabled    = false;
         }
 
-        protected override void OnModuleLoaded(EventArgs e)
-        {
-            var windowRegion = new Rectangle(40, 26, 423, 780 - 56);
-            var contentRegion = new Rectangle(70, 41, 380, 780 - 42);
-            _moduleWindow = new StandardWindow(_backgroundTexture, windowRegion, contentRegion)
+        protected override void OnModuleLoaded(EventArgs e) {
+            Data      = new DataService();
+            Gw2Api    = new Gw2WebApiService();
+            Resources = new ResourceService();
+            Macro     = new MacroService();
+            Speech    = new SpeechService();
+
+            var windowRegion  = new Rectangle(40, 26, 913, 691);
+            _moduleWindow = new TabbedWindow2(GameService.Content.DatAssetCache.GetTextureFromAssetId(155985),
+                                              windowRegion, 
+                                              new Rectangle(100, 36, 839, 605))
             {
-                Parent = GameService.Graphics.SpriteScreen,
-                Emblem = _cornerTexture,
-                Location = new Point((GameService.Graphics.SpriteScreen.Width - windowRegion.Width) / 2, (GameService.Graphics.SpriteScreen.Height) / 2),
+                Parent        = GameService.Graphics.SpriteScreen,
+                Emblem        = _cornerTexture,
                 SavesPosition = true,
-                Title = this.Name,
-                Id = $"ChatShorts_{nameof(LibraryView)}_42d3a11e-ffa7-4c82-8fd9-ee9d9a118914"
+                SavesSize     = true,
+                Title         = this.Name,
+                Id            = $"{nameof(ChatMacros)}_42d3a11e-ffa7-4c82-8fd9-ee9d9a118914",
+                Left          = (GameService.Graphics.SpriteScreen.Width  - windowRegion.Width)  / 2,
+                Top           = (GameService.Graphics.SpriteScreen.Height - windowRegion.Height) / 2
             };
             _cornerIcon = new CornerIcon
             {
@@ -98,96 +111,62 @@ namespace Nekres.Chat_Shorts
             };
             _cornerIcon.Click += OnModuleIconClick;
 
-            GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
-            GameService.Gw2Mumble.PlayerCharacter.IsCommanderChanged += OnIsCommanderChanged;
+            _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
+                                  () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
 
-            ChatService.LoadMacros();
+            _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
+                                   () => new SettingsView(InputConfig.Value), Properties.Resources.Settings);
+            _moduleWindow.Tabs.Add(_libraryTab);
+            _moduleWindow.Tabs.Add(_settingsTab);
+            _moduleWindow.TabChanged += OnTabChanged;
 
-            BuildContextMenu();
-
+            GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
             // Base handler must be called
             base.OnModuleLoaded(e);
         }
 
-        private void OnMapChanged(object o, ValueEventArgs<int> e)
-        {
-            if (!this.Loaded) return;
-            BuildContextMenu();
+        private void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
+            _libraryTab.Name  = Properties.Resources.Library;
+            _settingsTab.Name = Properties.Resources.Settings;
         }
 
-        public override IView GetSettingsView()
-        {
-            return new SocialsSettingsView(new SocialsSettingsModel(this.SettingsManager.ModuleSettings, "https://pastebin.com/raw/Kk9DgVmL"));
+        private void OnTabChanged(object sender, ValueChangedEventArgs<Tab> e) {
+            _moduleWindow.Subtitle = e.NewValue.Name;
         }
 
-        private void OnIsCommanderChanged(object o, ValueEventArgs<bool> e)
-        {
-            if (!this.Loaded) return;
-            BuildContextMenu();
+        public void OnModuleIconClick(object o, MouseEventArgs e) {
+            _moduleWindow.Show();
         }
 
-        public void OnModuleIconClick(object o, MouseEventArgs e)
-        {
-            _moduleContextMenu?.Show(_cornerIcon);
-        }
-
-        internal void BuildContextMenu()
-        {
-            var prevVisible = _moduleContextMenu?.Visible;
-            var prevLocation = _moduleContextMenu?.Location;
-            _moduleContextMenu?.Dispose();
-            _moduleContextMenu = new ContextMenuStrip();
-
-            var openLibrary = new ContextMenuStripItem("Open Library")
-            {
-                Parent = _moduleContextMenu
-            };
-            openLibrary.Click += (_, _) => _moduleWindow.ToggleWindow(new LibraryView(new LibraryModel()));
-
-            var separatorItem = new ContextMenuStripItemSeparator
-            {
-                Parent = _moduleContextMenu,
-                CanCheck = false,
-                Enabled = false
-            };
-
-            var macros = DataService.GetAllActives().Select(MacroModel.FromEntity);
-
-            foreach (var model in macros)
-            {
-                var entry = new ContextMenuStripItemWithModel<MacroModel>(model)
-                {
-                    Text             = model.Title,
-                    Parent           = _moduleContextMenu,
-                    BasicTooltipText = string.Join("\n", model.TextLines)
-                };
-                entry.Click += async (_, _) => await ChatService.Send(model.TextLines.ToArray(), model.SquadBroadcast);
+        protected override void Update(GameTime gameTime) {
+            // Rate limit update
+            if (gameTime.TotalGameTime.TotalMilliseconds - _lastRun < 10) {
+                return;
             }
+            _lastRun = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            if (!prevVisible.GetValueOrDefault()) return;
-            _moduleContextMenu.Location = prevLocation.GetValueOrDefault();
-            _moduleContextMenu.Show();
+            Speech?.Update(gameTime);
+            Macro?.Update(gameTime);
+            base.Update(gameTime);
         }
 
         /// <inheritdoc />
-        protected override void Unload()
-        {
-            // Unload here
-            this.ChatService?.Dispose();
-            this.DataService?.Dispose();
-            GameService.Gw2Mumble.CurrentMap.MapChanged -= OnMapChanged;
-            GameService.Gw2Mumble.PlayerCharacter.IsCommanderChanged -= OnIsCommanderChanged;
-            _moduleContextMenu?.Dispose();
+        protected override void Unload() {
+            GameService.Overlay.UserLocaleChanged -= OnUserLocaleChanged;
             if (_cornerIcon != null)
             {
                 _cornerIcon.Click -= OnModuleIconClick;
                 _cornerIcon.Dispose();
             }
             _moduleWindow?.Dispose();
-            _backgroundTexture?.Dispose();
             _cornerTexture?.Dispose();
-            EditTexture?.Dispose();
+            Speech?.Dispose();
+            Macro?.Dispose();
+            Resources?.Dispose();
+            Gw2Api?.Dispose();
+            Data?.Dispose();
             // All static members must be manually unset
+            Instance = null;
         }
     }
 }
