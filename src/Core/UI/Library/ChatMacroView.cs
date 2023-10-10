@@ -284,7 +284,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     _mouseOverDelete      = true;
                     BasicTooltipText      = Resources.Delete;
                 } else if (_activeBounds.Contains(RelativeMousePosition)) {
-                    BasicTooltipText = "Active";
+                    BasicTooltipText = Resources.This_macro_is_currently_active_and_can_be_triggered_;
                     _mouseOverActive = true;
                 } else {
                     _currentDeleteTexture = _deleteTexture;

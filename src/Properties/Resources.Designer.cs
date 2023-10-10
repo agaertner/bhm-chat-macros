@@ -646,6 +646,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This macro is currently active and can be triggered..
+        /// </summary>
+        internal static string This_macro_is_currently_active_and_can_be_triggered_ {
+            get {
+                return ResourceManager.GetString("This macro is currently active and can be triggered.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Trigger Options.
         /// </summary>
         internal static string Trigger_Options {

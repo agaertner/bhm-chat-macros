@@ -358,4 +358,7 @@
   <data name="Drag to Reorder" xml:space="preserve">
     <value>Drag to Reorder</value>
   </data>
+  <data name="This macro is currently active and can be triggered." xml:space="preserve">
+    <value>This macro is currently active and can be triggered.</value>
+  </data>
 </root>
