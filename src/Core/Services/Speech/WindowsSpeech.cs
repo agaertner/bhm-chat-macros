@@ -61,14 +61,15 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Reset(CultureInfo lang, CultureInfo secondaryLanguage, bool freeDictation, params string[] grammar) {
-            _speech.StartRecording              -= OnStartRecording;
-            _speech.StopRecording               -= OnStopRecording;
-            _speech.VoiceStreamChanged          -= OnVoiceStreamChanged;
-            _speech.SecondaryVoiceStreamChanged -= OnSecondaryVoiceStreamChanged;
+            Disable();
+
+            if (grammar is { Length: < 1 }) {
+                return;
+            }
 
             ChangeModel(lang, secondaryLanguage);
 
-            if (!Refresh()) {
+            if (!CreateRecognizers()) {
                 return;
             }
 
@@ -81,6 +82,18 @@ namespace Nekres.ChatMacros.Core.Services {
             _speech.StopRecording               += OnStopRecording;
             _speech.VoiceStreamChanged          += OnVoiceStreamChanged;
             _speech.SecondaryVoiceStreamChanged += OnSecondaryVoiceStreamChanged;
+        }
+
+        private void Disable() {
+            _speech.StartRecording              -= OnStartRecording;
+            _speech.StopRecording               -= OnStopRecording;
+            _speech.VoiceStreamChanged          -= OnVoiceStreamChanged;
+            _speech.SecondaryVoiceStreamChanged -= OnSecondaryVoiceStreamChanged;
+
+            _recognizer?.Dispose();
+            _recognizer = null;
+            _secondaryLanguageRecognizer?.Dispose();
+            _secondaryLanguageRecognizer = null;
         }
 
         private void RegisterDelegates(SpeechRecognitionEngine recognizer) {
@@ -98,12 +111,7 @@ namespace Nekres.ChatMacros.Core.Services {
             SpeechDetected?.Invoke(this, EventArgs.Empty);
         }
 
-        private bool Refresh() {
-            _recognizer?.Dispose();
-            _recognizer = null;
-            _secondaryLanguageRecognizer?.Dispose();
-            _secondaryLanguageRecognizer = null;
-
+        private bool CreateRecognizers() {
             var recognizers = 0;
             try {
                 _recognizer = new SpeechRecognitionEngine(_voiceCulture);
@@ -146,11 +154,15 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void ChangeGrammar(SpeechRecognitionEngine recognizer, bool freeDictation, params string[] grammar) {
-            if (recognizer == null) {
+            if (recognizer == null || grammar is { Length: < 1 }) {
                 return;
             }
-            recognizer.UnloadAllGrammars();
-            if (grammar == null || grammar.Length == 0 || freeDictation) {
+
+            if (recognizer.Grammars?.Any() ?? false) {
+                recognizer.UnloadAllGrammars();
+            }
+            
+            if (freeDictation) {
                 _grammar = new DictationGrammar();
             } else {
                 _grammar = new Grammar(new GrammarBuilder(new Choices(grammar)) {
@@ -232,12 +244,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public void Dispose() {
             GameService.Input.Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
-            _speech.SecondaryVoiceStreamChanged            -= OnSecondaryVoiceStreamChanged;
-            _speech.VoiceStreamChanged                     -= OnVoiceStreamChanged;
-            _speech.StartRecording                         -= OnStartRecording;
-            _speech.StopRecording                          -= OnStopRecording;
-            _recognizer?.Dispose();
-            _secondaryLanguageRecognizer?.Dispose();
+            Disable();
         }
     }
 }

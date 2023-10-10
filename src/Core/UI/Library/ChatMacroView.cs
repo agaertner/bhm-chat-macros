@@ -570,9 +570,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                     void OnLeftMouseButtonReleased(object o, MouseEventArgs mouseEventArgs) {
                         if (IsDragging) {
-                            IsDragging = false;
                             this.DragEnd?.Invoke(this, EventArgs.Empty);
                         }
+                        IsDragging = false;
                     }
 
                     GameService.Input.Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
