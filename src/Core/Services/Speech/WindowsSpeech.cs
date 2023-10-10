@@ -207,12 +207,14 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            // The confidence will eventually max out and never be beaten unless the listener is reset.
-            /*if (_lastResult.Item1 > word.Confidence) {
-                return;
-            }*/
+            if (string.Equals(_lastResult.Item2, word.Text, StringComparison.InvariantCultureIgnoreCase) &&
+                _lastResult.Item1 < word.Confidence) {
+                // The confidence will eventually max out and never be beaten unless the listener is reset.
+                _lastResult = (word.Confidence, word.Text);
+                return; // Return to avoid spamming the same result.
+            }
 
-            _lastResult = (word.Confidence, word.LexicalForm);
+            _lastResult = (word.Confidence, word.Text);
             PartialResult?.Invoke(this, new ValueEventArgs<string>(_lastResult.Item2));
         }
 
