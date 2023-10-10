@@ -30,6 +30,7 @@ namespace Nekres.ChatMacros.Core.Services {
         private bool               _isListening;
         private int                _processing;
         private (float, string)    _lastResult;
+        private bool               _lockResult;
         private AudioSignalProblem _lastAudioSignalProblem;
 
         private readonly SpeechService _speech;
@@ -41,8 +42,10 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void DiscardResult() {
-            _lastResult             = default;
-            _lastAudioSignalProblem = AudioSignalProblem.None;
+            if (!_lockResult) {
+                _lastResult             = default;
+                _lastAudioSignalProblem = AudioSignalProblem.None;
+            }
         }
 
         private void OnVoiceStreamChanged(object sender, ValueEventArgs<Stream> e) {
@@ -210,10 +213,11 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            if (string.Equals(_lastResult.Item2, word.Text, StringComparison.InvariantCultureIgnoreCase) &&
-                _lastResult.Item1 < word.Confidence) {
+            if (string.Equals(_lastResult.Item2, word.Text, StringComparison.InvariantCultureIgnoreCase)) {
                 // The confidence will eventually max out and never be beaten unless the listener is reset.
-                _lastResult = (word.Confidence, word.Text);
+                if (_lastResult.Item1 < word.Confidence) {
+                    _lastResult = (word.Confidence, word.Text);
+                }
                 return; // Return to avoid spamming the same result.
             }
 
@@ -240,11 +244,13 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private async void OnStopRecording(object sender, EventArgs e) {
+            _lockResult = true;
             do {
                 await Task.Delay(650);
             } while (Interlocked.CompareExchange(ref _processing, 0, 0) > 0);
             InvokeResultAvailable();
             _isListening = false;
+            _lockResult  = false;
         }
 
         private void OnStartRecording(object sender, EventArgs e) {

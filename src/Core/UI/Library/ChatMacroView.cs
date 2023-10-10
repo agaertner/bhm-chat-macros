@@ -558,7 +558,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
                         ForeColor = _line.Channel.GetMessageColor(),
                         BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.Message,
-                        Font = ChatMacros.Instance.Resources.Menomonia24
+                        Font = GameService.Content.GetFont(ContentService.FontFace.Menomonia, ContentService.FontSize.Size18, ContentService.FontStyle.Bold)
                     };
 
                     var remove = new Image {
