@@ -60,6 +60,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void ChangeDevice(SpeechRecognitionEngine recognizer, Stream stream) {
+            if (recognizer == null) {
+                return;
+            }
             recognizer.RecognizeAsyncCancel();
             recognizer.SetInputToAudioStream(stream, new SpeechAudioFormatInfo(SpeechService.SAMPLE_RATE, AudioBitsPerSample.Sixteen, (AudioChannel)SpeechService.CHANNELS));
             recognizer.RecognizeAsync(RecognizeMode.Multiple);
