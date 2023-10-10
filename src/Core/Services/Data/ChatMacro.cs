@@ -28,7 +28,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
     public static class ChannelExtensions {
         public static string ToChatCommand(this ChatChannel channel) {
-            return $"{channel switch {
+            var ch = channel switch {
                 ChatChannel.Current => string.Empty,
                 ChatChannel.Emote   => Resources._emote,
                 ChatChannel.Say     => Resources._say,
@@ -44,8 +44,9 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => string.Format(Resources._guild_0_, 3),
                 ChatChannel.Guild4  => string.Format(Resources._guild_0_, 4),
                 ChatChannel.Guild5  => string.Format(Resources._guild_0_, 5),
-                _               => string.Empty
-            }} ".TrimStart();
+                _                   => string.Empty
+            };
+            return $"{ch} ".TrimStart();
         }
 
         public static string ToDisplayName(this ChatChannel channel, bool brackets = true) {
