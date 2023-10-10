@@ -103,13 +103,12 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Update(GameTime gameTime) {
-            if (ChatMacros.Instance.InputConfig.Value.PushToTalk == null) {
-                return;
-            }
-
-            if (DateTime.UtcNow > _partialResultExpiresAt) {
-                _display.Text = string.Empty;
-                return;
+            if (ChatMacros.Instance.InputConfig.Value.PushToTalk != null) {
+                if (ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
+                    Start();
+                } else {
+                    Stop();
+                }
             }
 
             if (DateTime.UtcNow.Subtract(_lastSpeechDetected).TotalSeconds > 30) {
@@ -117,10 +116,8 @@ namespace Nekres.ChatMacros.Core.Services {
                 InputDetected?.Invoke(this, new ValueEventArgs<bool>(false));
             }
 
-            if (ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
-                Start();
-            } else {
-                Stop();
+            if (DateTime.UtcNow > _partialResultExpiresAt) {
+                _display.Text = string.Empty;
             }
         }
 
