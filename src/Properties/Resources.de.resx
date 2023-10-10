@@ -373,4 +373,7 @@
   <data name="Buy Me a Coffee!" xml:space="preserve">
     <value>Kauf mir einen Kaffee!</value>
   </data>
+  <data name="Credits and Thanks" xml:space="preserve">
+    <value>Dank und Anerkennung</value>
+  </data>
 </root>

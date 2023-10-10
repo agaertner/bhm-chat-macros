@@ -241,6 +241,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Credits and Thanks.
+        /// </summary>
+        internal static string Credits_and_Thanks {
+            get {
+                return ResourceManager.GetString("Credits and Thanks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string Delete {

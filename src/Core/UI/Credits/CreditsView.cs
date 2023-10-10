@@ -30,7 +30,7 @@ namespace Nekres.ChatMacros.Core.UI.Credits {
                 Parent = buildPanel,
                 Width = buildPanel.ContentRegion.Width,
                 Height = buildPanel.ContentRegion.Height,
-                Title = "Credits"
+                Title = Resources.Credits_and_Thanks
             };
 
             var thanks = new FormattedLabelBuilder().SetHeight(100)
