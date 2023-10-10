@@ -37,7 +37,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             var panel = new FlowPanel {
                 Parent              = buildPanel,
                 Width               = 300,
-                Height              = buildPanel.ContentRegion.Height,
+                Height              = buildPanel.ContentRegion.Height - 50,
                 FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                 Title               = "Chat Macros",
                 OuterControlPadding = new Vector2(2, 5),
@@ -103,7 +103,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             var macrosMenuWrap = new FlowPanel {
                 Parent        = panel,
                 Width         = panel.ContentRegion.Width,
-                Height        = panel.ContentRegion.Height - 85 - (int)panel.ControlPadding.Y * 2 - (int)panel.OuterControlPadding.Y,
+                Height        = panel.ContentRegion.Height - 35 - (int)panel.ControlPadding.Y * 2 - (int)panel.OuterControlPadding.Y,
                 FlowDirection = ControlFlowDirection.SingleTopToBottom,
                 CanScroll     = true
             };
@@ -112,8 +112,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Parent     = buildPanel,
                 Width      = buildPanel.ContentRegion.Width - 300,
                 Height     = buildPanel.ContentRegion.Height,
-                Left       = panel.Right,
-                ShowBorder = true
+                Left       = panel.Right
             };
 
             MacroEntries = new Menu {
@@ -124,9 +123,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             };
 
             var createNewBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
-                Parent = panel,
-                Width  = panel.ContentRegion.Width - 12,
+                Parent = buildPanel,
+                Width  = panel.Width - 20,
                 Height = 50,
+                Top = panel.Bottom,
+                Left = 10,
                 Text   = Resources.Create_Macro
             };
 
@@ -380,25 +381,17 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
                 macroConfig.Show(new BaseMacroSettings(_macro, () => ChatMacros.Instance.Data.Upsert(_macro)));
 
-                var linesBttnWrap = new FlowPanel {
-                    Parent        = buildPanel,
-                    Width         = buildPanel.ContentRegion.Width,
-                    Height        = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING,
-                    FlowDirection = ControlFlowDirection.SingleTopToBottom,
-                    Top           = macroConfig.Bottom,
-                    Title         = Resources.Message_Sequence
-                };
-
-                #region linesBttnWrap children
                 var linesPanel = new FlowPanel {
-                    Parent              = linesBttnWrap,
-                    Width               = linesBttnWrap.ContentRegion.Width,
-                    Height              = linesBttnWrap.ContentRegion.Height - 50,
+                    Parent              = buildPanel,
+                    Width               = buildPanel.ContentRegion.Width,
+                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING - 50,
                     FlowDirection       = ControlFlowDirection.SingleTopToBottom,
+                    Top                 = macroConfig.Bottom,
                     ShowBorder          = true,
                     ControlPadding      = new Vector2(0,                  4),
                     OuterControlPadding = new Vector2(Panel.LEFT_PADDING, Panel.TOP_PADDING),
-                    CanScroll           = true
+                    CanScroll           = true,
+                    Title               = Resources.Message_Sequence
                 };
 
                 foreach (var line in _macro.Lines) {
@@ -406,8 +399,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 }
                 
                 var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
-                    Parent = linesBttnWrap,
-                    Width  = linesBttnWrap.ContentRegion.Width,
+                    Parent = buildPanel,
+                    Width  = linesPanel.Width - 20,
+                    Top    = linesPanel.Bottom,
+                    Left   = 10,
                     Height = 50,
                     Text   = Resources.Add_Line
                 };
@@ -415,7 +410,6 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 addLineBttn.Click += (_, _) => {
                     CreateLine(linesPanel);
                 };
-                #endregion linesBttnWrap children
 
                 base.Build(buildPanel);
             }
@@ -431,10 +425,21 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 lineDisplay.Show(lineView);
 
                 lineView.RemoveClick += (_, _) => {
-                    if (ChatMacros.Instance.Data.Delete(line)) {
-                        lineDisplay.Dispose();
-                        ChatMacros.Instance.Speech.UpdateGrammar();
+                    var oldLines = _macro.Lines.ToList();
+
+                    if (_macro.Lines.RemoveAll(x => x.Id.Equals(line.Id)) < 1) {
+                        return;
                     }
+
+                    if (!ChatMacros.Instance.Data.Delete(line)) {
+                        _macro.Lines = oldLines;
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
+                        return;
+                    }
+
+                    lineDisplay.Dispose();
+                    ChatMacros.Instance.Speech.UpdateGrammar();
                 };
 
                 int lineIndex = _macro.Lines.IndexOf(line);
@@ -471,6 +476,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     if (_macro.Lines.RemoveAll(l => l.Id.Equals(line.Id)) < 1) {
                         _macro.Lines = oldOrder;
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
                         return;
                     }
 
@@ -479,6 +485,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     if (!ChatMacros.Instance.Data.Upsert(_macro)) {
                         _macro.Lines = oldOrder;
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
                         return;
                     }
 
