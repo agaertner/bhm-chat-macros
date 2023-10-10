@@ -43,7 +43,7 @@ namespace Nekres.ChatMacros.Core.Services {
         private DateTime _partialResultExpiresAt;
 
         public SpeechService() {
-            _recognizer   = new WindowsSpeech(this);
+            _recognizer = new WindowsSpeech(this);
 
             StartRecognizer();
 
@@ -118,6 +118,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
             if (DateTime.UtcNow > _partialResultExpiresAt) {
                 _display.Text = string.Empty;
+                _recognizer.DiscardResult();
             }
         }
 
