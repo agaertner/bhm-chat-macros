@@ -170,12 +170,16 @@ namespace Nekres.ChatMacros.Core.Services {
                 };
 
                 string path = string.Empty;
-                if (Path.IsPathRooted(relativePath)) {
+                if (relativePath.IsPathFullyQualified()) {
                     path = System.IO.File.Exists(relativePath) ? relativePath : path;
                 } else {
+                    relativePath = relativePath.TrimStart('/');
+                    relativePath = relativePath.TrimStart('\\');
+                    relativePath = relativePath.Replace("/", "\\");
                     foreach (var basePath in basePaths) {
                         var testPath = Path.Combine(basePath, relativePath);
-                        if (System.IO.File.Exists(path)) {
+                        testPath = Path.GetFullPath(testPath);
+                        if (System.IO.File.Exists(testPath)) {
                             path = testPath;
                             break;
                         }
@@ -184,6 +188,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 
                 // File not found
                 if (string.IsNullOrEmpty(path)) {
+                    ChatMacros.Logger.Info($"File Not Found: {relativePath}", ScreenNotification.NotificationType.Error);
                     return string.Empty;
                 }
 
@@ -200,8 +205,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 }
                 return lines[line];
             } catch (Exception e) {
-                ChatMacros.Logger.Debug(e, e.Message);
-                ScreenNotification.ShowNotification($"Not Found: {relativePath}", ScreenNotification.NotificationType.Error);
+                ChatMacros.Logger.Info(e, e.Message);
                 return string.Empty;
             }
         }

@@ -81,8 +81,8 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void OnPartialResultReceived(object sender, ValueEventArgs<string> e) {
-            _display.Text           = e.Value;
             _partialResultExpiresAt = DateTime.UtcNow.AddMilliseconds(PARTIAL_RESULT_EXPIRE_MS);
+            _display.Text           = e.Value;
             _display.TextExpiresAt  = _partialResultExpiresAt;
         }
 
@@ -278,7 +278,7 @@ namespace Nekres.ChatMacros.Core.Services {
                     var expireText   = expiresIn.ToString(expiresIn.TotalSeconds > -1 ? @"\.ff" : expiresIn.TotalMinutes > -1 ? @"ss\.ff" : @"m\:ss").TrimStart('0');
                     var expireColor  = Color.Lerp(Color.White, _redShift, 1 + (float)expiresIn.TotalMilliseconds / PARTIAL_RESULT_EXPIRE_MS);
                     var textSize     = _font.MeasureString(_text);
-                    var expireBounds = new Rectangle(bounds.X + (int)Math.Round(textSize.Width) + Panel.RIGHT_PADDING, bounds.Y, bounds.Width, bounds.Height);
+                    var expireBounds = new Rectangle(bounds.X + (int)Math.Round(textSize.Width) + Panel.RIGHT_PADDING + 1, bounds.Y, bounds.Width, bounds.Height);
                     spriteBatch.DrawStringOnCtrl(this, expireText, _font, expireBounds, expireColor, false, true, 2, HorizontalAlignment.Center);
                 }
             }
