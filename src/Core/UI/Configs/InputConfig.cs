@@ -41,7 +41,7 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             _inputDevice        = Guid.Empty,
             _voiceLang          = VoiceLanguage.English,
             _secondaryVoiceLang = VoiceLanguage.English,
-            _pushToTalk         = new KeyBinding(Keys.Y)
+            PushToTalk          = new KeyBinding(Keys.LeftAlt)
         };
 
         private Guid _inputDevice;
@@ -83,6 +83,7 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
 
         private KeyBinding ResetDelegates(KeyBinding oldBinding, KeyBinding newBinding) {
             if (oldBinding != null) {
+                oldBinding.Enabled = false;
                 oldBinding.BindingChanged -= OnPushToTalkChanged;
             }
             newBinding                ??= new KeyBinding();
