@@ -201,7 +201,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 int line = RandomUtil.GetRandom(0, lines.Length - 1);
 
                 if (args.Count == 2 && int.TryParse(args[1], out line)) {
-                    line = line < lines.Length - 1 ? line : RandomUtil.GetRandom(0, lines.Length - 1);
+                    line = line < lines.Length ? line : RandomUtil.GetRandom(0, lines.Length - 1);
                 }
                 return lines[line];
             } catch (Exception e) {
