@@ -199,11 +199,11 @@
     <value>Microphone</value>
   </data>
   <data name="Mic" xml:space="preserve">
-    <value>Mic</value>
+    <value>Micro</value>
     <comment>Abbreviation of microphone</comment>
   </data>
   <data name="Listening" xml:space="preserve">
-    <value>Entendre</value>
+    <value>Écoute</value>
     <comment>Voice recognition is actively listening for speech.</comment>
   </data>
   <data name="Input Device" xml:space="preserve">
@@ -263,10 +263,10 @@
     <value>Créer une macro</value>
   </data>
   <data name="New Macro" xml:space="preserve">
-    <value>Nouveau Macro</value>
+    <value>Nouvelle Macro</value>
   </data>
   <data name="Something went wrong. Please try again." xml:space="preserve">
-    <value>Algo ha ido mal. Por favor, inténtelo de nuevo.</value>
+    <value>Quelque chose s&apos;est mal passé. Veuillez réessayer.</value>
   </data>
   <data name="Speech recognition for {0} is not installed." xml:space="preserve">
     <value>La reconnaissance vocale pour {0} n&apos;est pas installée.</value>
@@ -362,10 +362,10 @@
     <value>Cette macro est actuellement active et peut être déclenchée.</value>
   </data>
   <data name="Supporter since {0}" xml:space="preserve">
-    <value>Supporter puisque {0}</value>
+    <value>Mécène depuis {0}</value>
   </data>
   <data name="Thanks to my awesome supporters who keep me motivated!" xml:space="preserve">
-    <value>Merci à tous ceux qui me soutiennent et me motivent!</value>
+    <value>Merci à tous ceux qui me soutiennent et me motivent !</value>
   </data>
   <data name="Support Me on Ko-fi" xml:space="preserve">
     <value>Soutenez-moi sur Ko-fi</value>
