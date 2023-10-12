@@ -31,8 +31,6 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private WaveInEvent _audioSource;
 
-        private int _deviceNumber;
-
         private bool _isRecording;
 
         private ISpeechRecognitionProvider _recognizer;
@@ -132,11 +130,15 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void ChangeDevice(Guid productNameGuid) {
-            _deviceNumber = InputDevices.FirstOrDefault(device => device.ProductNameGuid.Equals(productNameGuid)).DeviceNumber;
+            var device = InputDevices.FirstOrDefault(device => device.ProductNameGuid.Equals(productNameGuid));
+
+            if (device == default) {
+                return;
+            }
 
             _audioSource?.Dispose(); // Stop and dispose the old device.
             _audioSource = new WaveInEvent {
-                DeviceNumber = _deviceNumber,
+                DeviceNumber = device.DeviceNumber,
                 WaveFormat   = new WaveFormat(SAMPLE_RATE, CHANNELS)
             };
 

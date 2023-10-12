@@ -28,9 +28,13 @@ namespace Nekres.ChatMacros.Core.Services {
                 Connection = ConnectionType.Shared
             };
 
-            BsonMapper.Global.RegisterType(binding => JsonConvert.SerializeObject(binding, IncludePropertyResolver.Settings(nameof(KeyBinding.PrimaryKey), 
-                                                                                                                           nameof(KeyBinding.ModifierKeys))),
-                                           bson => JsonConvert.DeserializeObject<KeyBinding>(bson));
+            BsonMapper.Global.RegisterType(binding => JsonConvert.SerializeObject(binding, IncludePropertyResolver.Settings(nameof(KeyBinding.PrimaryKey),
+                                                                                                                            nameof(KeyBinding.ModifierKeys))),
+                                           bson => {
+                                               var keyBinding = JsonConvert.DeserializeObject<KeyBinding>(bson) ?? new KeyBinding();
+                                               keyBinding.Enabled = false;
+                                               return keyBinding;
+                                           });
         }
 
         private bool Upsert<T>(T model, string table) {
@@ -70,10 +74,16 @@ namespace Nekres.ChatMacros.Core.Services {
 
                 // Locally because bitwise operators and foreign methods cannot be converted by LiteDB to a valid query.
                 var mode = MapUtil.GetCurrentGameMode();
-                return mapMacros.Where(x => (x.GameModes == GameMode.None || (x.GameModes & mode) == mode || 
-                                            x.MapIds != null && x.MapIds.Any() && x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id)) && 
-                                            x.VoiceCommands != null && x.VoiceCommands.Any() || 
-                                            x.KeyBinding != null && !x.KeyBinding.GetBindingDisplayText().Equals(string.Empty)).ToList();
+                return mapMacros.Where(x => 
+                                           // Macro has no map restrictions and the game mode matches.
+                                           ((x.MapIds == null || !x.MapIds.Any()) && (x.GameModes == GameMode.None || (x.GameModes & mode) == mode) || 
+
+                                           // Game mode does not match but the map does.
+                                           x.MapIds != null && x.MapIds.Any() && x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id)) && 
+
+                                           // Macro has no key binding nor voice command.
+                                           x.VoiceCommands != null && x.VoiceCommands.Any() ||
+                                           x.KeyBinding != null && !x.KeyBinding.GetBindingDisplayText().Equals(string.Empty)).ToList();
             } catch (Exception e) {
                 ChatMacros.Logger.Warn(e, e.Message);
             } finally {

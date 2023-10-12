@@ -438,8 +438,13 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         return;
                     }
 
-                    lineDisplay.Dispose();
+                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
+                    }
+
                     ChatMacros.Instance.Speech.UpdateGrammar();
+                    lineDisplay.Dispose();
                 };
 
                 int lineIndex = _macro.Lines.IndexOf(line);

@@ -2,7 +2,7 @@
 
 namespace Nekres.ChatMacros.Core.UI.Configs {
     internal class LibraryConfig : ConfigBase {
-        public static LibraryConfig Default => new() { };
+        public static LibraryConfig Default = new();
 
         private bool _showActivesOnly;
         [JsonProperty("show_actives_only")]

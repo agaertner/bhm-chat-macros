@@ -37,7 +37,7 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
 
     internal class InputConfig : ConfigBase {
 
-        public static InputConfig Default => new() {
+        public static InputConfig Default = new() {
             _inputDevice        = Guid.Empty,
             _voiceLang          = VoiceLanguage.English,
             _secondaryVoiceLang = VoiceLanguage.English,
@@ -81,19 +81,8 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             set => _pushToTalk = ResetDelegates(_pushToTalk, value);
         }
 
-        private KeyBinding ResetDelegates(KeyBinding oldBinding, KeyBinding newBinding) {
-            if (oldBinding != null) {
-                oldBinding.Enabled = false;
-                oldBinding.BindingChanged -= OnPushToTalkChanged;
-            }
-            newBinding                ??= new KeyBinding();
-            newBinding.BindingChanged +=  OnPushToTalkChanged;
-            newBinding.Enabled        =   true;
-            return newBinding;
-        }
-
-        private void OnPushToTalkChanged(object sender, EventArgs e) {
-            this.SaveConfig(ChatMacros.Instance.InputConfig);
+        protected override void BindingChanged() {
+            SaveConfig(ChatMacros.Instance.InputConfig);
         }
     }
 }

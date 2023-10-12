@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services {
@@ -31,7 +32,13 @@ namespace Nekres.ChatMacros.Core.Services {
         public ContinentFloorRegionMapPoi ClosestWaypoint { get; private set; }
         public ContinentFloorRegionMapPoi ClosestPoi      { get; private set; }
         public IReadOnlyList<BaseMacro>   ActiveMacros    { get; private set; }
-        
+
+        public int IsFiring;
+
+        private readonly ReaderWriterLockSlim _rwLock       = new();
+        private          ManualResetEvent     _lockReleased = new(false);
+        private          bool                 _lockAcquired = false;
+
         public MacroService() {
             ActiveMacros = new List<BaseMacro>();
             UpdateMacros();
@@ -52,9 +59,30 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void ToggleMacros(bool enabled) {
-            foreach (var macro in ActiveMacros) {
-                macro.Toggle(enabled);
+            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            try {
+                foreach (var macro in ActiveMacros.ToList()) {
+                    macro.Toggle(enabled);
+
+                    if (enabled) {
+                        macro.Triggered += OnMacroTriggered;
+                    } else {
+                        macro.Triggered -= OnMacroTriggered;
+                    }
+                }
+            } finally {
+                LockUtil.Release(_rwLock, _lockReleased, ref _lockAcquired);
             }
+        }
+
+        private async void OnMacroTriggered(object sender, EventArgs e) {
+            await Trigger((BaseMacro)sender);
+        }
+
+        public async Task Trigger(BaseMacro macro) { 
+            ToggleMacros(false);
+            await macro.Fire();
+            ToggleMacros(true);
         }
 
         public void Update(GameTime gameTime) {
@@ -251,6 +279,20 @@ namespace Nekres.ChatMacros.Core.Services {
         public void Dispose() {
             GameService.Overlay.UserLocaleChanged -= OnUserLocaleChanged;
             ToggleMacros(false);
+
+            // Wait for the lock to be released
+            if (_lockAcquired) {
+                _lockReleased.WaitOne(500);
+            }
+
+            _lockReleased.Dispose();
+
+            // Dispose the lock
+            try {
+                _rwLock.Dispose();
+            } catch (Exception ex) {
+                ChatMacros.Logger.Debug(ex, ex.Message);
+            }
         }
     }
 }
