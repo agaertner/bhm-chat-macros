@@ -129,18 +129,19 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         }
 
         public override async Task Fire() {
+            ChatMacros.Instance.Macro.ToggleMacros(false);
             foreach (var line in Lines) {
                 Thread.Sleep(2);
 
                 var message = await ChatMacros.Instance.Macro.ReplaceCommands(line.ToChatMessage());
 
                 if (string.IsNullOrWhiteSpace(message)) {
-                    return;
+                    break;
                 }
 
                 if (line.Channel == ChatChannel.Whisper) {
                     if (string.IsNullOrWhiteSpace(line.WhisperTo)) {
-                        return;
+                        break;
                     }
 
                     ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ChatMessage.Value);
@@ -154,6 +155,8 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                     ChatUtil.Send(message, ChatMacros.Instance.ChatMessage.Value);
                 }
             }
+            await Task.Delay(200);
+            ChatMacros.Instance.Macro.ToggleMacros(true);
         }
     }
 

@@ -37,10 +37,9 @@ namespace Nekres.ChatMacros {
 
         public string ModuleDirectory { get; private set; }
 
-        private TabbedWindow2    _moduleWindow;
-        private ContextMenuStrip _quickAccessWindow;
-        private CornerIcon       _cornerIcon;
-        private Texture2D        _cornerTexture;
+        private TabbedWindow2 _moduleWindow;
+        private CornerIcon    _cornerIcon;
+        private Texture2D     _cornerTexture;
 
         internal SettingEntry<KeyBinding> SquadBroadcast;
         internal SettingEntry<KeyBinding> ChatMessage;
@@ -111,11 +110,6 @@ namespace Nekres.ChatMacros {
                 Top           = (GameService.Graphics.SpriteScreen.Height - windowRegion.Height) / 2
             };
 
-            _quickAccessWindow = new ContextMenuStrip {
-                Parent = GameService.Graphics.SpriteScreen,
-                Visible = false
-            };
-
             _cornerIcon = new CornerIcon
             {
                 Icon = ContentsManager.GetTexture("corner_icon.png"),
@@ -125,52 +119,15 @@ namespace Nekres.ChatMacros {
 
             _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
                                   () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
-
             _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
                                    () => new SettingsView(), Properties.Resources.Settings);
             _moduleWindow.Tabs.Add(_libraryTab);
             _moduleWindow.Tabs.Add(_settingsTab);
             _moduleWindow.TabChanged += OnTabChanged;
 
-            AddMacrosToQuickAccess(Macro.ActiveMacros);
-
-            GameService.Overlay.UserLocaleChanged          += OnUserLocaleChanged;
-            Macro.ActiveMacrosChange                       += OnActiveMacrosChange;
-            ControlsConfig.Value.OpenQuickAccess.Activated += OnOpenQuickAccessActivated;
+            GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
             // Base handler must be called
             base.OnModuleLoaded(e);
-        }
-
-        private void OnOpenQuickAccessActivated(object sender, EventArgs e) {
-            _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X;
-            _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y;
-            _quickAccessWindow.Show();
-        }
-
-        private void OnActiveMacrosChange(object sender, ValueEventArgs<IReadOnlyList<BaseMacro>> e) {
-            AddMacrosToQuickAccess(e.Value);
-        }
-
-        private void AddMacrosToQuickAccess(IReadOnlyList<BaseMacro> macros) {
-            if (macros.IsNullOrEmpty()) {
-                return;
-            }
-            foreach (var ctrl in _quickAccessWindow.Children.ToList()) {
-                ctrl?.Dispose();
-            }
-            _quickAccessWindow.ClearChildren();
-
-            foreach (var macro in macros) {
-                var menuItem = new ContextMenuStripItem {
-                    Parent = _quickAccessWindow,
-                    Text = macro.Title
-                };
-                menuItem.Click += async (_, _) => {
-                    _quickAccessWindow.Hide();
-                    await Macro.Trigger(macro);
-                };
-                _quickAccessWindow.AddChild(menuItem);
-            }
         }
 
         private void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
@@ -199,9 +156,7 @@ namespace Nekres.ChatMacros {
 
         /// <inheritdoc />
         protected override void Unload() {
-            Macro.ActiveMacrosChange                       -= OnActiveMacrosChange;
-            ControlsConfig.Value.OpenQuickAccess.Activated -= OnOpenQuickAccessActivated;
-            GameService.Overlay.UserLocaleChanged          -= OnUserLocaleChanged;
+            GameService.Overlay.UserLocaleChanged -= OnUserLocaleChanged;
             if (_cornerIcon != null)
             {
                 _cornerIcon.Click -= OnModuleIconClick;

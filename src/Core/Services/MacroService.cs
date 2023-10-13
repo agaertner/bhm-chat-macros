@@ -33,33 +33,81 @@ namespace Nekres.ChatMacros.Core.Services {
         public ContinentFloorRegionMapPoi ClosestPoi      { get; private set; }
         public IReadOnlyList<BaseMacro>   ActiveMacros    { get; private set; }
 
-        public int IsFiring;
-
         private readonly ReaderWriterLockSlim _rwLock       = new();
         private          ManualResetEvent     _lockReleased = new(false);
         private          bool                 _lockAcquired = false;
 
+        private          ContextMenuStrip     _quickAccessWindow;
+
         public MacroService() {
-            ActiveMacros = new List<BaseMacro>();
-            UpdateMacros();
-            GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
+            ActiveMacros =  new List<BaseMacro>();
+
+            _quickAccessWindow = new ContextMenuStrip {
+                Parent  = GameService.Graphics.SpriteScreen,
+                Visible = false
+            };
+
             OnMapChanged(this, new ValueEventArgs<int>(GameService.Gw2Mumble.CurrentMap.Id));
-            GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
+            UpdateMacros();
+
+            GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
+            GameService.Overlay.UserLocaleChanged       += OnUserLocaleChanged;
         }
 
         private async void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
             AllMaps = await ChatMacros.Instance.Gw2Api.GetMaps();
         }
 
+        private void OnOpenQuickAccessActivated(object sender, EventArgs e) {
+            _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X;
+            _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y;
+            _quickAccessWindow.Show();
+        }
+
+        private void AddMacrosToQuickAccess(IReadOnlyList<BaseMacro> macros) {
+            if (macros.IsNullOrEmpty()) {
+                return;
+            }
+
+
+            foreach (var ctrl in _quickAccessWindow.Children.ToList()) {
+                ctrl?.Dispose();
+            }
+            _quickAccessWindow.ClearChildren();
+            
+
+            foreach (var macro in macros) {
+                var menuItem = new ContextMenuStripItem {
+                    Parent = _quickAccessWindow,
+                    Text   = macro.Title
+                };
+                menuItem.Click += async (_, _) => {
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                    _quickAccessWindow.Hide();
+                    await Trigger(macro);
+                };
+                _quickAccessWindow.AddChild(menuItem);
+            }
+        }
+
         public void UpdateMacros() {
             ToggleMacros(false);
+            _quickAccessWindow?.Hide();
             ActiveMacros = ChatMacros.Instance.Data.GetActiveMacros();
-            ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros));
+            ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros.ToList()));
+            AddMacrosToQuickAccess(ActiveMacros.ToList());
             ToggleMacros(true);
         }
 
         public void ToggleMacros(bool enabled) {
             LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+
+            if (enabled) {
+                ChatMacros.Instance.ControlsConfig.Value.OpenQuickAccess.Activated += OnOpenQuickAccessActivated;
+            } else {
+                ChatMacros.Instance.ControlsConfig.Value.OpenQuickAccess.Activated -= OnOpenQuickAccessActivated;
+            }
+            
             try {
                 foreach (var macro in ActiveMacros.ToList()) {
                     macro.Toggle(enabled);
@@ -77,12 +125,11 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private async void OnMacroTriggered(object sender, EventArgs e) {
             await Trigger((BaseMacro)sender);
+
         }
 
-        public async Task Trigger(BaseMacro macro) { 
-            ToggleMacros(false);
+        public async Task Trigger(BaseMacro macro) {
             await macro.Fire();
-            ToggleMacros(true);
         }
 
         public void Update(GameTime gameTime) {
@@ -277,7 +324,8 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
-            GameService.Overlay.UserLocaleChanged -= OnUserLocaleChanged;
+            GameService.Gw2Mumble.CurrentMap.MapChanged -= OnMapChanged;
+            GameService.Overlay.UserLocaleChanged       -= OnUserLocaleChanged;
             ToggleMacros(false);
 
             // Wait for the lock to be released
@@ -286,6 +334,8 @@ namespace Nekres.ChatMacros.Core.Services {
             }
 
             _lockReleased.Dispose();
+
+            _quickAccessWindow?.Dispose();
 
             // Dispose the lock
             try {
