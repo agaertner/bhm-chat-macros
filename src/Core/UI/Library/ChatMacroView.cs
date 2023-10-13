@@ -1,4 +1,4 @@
-﻿using Blish_HUD;
+using Blish_HUD;
 using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
@@ -588,6 +588,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                         messageInput.Width = buildPanel.ContentRegion.Width - whisperTo.Right - Panel.RIGHT_PADDING * 3 - 50;
                         messageInput.Left  = whisperTo.Right + Panel.RIGHT_PADDING;
+                        messageInput.Invalidate();
                     }
 
                     void CreateSquadBroadcastTick() {
@@ -629,6 +630,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                         messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 3 - 50;
                         messageInput.Left  = squadBroadcast.Right;
+                        messageInput.Invalidate();
                     }
 
                     messageInput = new TextBox {
