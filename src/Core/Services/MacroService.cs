@@ -59,6 +59,10 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void OnOpenQuickAccessActivated(object sender, EventArgs e) {
+            if (_quickAccessWindow.Visible) {
+                _quickAccessWindow.Hide();
+                return;
+            }
             _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X;
             _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y;
             _quickAccessWindow.Show();

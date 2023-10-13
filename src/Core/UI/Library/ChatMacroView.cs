@@ -189,7 +189,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             foreach (var entry in entries) {
                 entry.Visible  = filtered.IsNullOrEmpty() || filtered.Contains(entry);
-                entry.IsActive = ChatMacros.Instance.Macro.ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
+                entry.IsActive = ChatMacros.Instance.Macro
+                                           .ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id) && 
+                                                         // Macro has no key binding nor voice command.
+                                                         macro.VoiceCommands != null && macro.VoiceCommands.Any() ||
+                                                         macro.KeyBinding != null && !macro.KeyBinding.GetBindingDisplayText().Equals(string.Empty));
                 if (showActives) {
                     entry.Visible = entry.IsActive;
                 }

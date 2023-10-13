@@ -76,14 +76,9 @@ namespace Nekres.ChatMacros.Core.Services {
                 var mode = MapUtil.GetCurrentGameMode();
                 return mapMacros.Where(x => 
                                            // Macro has no map restrictions and the game mode matches.
-                                           ((x.MapIds == null || !x.MapIds.Any()) && (x.GameModes == GameMode.None || (x.GameModes & mode) == mode) || 
-
+                                           (x.MapIds == null || !x.MapIds.Any()) && (x.GameModes == GameMode.None || (x.GameModes & mode) == mode) ||
                                            // Game mode does not match but the map does.
-                                           x.MapIds != null && x.MapIds.Any() && x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id)) && 
-
-                                           // Macro has no key binding nor voice command.
-                                           x.VoiceCommands != null && x.VoiceCommands.Any() ||
-                                           x.KeyBinding != null && !x.KeyBinding.GetBindingDisplayText().Equals(string.Empty)).ToList();
+                                           x.MapIds != null && x.MapIds.Any() && x.MapIds.Contains(GameService.Gw2Mumble.CurrentMap.Id)).ToList();
             } catch (Exception e) {
                 ChatMacros.Logger.Warn(e, e.Message);
             } finally {
