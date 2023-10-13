@@ -37,6 +37,8 @@ namespace Nekres.ChatMacros.Core.Services.Data {
     }
 
     internal abstract class BaseMacro {
+        public event EventHandler<EventArgs> Triggered;
+
         [BsonId(true)]
         public ObjectId Id { get; set; }
 
@@ -57,7 +59,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         protected BaseMacro() {
             Title         = string.Empty;
-            KeyBinding    = new KeyBinding();
+            KeyBinding    = new KeyBinding { Enabled = false };
             MapIds        = new List<int>();
             VoiceCommands = new List<string>();
             GameModes     = GameMode.PvE | GameMode.WvW | GameMode.PvP;
@@ -75,8 +77,8 @@ namespace Nekres.ChatMacros.Core.Services.Data {
             }
         }
 
-        private async void OnKeyBindingActivated(object sender, EventArgs e) {
-            await Fire();
+        private void OnKeyBindingActivated(object sender, EventArgs e) {
+            Triggered?.Invoke(this, EventArgs.Empty);
         }
 
         public bool HasGameMode(GameMode mode) {

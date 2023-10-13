@@ -42,6 +42,7 @@ namespace Nekres.ChatMacros {
         internal SettingEntry<KeyBinding> ChatMessage;
         internal SettingEntry<InputConfig> InputConfig;
         internal SettingEntry<LibraryConfig> LibraryConfig;
+        internal SettingEntry<ControlsConfig> ControlsConfig;
 
         internal Gw2WebApiService Gw2Api;
         internal ResourceService  Resources;
@@ -61,23 +62,23 @@ namespace Nekres.ChatMacros {
 
         protected override void DefineSettings(SettingCollection settings)
         {
-            var controlSettings = settings.AddSubCollection("Control Options (User Interface)", true, false,
-                () => "Control Options (User Interface)");
-            ChatMessage = controlSettings.DefineSetting("chatMessageKeyBinding", new KeyBinding(Keys.Enter),
-                () => "Chat Message",
-                () => "Give focus to the chat edit box.");
-            SquadBroadcast = controlSettings.DefineSetting("squadBroadcastKeyBinding", new KeyBinding(ModifierKeys.Shift, Keys.Enter),
-                () => "Squad Broadcast Message", 
-                () => "Give focus to the chat edit box.");
+            var controlSettings = settings.AddSubCollection("controlOptions", false,
+                () => $"{Properties.Resources.Control_Options} ({Properties.Resources.User_Interface})");
+            ChatMessage = controlSettings.DefineSetting("chatMessageKeyBinding", new KeyBinding(Keys.Enter) { Enabled = false, IgnoreWhenInTextField = true },
+                () => Properties.Resources.Chat_Message,
+                () => Properties.Resources.Give_focus_to_the_chat_edit_box_);
+            SquadBroadcast = controlSettings.DefineSetting("squadBroadcastKeyBinding", new KeyBinding(ModifierKeys.Shift, Keys.Enter) { Enabled = false, IgnoreWhenInTextField = true },
+                () => Properties.Resources.Squad_Broadcast_Message, 
+                () => Properties.Resources.Give_focus_to_the_chat_edit_box_);
 
             var selfManaged = settings.AddSubCollection("configs", false, false);
             InputConfig = selfManaged.DefineSetting("input_config", Core.UI.Configs.InputConfig.Default);
             LibraryConfig = selfManaged.DefineSetting("library_config", Core.UI.Configs.LibraryConfig.Default);
+            ControlsConfig = selfManaged.DefineSetting("controls_config", Core.UI.Configs.ControlsConfig.Default);
         }
 
         protected override void Initialize() {
             ModuleDirectory              = DirectoriesManager.GetFullDirectoryPath("chat_shorts");
-
             _cornerTexture               = ContentsManager.GetTexture("corner_icon.png");
             SquadBroadcast.Value.Enabled = false;
             ChatMessage.Value.Enabled    = false;
@@ -104,6 +105,7 @@ namespace Nekres.ChatMacros {
                 Left          = (GameService.Graphics.SpriteScreen.Width  - windowRegion.Width)  / 2,
                 Top           = (GameService.Graphics.SpriteScreen.Height - windowRegion.Height) / 2
             };
+
             _cornerIcon = new CornerIcon
             {
                 Icon = ContentsManager.GetTexture("corner_icon.png"),
@@ -113,9 +115,8 @@ namespace Nekres.ChatMacros {
 
             _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
                                   () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
-
             _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
-                                   () => new SettingsView(InputConfig.Value), Properties.Resources.Settings);
+                                   () => new SettingsView(), Properties.Resources.Settings);
             _moduleWindow.Tabs.Add(_libraryTab);
             _moduleWindow.Tabs.Add(_settingsTab);
             _moduleWindow.TabChanged += OnTabChanged;

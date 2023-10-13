@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services {
@@ -31,30 +32,121 @@ namespace Nekres.ChatMacros.Core.Services {
         public ContinentFloorRegionMapPoi ClosestWaypoint { get; private set; }
         public ContinentFloorRegionMapPoi ClosestPoi      { get; private set; }
         public IReadOnlyList<BaseMacro>   ActiveMacros    { get; private set; }
-        
+
+        private readonly ReaderWriterLockSlim _rwLock       = new();
+        private          ManualResetEvent     _lockReleased = new(false);
+        private          bool                 _lockAcquired = false;
+
+        private          ContextMenuStrip     _quickAccessWindow;
+
         public MacroService() {
-            ActiveMacros = new List<BaseMacro>();
-            UpdateMacros();
-            GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
+            ActiveMacros =  new List<BaseMacro>();
+
+            _quickAccessWindow = new ContextMenuStrip {
+                Parent  = GameService.Graphics.SpriteScreen,
+                Visible = false,
+                WidthSizingMode = SizingMode.AutoSize
+            };
+
             OnMapChanged(this, new ValueEventArgs<int>(GameService.Gw2Mumble.CurrentMap.Id));
-            GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
+            UpdateMacros();
+
+            GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
+            GameService.Overlay.UserLocaleChanged       += OnUserLocaleChanged;
         }
 
         private async void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
             AllMaps = await ChatMacros.Instance.Gw2Api.GetMaps();
         }
 
+        private void OnOpenQuickAccessActivated(object sender, EventArgs e) {
+            if (!Gw2Util.IsInGame()) {
+                return;
+            }
+            GameService.Content.PlaySoundEffectByName("numeric-spinner");
+            if (_quickAccessWindow.Visible) {
+                _quickAccessWindow.Hide();
+                return;
+            }
+            _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X;
+            _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y;
+            _quickAccessWindow.Show();
+        }
+
+        private void AddMacrosToQuickAccess(IReadOnlyList<BaseMacro> macros) {
+            if (macros.IsNullOrEmpty()) {
+                return;
+            }
+
+            foreach (var ctrl in _quickAccessWindow.Children.ToList()) {
+                ctrl?.Dispose();
+            }
+            _quickAccessWindow.ClearChildren();
+            _quickAccessWindow.Width = 1; // Reset width; otherwise WidthSizingMode Auto will never shrink the width when appropriate.
+
+            foreach (var macro in macros) {
+                var menuItem = new ContextMenuStripItem {
+                    Parent = _quickAccessWindow,
+                    Text   = AssetUtil.Truncate(macro.Title, 300, GameService.Content.DefaultFont14),
+                    BasicTooltipText = macro.Title
+                };
+                menuItem.Click += async (_, _) => {
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                    _quickAccessWindow.Hide();
+                    await Trigger(macro);
+                };
+                _quickAccessWindow.AddChild(menuItem);
+            }
+        }
+
         public void UpdateMacros() {
             ToggleMacros(false);
+            _quickAccessWindow?.Hide();
             ActiveMacros = ChatMacros.Instance.Data.GetActiveMacros();
-            ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros));
+            ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros.ToList()));
+            AddMacrosToQuickAccess(ActiveMacros.ToList());
             ToggleMacros(true);
         }
 
         public void ToggleMacros(bool enabled) {
-            foreach (var macro in ActiveMacros) {
-                macro.Toggle(enabled);
+            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+
+            if (enabled) {
+                ChatMacros.Instance.ControlsConfig.Value.OpenQuickAccess.Activated += OnOpenQuickAccessActivated;
+            } else {
+                ChatMacros.Instance.ControlsConfig.Value.OpenQuickAccess.Activated -= OnOpenQuickAccessActivated;
             }
+            
+            try {
+                foreach (var macro in ActiveMacros.ToList()) {
+                    macro.Toggle(enabled);
+
+                    if (enabled) {
+                        macro.Triggered += OnMacroTriggered;
+                    } else {
+                        macro.Triggered -= OnMacroTriggered;
+                    }
+                }
+            } finally {
+                LockUtil.Release(_rwLock, _lockReleased, ref _lockAcquired);
+            }
+        }
+
+        private async void OnMacroTriggered(object sender, EventArgs e) {
+            await Trigger((BaseMacro)sender);
+
+        }
+
+        public async Task Trigger(BaseMacro macro) {
+            if (macro == null) {
+                return;
+            }
+
+            if (!Gw2Util.IsInGame()) {
+                return;
+            }
+
+            await macro.Fire();
         }
 
         public void Update(GameTime gameTime) {
@@ -201,7 +293,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 int line = RandomUtil.GetRandom(0, lines.Length - 1);
 
                 if (args.Count == 2 && int.TryParse(args[1], out line)) {
-                    line = line < lines.Length - 1 ? line : RandomUtil.GetRandom(0, lines.Length - 1);
+                    line = line < lines.Length ? line : RandomUtil.GetRandom(0, lines.Length - 1);
                 }
                 return lines[line];
             } catch (Exception e) {
@@ -249,8 +341,25 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Dispose() {
-            GameService.Overlay.UserLocaleChanged -= OnUserLocaleChanged;
+            GameService.Gw2Mumble.CurrentMap.MapChanged -= OnMapChanged;
+            GameService.Overlay.UserLocaleChanged       -= OnUserLocaleChanged;
             ToggleMacros(false);
+
+            // Wait for the lock to be released
+            if (_lockAcquired) {
+                _lockReleased.WaitOne(500);
+            }
+
+            _lockReleased.Dispose();
+
+            _quickAccessWindow?.Dispose();
+
+            // Dispose the lock
+            try {
+                _rwLock.Dispose();
+            } catch (Exception ex) {
+                ChatMacros.Logger.Debug(ex, ex.Message);
+            }
         }
     }
 }

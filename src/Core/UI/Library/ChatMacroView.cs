@@ -1,4 +1,4 @@
-﻿using Blish_HUD;
+using Blish_HUD;
 using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
@@ -189,7 +189,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             foreach (var entry in entries) {
                 entry.Visible  = filtered.IsNullOrEmpty() || filtered.Contains(entry);
-                entry.IsActive = ChatMacros.Instance.Macro.ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
+                entry.IsActive = ChatMacros.Instance.Macro
+                                           .ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id) && 
+                                                         // Macro has no key binding nor voice command.
+                                                         macro.VoiceCommands != null && macro.VoiceCommands.Any() ||
+                                                         macro.KeyBinding != null && !macro.KeyBinding.GetBindingDisplayText().Equals(string.Empty));
                 if (showActives) {
                     entry.Visible = entry.IsActive;
                 }
@@ -371,6 +375,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     }
 
                     TitleChanged?.Invoke(this, new ValueEventArgs<string>(_macro.Title));
+                    ChatMacros.Instance.Macro.UpdateMacros();
                 };
 
                 var macroConfig = new ViewContainer {
@@ -438,8 +443,13 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         return;
                     }
 
-                    lineDisplay.Dispose();
+                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
+                    }
+
                     ChatMacros.Instance.Speech.UpdateGrammar();
+                    lineDisplay.Dispose();
                 };
 
                 int lineIndex = _macro.Lines.IndexOf(line);
@@ -502,7 +512,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             private void CreateLine(Container parent) {
                 var line = new ChatLine {
-                    Channel = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel
+                    Channel = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel,
+                    WhisperTo = _macro.Lines.IsNullOrEmpty() ? string.Empty : _macro.Lines.Last().WhisperTo,
                 };
 
                 if (!ChatMacros.Instance.Data.Upsert(line)) {
@@ -530,8 +541,19 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                 public bool IsDragging { get; private set; }
 
+                private AsyncTexture2D _squadBroadcastActive;
+                private AsyncTexture2D _squadBroadcastInactive;
+                private AsyncTexture2D _squadBroadcastActiveHover;
+                private AsyncTexture2D _squadBroadcastInactiveHover;
+
+                private MonoGame.Extended.BitmapFonts.BitmapFont _font;
                 public LineView(ChatLine line) {
-                    _line = line;
+                    _line                        = line;
+                    _font                        = GameService.Content.GetFont(ContentService.FontFace.Menomonia, ContentService.FontSize.Size18, ContentService.FontStyle.Bold);
+                    _squadBroadcastActive        = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304068);
+                    _squadBroadcastActiveHover   = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304069);
+                    _squadBroadcastInactive      = GameService.Content.DatAssetCache.GetTextureFromAssetId(1234950);
+                    _squadBroadcastInactiveHover = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304070);
                 }
 
                 protected override void Build(Container buildPanel) {
@@ -545,21 +567,93 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
-                        if (channel != ChatChannel.Whisper) {
-                            targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
-                        }
+                        targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
                     }
 
-                    var messageInput = new TextBox {
-                        Parent = buildPanel,
-                        PlaceholderText = Resources.Enter_a_message___,
-                        Text = _line.Message,
-                        Width = buildPanel.ContentRegion.Width - targetChannelDd.Width - Panel.RIGHT_PADDING * 4 - 50,
-                        Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
-                        ForeColor = _line.Channel.GetMessageColor(),
+                    TextBox messageInput   = null;
+                    TextBox whisperTo      = null;
+                    Image   squadBroadcast = null;
+
+                    void CreateWhisperToField() {
+                        whisperTo = new TextBox {
+                            Parent          = buildPanel,
+                            PlaceholderText = Resources.Recipient___,
+                            Width           = 100,
+                            ForeColor       = _line.Channel.GetMessageColor(),
+                            Left            = targetChannelDd.Right + Panel.RIGHT_PADDING,
+                            Font            = _font,
+                            Text            = _line.WhisperTo,
+                        };
+
+                        whisperTo.TextChanged += (_, _) => {
+                            _line.WhisperTo = whisperTo.Text.Trim();
+                            whisperTo.BasicTooltipText = _line.WhisperTo;
+                            Save();
+                        };
+
+                        messageInput.Width = buildPanel.ContentRegion.Width - whisperTo.Right - Panel.RIGHT_PADDING * 3 - 50;
+                        messageInput.Left  = whisperTo.Right + Panel.RIGHT_PADDING;
+                        messageInput.Invalidate();
+                    }
+
+                    void CreateSquadBroadcastTick() {
+
+                        bool hovering = false;
+                        squadBroadcast = new Image {
+                            Parent           = buildPanel,
+                            Left             = targetChannelDd.Right,
+                            Height           = 32,
+                            Width            = 32,
+                            Top              = -2,
+                            BasicTooltipText = Resources.Broadcast_to_Squad,
+                            Texture          = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive
+                        };
+
+                        squadBroadcast.Click += (_, _) => {
+                            _line.SquadBroadcast = !_line.SquadBroadcast;
+
+                            if (hovering) {
+                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
+                            } else {
+                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
+                            }
+
+                            GameService.Content.PlaySoundEffectByName("button-click");
+
+                            Save();
+                        };
+
+                        squadBroadcast.MouseEntered += (_, _) => {
+                            hovering = true;
+                            squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
+                        };
+
+                        squadBroadcast.MouseLeft += (_, _) => {
+                            hovering = false;
+                            squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
+                        };
+
+                        messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 3 - 50;
+                        messageInput.Left  = squadBroadcast.Right;
+                        messageInput.Invalidate();
+                    }
+
+                    messageInput = new TextBox {
+                        Parent           = buildPanel,
+                        PlaceholderText  = Resources.Enter_a_message___,
+                        Text             = _line.Message,
+                        Width            = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 3 - 50,
+                        Left             = targetChannelDd.Right + Panel.RIGHT_PADDING,
+                        ForeColor        = _line.Channel.GetMessageColor(),
                         BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.Message,
-                        Font = GameService.Content.GetFont(ContentService.FontFace.Menomonia, ContentService.FontSize.Size18, ContentService.FontStyle.Bold)
+                        Font             = _font
                     };
+
+                    if (targetChannelDd.SelectedItem == ChatChannel.Whisper) {
+                        CreateWhisperToField();
+                    } else if (targetChannelDd.SelectedItem == ChatChannel.Squad) {
+                        CreateSquadBroadcastTick();
+                    }
 
                     var remove = new Image {
                         Parent  = buildPanel,
@@ -614,7 +708,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     messageInput.TextChanged += (_, _) => {
-                        _line.Message                  = messageInput.Text.TrimEnd();
+                        _line.Message = messageInput.Text.TrimEnd();
                         messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.Message;
                         Save();
                     };
@@ -624,10 +718,21 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         messageInput.Left  = targetChannelDd.Right          + Panel.RIGHT_PADDING;
                     };
 
-                    targetChannelDd.ValueChanged += (_, _) => {
-                        _line.Channel = targetChannelDd.SelectedItem;
+                    targetChannelDd.ValueChanged += (_, e) => {
+                        _line.Channel          = e.NewValue;
                         messageInput.ForeColor = _line.Channel.GetMessageColor();
                         Save();
+
+                        whisperTo?.Dispose();
+                        squadBroadcast?.Dispose();
+                        messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 4 - 50;
+                        messageInput.Left  = targetChannelDd.Right          + Panel.RIGHT_PADDING;
+
+                        if (e.NewValue == ChatChannel.Whisper) {
+                            CreateWhisperToField();
+                        } else if (e.NewValue == ChatChannel.Squad) {
+                            CreateSquadBroadcastTick();
+                        }
                     };
                     base.Build(buildPanel);
                 }
@@ -637,8 +742,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                         return;
                     }
-
                     ChatMacros.Instance.Macro.UpdateMacros();
+                    return;
                 }
             }
         }

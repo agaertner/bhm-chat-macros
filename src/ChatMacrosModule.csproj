@@ -192,6 +192,7 @@
     <Compile Include="Core\Services\Speech\VoskSpeech.cs" />
     <Compile Include="Core\Services\Speech\WindowsSpeech.cs" />
     <Compile Include="Core\UI\Configs\ConfigBase.cs" />
+    <Compile Include="Core\UI\Configs\ControlsConfig.cs" />
     <Compile Include="Core\UI\Configs\InputConfig.cs" />
     <Compile Include="Core\UI\Configs\LibraryConfig.cs" />
     <Compile Include="Core\UI\Credits\CreditsView.cs" />
@@ -202,10 +203,13 @@
     <Compile Include="Core\UI\Library\ChatMacroView.cs" />
     <Compile Include="Core\UI\RotatableImage.cs" />
     <Compile Include="Core\UI\RoundedImage.cs" />
+    <Compile Include="Core\UI\Settings\ControlSettings.cs" />
     <Compile Include="Core\UI\Settings\SettingsView.cs" />
+    <Compile Include="Core\UI\Settings\VoiceRecognitionSettings.cs" />
     <Compile Include="Core\Utils\AssetUtil.cs" />
     <Compile Include="Core\Utils\BitmapFont.cs" />
     <Compile Include="Core\Utils\FastenshteinUtil.cs" />
+    <Compile Include="Core\Utils\Gw2Util.cs" />
     <Compile Include="Core\Utils\HttpUtil.cs" />
     <Compile Include="Core\Utils\JsonPropertyUtil.cs" />
     <Compile Include="Core\Utils\LockUtil.cs" />

@@ -376,4 +376,31 @@
   <data name="Credits and Thanks" xml:space="preserve">
     <value>Credits and Thanks</value>
   </data>
+  <data name="Open Quick Access" xml:space="preserve">
+    <value>Open Quick Access</value>
+  </data>
+  <data name="Show or hide the quick access menu to all active macros." xml:space="preserve">
+    <value>Show or hide the quick access menu to all active macros.</value>
+  </data>
+  <data name="Recipient..." xml:space="preserve">
+    <value>Recipient…</value>
+  </data>
+  <data name="Chat Message" xml:space="preserve">
+    <value>Chat Message</value>
+  </data>
+  <data name="Give focus to the chat edit box." xml:space="preserve">
+    <value>Give focus to the chat edit box.</value>
+  </data>
+  <data name="Squad Broadcast Message" xml:space="preserve">
+    <value>Squad Broadcast Message</value>
+  </data>
+  <data name="Broadcast to Squad" xml:space="preserve">
+    <value>Broadcast to Squad</value>
+  </data>
+  <data name="Control Options" xml:space="preserve">
+    <value>Control Options</value>
+  </data>
+  <data name="User Interface" xml:space="preserve">
+    <value>User Interface</value>
+  </data>
 </root>

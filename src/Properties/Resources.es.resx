@@ -376,4 +376,31 @@
   <data name="Credits and Thanks" xml:space="preserve">
     <value>Créditos y agradecimientos</value>
   </data>
+  <data name="Open Quick Access" xml:space="preserve">
+    <value>Abrir acceso rápido</value>
+  </data>
+  <data name="Show or hide the quick access menu to all active macros." xml:space="preserve">
+    <value>Mostrar u ocultar el menú de acceso rápido a todas las macros activas.</value>
+  </data>
+  <data name="Recipient..." xml:space="preserve">
+    <value>Destinatario…</value>
+  </data>
+  <data name="Chat Message" xml:space="preserve">
+    <value>Mensaje de chat</value>
+  </data>
+  <data name="Give focus to the chat edit box." xml:space="preserve">
+    <value>Da enfoque al cuadro de edición de chat.</value>
+  </data>
+  <data name="Squad Broadcast Message" xml:space="preserve">
+    <value>Mensaje para todo el escuadrón</value>
+  </data>
+  <data name="Broadcast to Squad" xml:space="preserve">
+    <value>Retransmitir al escua</value>
+  </data>
+  <data name="Control Options" xml:space="preserve">
+    <value>Configuratión de los controles</value>
+  </data>
+  <data name="User Interface" xml:space="preserve">
+    <value>Interfaz de usuario</value>
+  </data>
 </root>

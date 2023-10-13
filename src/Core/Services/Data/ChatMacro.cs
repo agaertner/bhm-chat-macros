@@ -1,9 +1,11 @@
-﻿using Blish_HUD.Extended;
+﻿using Blish_HUD;
+using Blish_HUD.Extended;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services.Data {
@@ -127,19 +129,34 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         }
 
         public override async Task Fire() {
-            var messages = new List<string>();
-            int i = 1;
-            foreach (var line in ToChatMessage()) {
-                var message = await ChatMacros.Instance.Macro.ReplaceCommands(line);
+            ChatMacros.Instance.Macro.ToggleMacros(false);
+            foreach (var line in Lines) {
+                Thread.Sleep(2);
+
+                var message = await ChatMacros.Instance.Macro.ReplaceCommands(line.ToChatMessage());
+
                 if (string.IsNullOrWhiteSpace(message)) {
-                    return;
+                    break;
                 }
-                ++i;
-                messages.Add(message);
+
+                if (line.Channel == ChatChannel.Whisper) {
+                    if (string.IsNullOrWhiteSpace(line.WhisperTo)) {
+                        break;
+                    }
+
+                    ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ChatMessage.Value);
+                    continue;
+                }
+
+                if (line.Channel == ChatChannel.Squad && line.SquadBroadcast && 
+                    GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
+                    ChatUtil.Send(message, ChatMacros.Instance.SquadBroadcast.Value);
+                } else {
+                    ChatUtil.Send(message, ChatMacros.Instance.ChatMessage.Value);
+                }
             }
-            foreach (var msg in messages) {
-                ChatUtil.Send(msg, ChatMacros.Instance.ChatMessage.Value);
-            }
+            await Task.Delay(200);
+            ChatMacros.Instance.Macro.ToggleMacros(true);
         }
     }
 
@@ -149,6 +166,12 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         [BsonField("channel")]
         public ChatChannel Channel { get; set; }
+
+        [BsonField("whisper_to")]
+        public string WhisperTo { get; set; }
+
+        [BsonField("squad_broadcast")]
+        public bool SquadBroadcast { get; set; } 
 
         [BsonField("message")]
         public string Message { get; set; }

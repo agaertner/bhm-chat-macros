@@ -31,8 +31,6 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private WaveInEvent _audioSource;
 
-        private int _deviceNumber;
-
         private bool _isRecording;
 
         private ISpeechRecognitionProvider _recognizer;
@@ -88,10 +86,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private async void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
             var macro = FastenshteinUtil.FindClosestMatchBy(e.Value, ChatMacros.Instance.Macro.ActiveMacros, m => m.VoiceCommands);
-
-            if (macro != null) {
-                await macro.Fire();
-            }
+            await ChatMacros.Instance.Macro.Trigger(macro);
         }
 
         private void OnInputConfigChanged(object sender, ValueChangedEventArgs<InputConfig> e) {
@@ -104,7 +99,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public void Update(GameTime gameTime) {
             if (ChatMacros.Instance.InputConfig.Value.PushToTalk != null) {
-                if (ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
+                if (Gw2Util.IsInGame() && ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
                     Start();
                 } else {
                     Stop();
@@ -132,11 +127,15 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void ChangeDevice(Guid productNameGuid) {
-            _deviceNumber = InputDevices.FirstOrDefault(device => device.ProductNameGuid.Equals(productNameGuid)).DeviceNumber;
+            var device = InputDevices.FirstOrDefault(device => device.ProductNameGuid.Equals(productNameGuid));
+
+            if (device == default) {
+                return;
+            }
 
             _audioSource?.Dispose(); // Stop and dispose the old device.
             _audioSource = new WaveInEvent {
-                DeviceNumber = _deviceNumber,
+                DeviceNumber = device.DeviceNumber,
                 WaveFormat   = new WaveFormat(SAMPLE_RATE, CHANNELS)
             };
 
