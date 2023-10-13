@@ -73,13 +73,11 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-
             foreach (var ctrl in _quickAccessWindow.Children.ToList()) {
                 ctrl?.Dispose();
             }
             _quickAccessWindow.ClearChildren();
             
-
             foreach (var macro in macros) {
                 var menuItem = new ContextMenuStripItem {
                     Parent = _quickAccessWindow,
