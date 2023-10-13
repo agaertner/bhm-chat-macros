@@ -86,10 +86,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private async void OnFinalResultReceived(object sender, ValueEventArgs<string> e) {
             var macro = FastenshteinUtil.FindClosestMatchBy(e.Value, ChatMacros.Instance.Macro.ActiveMacros, m => m.VoiceCommands);
-
-            if (macro != null) {
-                await macro.Fire();
-            }
+            await ChatMacros.Instance.Macro.Trigger(macro);
         }
 
         private void OnInputConfigChanged(object sender, ValueChangedEventArgs<InputConfig> e) {
@@ -102,7 +99,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public void Update(GameTime gameTime) {
             if (ChatMacros.Instance.InputConfig.Value.PushToTalk != null) {
-                if (ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
+                if (Gw2Util.IsInGame() && ChatMacros.Instance.InputConfig.Value.PushToTalk.IsTriggering) {
                     Start();
                 } else {
                     Stop();

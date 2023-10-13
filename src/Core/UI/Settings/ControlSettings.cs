@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blish_HUD.Controls;
+﻿using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Core.UI.Configs;
+using Nekres.ChatMacros.Properties;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class ControlSettings : View {
@@ -26,12 +22,13 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 OuterControlPadding = new Vector2(5, 5),
                 ControlPadding      = new Vector2(5, 5),
                 CanCollapse         = true,
-                Title               = "Misc"
+                Title               = Resources.Control_Options
             };
 
             var quickAccessKeybinding = new KeybindingAssigner(_config.OpenQuickAccess) {
                 Parent           = miscSettings,
-                KeyBindingName   = "Open Quick Access"
+                KeyBindingName   = Resources.Open_Quick_Access,
+                BasicTooltipText = Resources.Show_or_hide_the_quick_access_menu_to_all_active_macros_
             };
 
             base.Build(buildPanel);

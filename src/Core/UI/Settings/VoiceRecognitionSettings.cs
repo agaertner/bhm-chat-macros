@@ -8,7 +8,6 @@ using Nekres.ChatMacros.Properties;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Nekres.ChatMacros.Core.UI.Credits;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class VoiceRecognitionSettings : View {
@@ -23,8 +22,8 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
 
             var voiceRecognitionPanel = new FlowPanel {
                 Parent              = buildPanel,
-                Width               = buildPanel.ContentRegion.Width / 2,
-                Height              = buildPanel.ContentRegion.Height / 2,
+                Width               = buildPanel.ContentRegion.Width,
+                Height              = buildPanel.ContentRegion.Height,
                 FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                 OuterControlPadding = new Vector2(5, 5),
                 ControlPadding      = new Vector2(5, 5),

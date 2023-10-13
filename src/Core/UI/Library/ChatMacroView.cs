@@ -375,6 +375,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     }
 
                     TitleChanged?.Invoke(this, new ValueEventArgs<string>(_macro.Title));
+                    ChatMacros.Instance.Macro.UpdateMacros();
                 };
 
                 var macroConfig = new ViewContainer {
@@ -576,7 +577,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     void CreateWhisperToField() {
                         whisperTo = new TextBox {
                             Parent          = buildPanel,
-                            PlaceholderText = string.Empty,
+                            PlaceholderText = Resources.Recipient___,
                             Width           = 100,
                             ForeColor       = _line.Channel.GetMessageColor(),
                             Left            = targetChannelDd.Right + Panel.RIGHT_PADDING,
@@ -604,7 +605,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             Height           = 32,
                             Width            = 32,
                             Top              = -2,
-                            BasicTooltipText = string.Empty, //TODO: Add tooltip
+                            BasicTooltipText = Resources.Broadcast_to_Squad,
                             Texture          = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive
                         };
 

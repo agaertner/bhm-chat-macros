@@ -44,7 +44,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
             _quickAccessWindow = new ContextMenuStrip {
                 Parent  = GameService.Graphics.SpriteScreen,
-                Visible = false
+                Visible = false,
+                WidthSizingMode = SizingMode.AutoSize
             };
 
             OnMapChanged(this, new ValueEventArgs<int>(GameService.Gw2Mumble.CurrentMap.Id));
@@ -59,6 +60,10 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private void OnOpenQuickAccessActivated(object sender, EventArgs e) {
+            if (!Gw2Util.IsInGame()) {
+                return;
+            }
+            GameService.Content.PlaySoundEffectByName("numeric-spinner");
             if (_quickAccessWindow.Visible) {
                 _quickAccessWindow.Hide();
                 return;
@@ -77,11 +82,13 @@ namespace Nekres.ChatMacros.Core.Services {
                 ctrl?.Dispose();
             }
             _quickAccessWindow.ClearChildren();
-            
+            _quickAccessWindow.Width = 1; // Reset width; otherwise WidthSizingMode Auto will never shrink the width when appropriate.
+
             foreach (var macro in macros) {
                 var menuItem = new ContextMenuStripItem {
                     Parent = _quickAccessWindow,
-                    Text   = macro.Title
+                    Text   = AssetUtil.Truncate(macro.Title, 300, GameService.Content.DefaultFont14),
+                    BasicTooltipText = macro.Title
                 };
                 menuItem.Click += async (_, _) => {
                     GameService.Content.PlaySoundEffectByName("button-click");
@@ -131,6 +138,14 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public async Task Trigger(BaseMacro macro) {
+            if (macro == null) {
+                return;
+            }
+
+            if (!Gw2Util.IsInGame()) {
+                return;
+            }
+
             await macro.Fire();
         }
 

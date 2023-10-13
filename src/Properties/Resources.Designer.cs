@@ -223,11 +223,38 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Broadcast to Squad.
+        /// </summary>
+        internal static string Broadcast_to_Squad {
+            get {
+                return ResourceManager.GetString("Broadcast to Squad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Buy Me a Coffee!.
         /// </summary>
         internal static string Buy_Me_a_Coffee_ {
             get {
                 return ResourceManager.GetString("Buy Me a Coffee!", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat Message.
+        /// </summary>
+        internal static string Chat_Message {
+            get {
+                return ResourceManager.GetString("Chat Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Control Options.
+        /// </summary>
+        internal static string Control_Options {
+            get {
+                return ResourceManager.GetString("Control Options", resourceCulture);
             }
         }
         
@@ -327,6 +354,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string German {
             get {
                 return ResourceManager.GetString("German", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Give focus to the chat edit box..
+        /// </summary>
+        internal static string Give_focus_to_the_chat_edit_box_ {
+            get {
+                return ResourceManager.GetString("Give focus to the chat edit box.", resourceCulture);
             }
         }
         
@@ -448,6 +484,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Quick Access.
+        /// </summary>
+        internal static string Open_Quick_Access {
+            get {
+                return ResourceManager.GetString("Open Quick Access", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Party.
         /// </summary>
         internal static string Party {
@@ -498,6 +543,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string PvP {
             get {
                 return ResourceManager.GetString("PvP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recipient….
+        /// </summary>
+        internal static string Recipient___ {
+            get {
+                return ResourceManager.GetString("Recipient...", resourceCulture);
             }
         }
         
@@ -619,6 +673,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show or hide the quick access menu to all active macros..
+        /// </summary>
+        internal static string Show_or_hide_the_quick_access_menu_to_all_active_macros_ {
+            get {
+                return ResourceManager.GetString("Show or hide the quick access menu to all active macros.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Something went wrong. Please try again..
         /// </summary>
         internal static string Something_went_wrong__Please_try_again_ {
@@ -651,6 +714,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Squad {
             get {
                 return ResourceManager.GetString("Squad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Squad Broadcast Message.
+        /// </summary>
+        internal static string Squad_Broadcast_Message {
+            get {
+                return ResourceManager.GetString("Squad Broadcast Message", resourceCulture);
             }
         }
         
@@ -714,6 +786,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Unset {
             get {
                 return ResourceManager.GetString("Unset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Interface.
+        /// </summary>
+        internal static string User_Interface {
+            get {
+                return ResourceManager.GetString("User Interface", resourceCulture);
             }
         }
         

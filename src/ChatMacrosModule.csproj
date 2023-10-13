@@ -209,6 +209,7 @@
     <Compile Include="Core\Utils\AssetUtil.cs" />
     <Compile Include="Core\Utils\BitmapFont.cs" />
     <Compile Include="Core\Utils\FastenshteinUtil.cs" />
+    <Compile Include="Core\Utils\Gw2Util.cs" />
     <Compile Include="Core\Utils\HttpUtil.cs" />
     <Compile Include="Core\Utils\JsonPropertyUtil.cs" />
     <Compile Include="Core\Utils\LockUtil.cs" />
