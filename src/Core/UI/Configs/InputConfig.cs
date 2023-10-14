@@ -41,7 +41,7 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             _inputDevice        = Guid.Empty,
             _voiceLang          = VoiceLanguage.English,
             _secondaryVoiceLang = VoiceLanguage.English,
-            PushToTalk          = new KeyBinding(Keys.LeftAlt)
+            PushToTalk          = new KeyBinding()
         };
 
         private Guid _inputDevice;

@@ -403,4 +403,10 @@
   <data name="User Interface" xml:space="preserve">
     <value>Interfaz de usuario</value>
   </data>
+  <data name="Unable to whisper. No recipient specified." xml:space="preserve">
+    <value>No se puede susurrar. No se ha especificado destinatario.</value>
+  </data>
+  <data name="{0} is not assigned a key!" xml:space="preserve">
+    <value>{0} no tiene asignada una tecla.</value>
+  </data>
 </root>
