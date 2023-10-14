@@ -1,11 +1,14 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Extended;
+using Gw2Sharp.WebApi;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -118,6 +121,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
     }
 
     internal class ChatMacro : BaseMacro {
+
         [BsonRef(DataService.TBL_CHATLINES), BsonField("lines")]
         public List<ChatLine> Lines { get; set; }
 
@@ -190,6 +194,136 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         public string ToChatMessage() {
             return $"{Channel.ToChatCommand()}{Message}";
+        }
+
+        private static Regex _whisperRecipientPattern = new (@"<@(?<name>.*)>", RegexOptions.Compiled);
+        private const string _squadBroadcastPattern   = "<!>";
+        public static ChatLine Parse(string input) {
+
+            var line = new ChatLine {
+                Id = new ObjectId()
+            };
+
+            if (input.IsNullOrEmpty()) {
+                return line;
+            }
+
+            var separator  = input.IndexOf(' ');
+            var channelStr = separator < 0 ? string.Empty : input.Substring(0, separator).Trim();
+            var message = channelStr.Length >= input.Length ? string.Empty : input.Substring(channelStr.Length);
+            message = message.TrimStart(1);
+
+            var channel = ParseChannel(channelStr);
+
+            line.Channel = channel;
+            
+            if (channel == ChatChannel.Whisper) {
+                var recipientMatch = _whisperRecipientPattern.Match(message);
+
+                if (recipientMatch.Success) {
+                    line.WhisperTo = recipientMatch.Groups["name"].Value;
+                    message = _whisperRecipientPattern.Replace(message, string.Empty, 1);
+                    message = message.TrimStart(1);
+                }
+            }
+
+            if (channel == ChatChannel.Squad) {
+                line.SquadBroadcast = message.TrimStart().StartsWith(_squadBroadcastPattern);
+
+                if (line.SquadBroadcast) {
+                    message = message.Replace(_squadBroadcastPattern, string.Empty);
+                    message = message.TrimStart(1);
+                }
+            }
+
+            line.Message = message.TrimEnd();
+            return line;
+        }
+
+        private static ChatChannel ParseChannel(string input) {
+            if (string.IsNullOrEmpty(input)) {
+                return ChatChannel.Current;
+            }
+
+            input = input.Trim().ToLowerInvariant();
+
+            var currentCulture = Resources.Culture;
+            var channel        = ChatChannel.Current;
+            foreach (var culture in Enum.GetValues(typeof(Locale)).Cast<Locale>().Select(l => l.GetCulture())) {
+                Resources.Culture = culture;
+
+                if (input.Equals(Resources._emote)) {
+                    channel = ChatChannel.Emote;
+                    break;
+                }
+
+                if (input.Equals(Resources._say)) {
+                    channel = ChatChannel.Say;
+                    break;
+                }
+
+                if (input.Equals(Resources._map)) {
+                    channel = ChatChannel.Map;
+                    break;
+                }
+
+                if (input.Equals(Resources._party)) {
+                    channel = ChatChannel.Party;
+                    break;
+                }
+
+                if (input.Equals(Resources._squad)) {
+                    channel = ChatChannel.Squad;
+                    break;
+                }
+
+                if (input.Equals(Resources._team)) {
+                    channel = ChatChannel.Team;
+                    break;
+                }
+
+                if (input.Equals(Resources._reply)) {
+                    channel = ChatChannel.Reply;
+                    break;
+                }
+
+                if (input.Equals(Resources._whisper)) {
+                    channel = ChatChannel.Whisper;
+                    break;
+                }
+
+                if (input.Equals(Resources._guild)) {
+                    channel = ChatChannel.Guild;
+                    break;
+                }
+
+                if (input.Equals(string.Format(Resources._guild_0_, 1))) {
+                    channel = ChatChannel.Guild1;
+                    break;
+                }
+
+                if (input.Equals(string.Format(Resources._guild_0_, 2))) {
+                    channel = ChatChannel.Guild2;
+                    break;
+                }
+
+                if (input.Equals(string.Format(Resources._guild_0_, 3))) {
+                    channel = ChatChannel.Guild3;
+                    break;
+                }
+
+                if (input.Equals(string.Format(Resources._guild_0_, 4))) {
+                    channel = ChatChannel.Guild4;
+                    break;
+                }
+
+                if (input.Equals(string.Format(Resources._guild_0_, 5))) {
+                    channel = ChatChannel.Guild5;
+                    break;
+                }
+            }
+            Resources.Culture = currentCulture;
+            return channel;
         }
     }
 }

@@ -11,6 +11,7 @@ using Nekres.ChatMacros.Core.UI.Configs;
 using Nekres.ChatMacros.Core.UI.Library;
 using Nekres.ChatMacros.Core.UI.Settings;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using Gw2WebApiService = Nekres.ChatMacros.Core.Services.Gw2WebApiService;
@@ -31,7 +32,8 @@ namespace Nekres.ChatMacros {
         internal Gw2ApiManager Gw2ApiManager => this.ModuleParameters.Gw2ApiManager;
         #endregion
 
-        public string ModuleDirectory { get; private set; }
+        public string          ModuleDirectory { get; private set; }
+        public IReadOnlyList<string> BasePaths { get; private set; }
 
         private TabbedWindow2 _moduleWindow;
         private CornerIcon    _cornerIcon;
@@ -68,6 +70,10 @@ namespace Nekres.ChatMacros {
         protected override void Initialize() {
             ModuleDirectory = DirectoriesManager.GetFullDirectoryPath("chat_shorts");
             _cornerTexture  = ContentsManager.GetTexture("corner_icon.png");
+            BasePaths       = new List<string> {
+                ModuleDirectory,
+                AppDomain.CurrentDomain.BaseDirectory
+            };
         }
 
         protected override void OnModuleLoaded(EventArgs e) {

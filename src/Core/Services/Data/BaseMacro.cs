@@ -1,5 +1,4 @@
-﻿using Blish_HUD;
-using Blish_HUD.Input;
+﻿using Blish_HUD.Input;
 using LiteDB;
 using Nekres.ChatMacros.Properties;
 using System;
@@ -56,6 +55,9 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         [BsonField("map_ids")]
         public List<int> MapIds { get; set; }
+
+        [BsonField("link_file")]
+        public string LinkFile { get; set; }
 
         protected BaseMacro() {
             Title         = string.Empty;

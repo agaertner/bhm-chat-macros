@@ -3,6 +3,7 @@ using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
 using Blish_HUD.Input;
+using LiteDB;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nekres.ChatMacros.Core.Services.Data;
@@ -139,6 +140,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             createNewBttn.Click += (_,_) => {
                 var newMacro = new ChatMacro {
+                    Id = new ObjectId(),
                     Title = Resources.New_Macro,
                     Lines = new List<ChatLine>(),
                     VoiceCommands = new List<string>()
@@ -183,7 +185,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
         }
 
         private void UpdateFilter(string searchKey, bool showActives) {
-            var entries = MacroEntries.Children.Cast<MenuItem<ChatMacro>>().ToList();
+            var entries = MacroEntries.Children.Cast<MenuItem<ChatMacro>>()
+                                      .OrderBy(x => x.Item.Title.ToLowerInvariant()).ToList();
 
             var filtered = FastenshteinUtil.FindMatchesBy(searchKey, entries, entry => entry.Item.Title).ToList();
 
@@ -199,6 +202,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 }
             }
 
+            MacroEntries.GetPrivateField("_children").SetValue(MacroEntries, new ControlCollection<Control>(entries));
             MacroEntries.Invalidate();
         }
 
@@ -341,8 +345,32 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             private readonly ChatMacro _macro;
 
+            private FlowPanel _linesPanel;
+
             public MacroView(ChatMacro macro) {
-                _macro = macro;
+                _macro                                         =  macro;
+                ChatMacros.Instance.Macro.Observer.MacroUpdate += OnLinkFileUpdate;
+            }
+
+            private void OnLinkFileUpdate(object sender, ValueEventArgs<BaseMacro> e) {
+                if (_linesPanel == null || e.Value is not ChatMacro chatMacro || !_macro.Id.Equals(e.Value.Id)) {
+                    return;
+                }
+
+                _macro.Lines = chatMacro.Lines;
+
+                foreach (var ctrl in _linesPanel.Children.ToList()) {
+                    ctrl?.Dispose();
+                }
+
+                foreach (var line in _macro.Lines) {
+                    AddLine(_linesPanel, line);
+                }
+            }
+
+            protected override void Unload() {
+                ChatMacros.Instance.Macro.Observer.MacroUpdate -= OnLinkFileUpdate;
+                base.Unload();
             }
 
             protected override void Build(Container buildPanel) {
@@ -386,10 +414,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
                 macroConfig.Show(new BaseMacroSettings(_macro, () => ChatMacros.Instance.Data.Upsert(_macro)));
 
-                var linesPanel = new FlowPanel {
+                _linesPanel = new FlowPanel {
                     Parent              = buildPanel,
                     Width               = buildPanel.ContentRegion.Width,
-                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING - 50,
+                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING - 77,
                     FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                     Top                 = macroConfig.Bottom,
                     ShowBorder          = true,
@@ -400,20 +428,42 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
 
                 foreach (var line in _macro.Lines) {
-                    AddLine(linesPanel, line);
+                    AddLine(_linesPanel, line);
                 }
-                
+
+                var linkFile = new TextBox {
+                    Parent = buildPanel,
+                    Top = _linesPanel.Bottom,
+                    Width = buildPanel.ContentRegion.Width - Panel.LEFT_PADDING - Panel.RIGHT_PADDING,
+                    Text = _macro.LinkFile
+                };
+
+                linkFile.InputFocusChanged += (_,e) => {
+                    if (e.Value || string.IsNullOrWhiteSpace(linkFile.Text)) {
+                        return;
+                    }
+
+                    _macro.LinkFile = linkFile.Text.Trim();
+
+                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        return;
+                    }
+
+                    ChatMacros.Instance.Data.LinkFileChanged(_macro);
+                };
+
                 var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
                     Parent = buildPanel,
-                    Width  = linesPanel.Width - 20,
-                    Top    = linesPanel.Bottom,
+                    Width  = _linesPanel.Width - 20,
+                    Top    = linkFile.Bottom,
                     Left   = 10,
                     Height = 50,
                     Text   = Resources.Add_Line
                 };
 
                 addLineBttn.Click += (_, _) => {
-                    CreateLine(linesPanel);
+                    CreateLine(_linesPanel);
                 };
 
                 base.Build(buildPanel);

@@ -27,5 +27,16 @@ namespace Nekres.ChatMacros.Core {
             var root = Path.GetPathRoot(path);
             return root.StartsWith(@"\\") || root.EndsWith(@"\") && root != @"\";
         }
+
+        public static string TrimStart(this string input, int count) {
+            if (string.IsNullOrEmpty(input)) {
+                return input;
+            }
+            while (count > 0 && input.Length > 0 && input.StartsWith(" ")) {
+                input = input.Substring(1);
+                --count;
+            }
+            return input;
+        }
     }
 }

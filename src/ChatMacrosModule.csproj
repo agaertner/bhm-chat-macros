@@ -176,6 +176,7 @@
     <Compile Include="Core\Extensions\ContentsManagerExtensions.cs" />
     <Compile Include="Core\Extensions\Gw2SharpExtensions\CoordinatesExtensions.cs" />
     <Compile Include="Core\Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Core\Extensions\Gw2SharpExtensions\LocaleExtensions.cs" />
     <Compile Include="Core\Extensions\ObjectExtensions.cs" />
     <Compile Include="Core\Extensions\SpriteFontExtensions.cs" />
     <Compile Include="Core\Extensions\StringExtensions.cs" />
@@ -185,6 +186,7 @@
     <Compile Include="Core\Services\Data\PropertyResolver.cs" />
     <Compile Include="Core\Services\Gw2WebApiService.cs" />
     <Compile Include="Core\Services\MacroService.cs" />
+    <Compile Include="Core\Services\Macro\FileMacroObserver.cs" />
     <Compile Include="Core\Services\ResourceService.cs" />
     <Compile Include="Core\Services\SpeechService.cs" />
     <Compile Include="Core\Services\Speech\ISpeechRecognitionProvider.cs" />
@@ -209,6 +211,7 @@
     <Compile Include="Core\Utils\AssetUtil.cs" />
     <Compile Include="Core\Utils\BitmapFont.cs" />
     <Compile Include="Core\Utils\FastenshteinUtil.cs" />
+    <Compile Include="Core\Utils\FileUtil.cs" />
     <Compile Include="Core\Utils\Gw2Util.cs" />
     <Compile Include="Core\Utils\HttpUtil.cs" />
     <Compile Include="Core\Utils\JsonPropertyUtil.cs" />

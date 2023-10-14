@@ -12,6 +12,8 @@ using System.Threading;
 namespace Nekres.ChatMacros.Core.Services {
     internal class DataService : IDisposable {
 
+        public event EventHandler<ValueEventArgs<BaseMacro>> LinkFileChange;
+
         private ConnectionString _connectionString;
 
         private readonly ReaderWriterLockSlim _rwLock        = new();
@@ -58,8 +60,33 @@ namespace Nekres.ChatMacros.Core.Services {
             return Upsert(model, TBL_CHATMACROS);
         }
 
+        public void LinkFileChanged(ChatMacro macro) {
+            if (!macro.LinkFile.IsNullOrWhiteSpace() && !macro.LinkFile.IsWebLink()) {
+                LinkFileChange?.Invoke(this, new ValueEventArgs<BaseMacro>(macro));
+            }
+        }
+
+        private bool InsertMany<T>(List<T> model, string table) {
+            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+
+            try {
+                using var db         = new LiteDatabase(_connectionString);
+                var       collection = db.GetCollection<T>(table);
+                return collection.InsertBulk(model) > 0;
+            } catch (Exception e) {
+                ChatMacros.Logger.Warn(e, e.Message);
+                return false;
+            } finally {
+                LockUtil.Release(_rwLock, _lockReleased, ref _lockAcquired);
+            }
+        }
+
         public bool Upsert(ChatLine model) {
             return Upsert(model, TBL_CHATLINES);
+        }
+
+        public bool Insert(params ChatLine[] chatLines) {
+            return InsertMany(chatLines.ToList(), TBL_CHATLINES);
         }
 
         public List<ChatMacro> GetActiveMacros() {
