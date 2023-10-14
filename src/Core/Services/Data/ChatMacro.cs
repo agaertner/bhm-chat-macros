@@ -142,7 +142,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
                 if (line.Channel == ChatChannel.Squad && line.SquadBroadcast && 
                     GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
-                    if (ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage.GetBindingDisplayText().Equals(string.Empty)) {
+                    if (ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage == null || ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage.GetBindingDisplayText().Equals(string.Empty)) {
                         ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Squad_Broadcast_Message), ScreenNotification.NotificationType.Warning);
                         break;
                     }
@@ -150,7 +150,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                     continue;
                 }
 
-                if (ChatMacros.Instance.ControlsConfig.Value.ChatMessage.GetBindingDisplayText().Equals(string.Empty)) {
+                if (ChatMacros.Instance.ControlsConfig.Value.ChatMessage == null || ChatMacros.Instance.ControlsConfig.Value.ChatMessage.GetBindingDisplayText().Equals(string.Empty)) {
                     ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Chat_Message), ScreenNotification.NotificationType.Warning);
                     break;
                 }

@@ -71,6 +71,8 @@ namespace Nekres.ChatMacros {
         }
 
         protected override void OnModuleLoaded(EventArgs e) {
+            ValidateSettings();
+
             Data      = new DataService();
             Gw2Api    = new Gw2WebApiService();
             Resources = new ResourceService();
@@ -108,8 +110,24 @@ namespace Nekres.ChatMacros {
             _moduleWindow.TabChanged += OnTabChanged;
 
             GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
+
             // Base handler must be called
             base.OnModuleLoaded(e);
+        }
+
+        private void ValidateSettings() {
+            ControlsConfig.Value                                       ??= Core.UI.Configs.ControlsConfig.Default;
+            InputConfig.Value                                          ??= Core.UI.Configs.InputConfig.Default;
+            ControlsConfig.Value.OpenQuickAccess                       ??= Core.UI.Configs.ControlsConfig.Default.OpenQuickAccess;
+            ControlsConfig.Value.ChatMessage                           ??= Core.UI.Configs.ControlsConfig.Default.ChatMessage;
+            ControlsConfig.Value.SquadBroadcastMessage                 ??= Core.UI.Configs.ControlsConfig.Default.SquadBroadcastMessage;
+            InputConfig.Value.PushToTalk                               ??= Core.UI.Configs.InputConfig.Default.PushToTalk;
+            ControlsConfig.Value.OpenQuickAccess.Enabled               =   true;
+            ControlsConfig.Value.OpenQuickAccess.IgnoreWhenInTextField =   true;
+            InputConfig.Value.PushToTalk.Enabled                       =   true;
+            InputConfig.Value.PushToTalk.IgnoreWhenInTextField         =   true;
+            ControlsConfig.Value.ChatMessage.Enabled                   =   false;
+            ControlsConfig.Value.SquadBroadcastMessage.Enabled         =   false;
         }
 
         private void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
