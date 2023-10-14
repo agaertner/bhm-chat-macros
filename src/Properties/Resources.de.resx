@@ -403,4 +403,10 @@
   <data name="User Interface" xml:space="preserve">
     <value>Benutzer-Interface</value>
   </data>
+  <data name="Unable to whisper. No recipient specified." xml:space="preserve">
+    <value>Flüstern nicht möglich. Kein Empfänger angegeben.</value>
+  </data>
+  <data name="{0} is not assigned a key!" xml:space="preserve">
+    <value>{0} ist keine Taste zugewiesen!</value>
+  </data>
 </root>

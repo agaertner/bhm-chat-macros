@@ -31,6 +31,29 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 BasicTooltipText = Resources.Show_or_hide_the_quick_access_menu_to_all_active_macros_
             };
 
+            var userInterface = new FlowPanel {
+                Parent              = miscSettings,
+                Width               = miscSettings.ContentRegion.Width,
+                Height              = miscSettings.ContentRegion.Height,
+                FlowDirection       = ControlFlowDirection.SingleTopToBottom,
+                OuterControlPadding = new Vector2(5, 5),
+                ControlPadding      = new Vector2(5, 5),
+                CanCollapse         = true,
+                Title = Resources.User_Interface
+            };
+
+            var chatMessageKeybinding = new KeybindingAssigner(_config.ChatMessage) {
+                Parent           = userInterface,
+                KeyBindingName   = Resources.Chat_Message,
+                BasicTooltipText = Resources.Give_focus_to_the_chat_edit_box_
+            };
+
+            var squadBroadcastMessageKeybinding = new KeybindingAssigner(_config.SquadBroadcastMessage) {
+                Parent           = userInterface,
+                KeyBindingName   = Resources.Squad_Broadcast_Message,
+                BasicTooltipText = Resources.Give_focus_to_the_chat_edit_box_
+            };
+
             base.Build(buildPanel);
         }
     }

@@ -70,6 +70,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is not assigned a key!.
+        /// </summary>
+        internal static string _0__is_not_assigned_a_key_ {
+            get {
+                return ResourceManager.GetString("{0} is not assigned a key!", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} not found. Check your spelling..
         /// </summary>
         internal static string _0__not_found__Check_your_spelling_ {
@@ -777,6 +786,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Trigger_Options {
             get {
                 return ResourceManager.GetString("Trigger Options", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to whisper. No recipient specified..
+        /// </summary>
+        internal static string Unable_to_whisper__No_recipient_specified_ {
+            get {
+                return ResourceManager.GetString("Unable to whisper. No recipient specified.", resourceCulture);
             }
         }
         

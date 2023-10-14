@@ -6,7 +6,6 @@ using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Nekres.ChatMacros.Core.Services;
 using Nekres.ChatMacros.Core.UI.Configs;
 using Nekres.ChatMacros.Core.UI.Library;
@@ -38,8 +37,6 @@ namespace Nekres.ChatMacros {
         private CornerIcon    _cornerIcon;
         private Texture2D     _cornerTexture;
 
-        internal SettingEntry<KeyBinding> SquadBroadcast;
-        internal SettingEntry<KeyBinding> ChatMessage;
         internal SettingEntry<InputConfig> InputConfig;
         internal SettingEntry<LibraryConfig> LibraryConfig;
         internal SettingEntry<ControlsConfig> ControlsConfig;
@@ -62,15 +59,6 @@ namespace Nekres.ChatMacros {
 
         protected override void DefineSettings(SettingCollection settings)
         {
-            var controlSettings = settings.AddSubCollection("controlOptions", false,
-                () => $"{Properties.Resources.Control_Options} ({Properties.Resources.User_Interface})");
-            ChatMessage = controlSettings.DefineSetting("chatMessageKeyBinding", new KeyBinding(Keys.Enter) { Enabled = false, IgnoreWhenInTextField = true },
-                () => Properties.Resources.Chat_Message,
-                () => Properties.Resources.Give_focus_to_the_chat_edit_box_);
-            SquadBroadcast = controlSettings.DefineSetting("squadBroadcastKeyBinding", new KeyBinding(ModifierKeys.Shift, Keys.Enter) { Enabled = false, IgnoreWhenInTextField = true },
-                () => Properties.Resources.Squad_Broadcast_Message, 
-                () => Properties.Resources.Give_focus_to_the_chat_edit_box_);
-
             var selfManaged = settings.AddSubCollection("configs", false, false);
             InputConfig = selfManaged.DefineSetting("input_config", Core.UI.Configs.InputConfig.Default);
             LibraryConfig = selfManaged.DefineSetting("library_config", Core.UI.Configs.LibraryConfig.Default);
@@ -78,10 +66,8 @@ namespace Nekres.ChatMacros {
         }
 
         protected override void Initialize() {
-            ModuleDirectory              = DirectoriesManager.GetFullDirectoryPath("chat_shorts");
-            _cornerTexture               = ContentsManager.GetTexture("corner_icon.png");
-            SquadBroadcast.Value.Enabled = false;
-            ChatMessage.Value.Enabled    = false;
+            ModuleDirectory = DirectoriesManager.GetFullDirectoryPath("chat_shorts");
+            _cornerTexture  = ContentsManager.GetTexture("corner_icon.png");
         }
 
         protected override void OnModuleLoaded(EventArgs e) {
