@@ -13,6 +13,8 @@ namespace Nekres.ChatMacros.Core.Services {
         public Texture2D  TwitchLogo      { get; private set; }
         public Texture2D  YoutubeLogo     { get; private set; }
         public Texture2D  EditIcon        { get; private set; }
+        public Texture2D  LinkIcon        { get; private set; }
+        public Texture2D  LinkBrokenIcon  { get; private set; }
         public BitmapFont RubikRegular26  { get; private set; }
         public BitmapFont LatoRegular24   { get; private set; }
 
@@ -28,6 +30,8 @@ namespace Nekres.ChatMacros.Core.Services {
         public void LoadTextures() {
             DragReorderIcon = ChatMacros.Instance.ContentsManager.GetTexture("icons/drag-reorder.png");
             EditIcon        = ChatMacros.Instance.ContentsManager.GetTexture("icons/edit_icon.png");
+            LinkIcon        = ChatMacros.Instance.ContentsManager.GetTexture("icons/link.png");
+            LinkBrokenIcon  = ChatMacros.Instance.ContentsManager.GetTexture("icons/link-broken.png");
             TwitchLogo      = ChatMacros.Instance.ContentsManager.GetTexture("socials/twitch_logo.png");
             YoutubeLogo     = ChatMacros.Instance.ContentsManager.GetTexture("socials/youtube_logo.png");
         }
@@ -60,6 +64,8 @@ namespace Nekres.ChatMacros.Core.Services {
             this.LatoRegular24?.Dispose();
             this.DragReorderIcon?.Dispose();
             this.EditIcon?.Dispose();
+            this.LinkIcon?.Dispose();
+            this.LinkBrokenIcon?.Dispose();
             this.TwitchLogo?.Dispose();
             this.YoutubeLogo?.Dispose();
         }

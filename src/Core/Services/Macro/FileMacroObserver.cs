@@ -57,11 +57,25 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
         }
 
         private void RegisterEvents(FileSystemWatcher fw) {
+            Import(_watchers.FirstOrDefault(x => x.Value == fw).Key, Path.Combine(fw.Path, fw.Filter));
+
             fw.EnableRaisingEvents =  true;
-            fw.Changed             += OnChanged;
-            fw.Renamed             += OnChanged;
-            fw.Deleted             += OnChanged;
-            fw.Created             += OnChanged;
+            fw.Changed += OnChanged;
+            fw.Deleted += OnDeleted;
+            fw.Created += OnChanged;
+        }
+
+        private void OnDeleted(object sender, FileSystemEventArgs e) {
+            var fw = (FileSystemWatcher)sender;
+            var id = _watchers.FirstOrDefault(x => x.Value == fw).Key;
+
+            var macro = ChatMacros.Instance.Data.GetChatMacro(id);
+            macro.LinkFile = string.Empty;
+            ChatMacros.Instance.Data.Upsert(macro);
+            
+            Remove(id);
+
+            MacroUpdate?.Invoke(this, new ValueEventArgs<BaseMacro>(macro));
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e) {
@@ -71,15 +85,17 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
             fw.Path   = dir;
             fw.Filter = file;
 
-            var id = _watchers.FirstOrDefault(x => x.Value == fw).Key;
+            Import(_watchers.FirstOrDefault(x => x.Value == fw).Key, e.FullPath);
+        }
 
+        private void Import(ObjectId id, string filePath) {
             if (id == null) {
                 return;
             }
 
             var macro = ChatMacros.Instance.Data.GetChatMacro(id);
 
-            if (!ChatMacros.Instance.Macro.TryImportFromFile(e.FullPath, out var lines)) {
+            if (!ChatMacros.Instance.Macro.TryImportFromFile(filePath, out var lines)) {
                 return;
             }
 
@@ -88,7 +104,7 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
 
             if (!ChatMacros.Instance.Data.Insert(macro.Lines.ToArray()) || !ChatMacros.Instance.Data.Upsert(macro)) {
                 macro.Lines = oldLines;
-                ChatMacros.Logger.Warn($"Failed to update macro {macro.Id} ('{macro.Title}') in database.");
+                ChatMacros.Logger.Warn($"Failed to upsert lines from file for macro {macro.Id} ('{macro.Title}')");
                 return;
             }
 

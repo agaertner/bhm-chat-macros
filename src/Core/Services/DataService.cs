@@ -162,9 +162,10 @@ namespace Nekres.ChatMacros.Core.Services {
             } finally {
                 LockUtil.Release(_rwLock, _lockReleased, ref _lockAcquired);
             }
-        }
+        }   
 
         public bool Delete(ChatMacro macro) {
+            ChatMacros.Instance.Macro.Observer.Remove(macro.Id);
             return Delete<ChatMacro>(macro.Id, TBL_CHATMACROS);
         }
         public bool Delete(ChatLine line) {

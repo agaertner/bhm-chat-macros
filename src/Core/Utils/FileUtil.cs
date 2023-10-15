@@ -18,27 +18,27 @@ namespace Nekres.ChatMacros.Core {
                 filePath = filePath.Replace("%20", " ");
 
                 if (filePath.IsPathFullyQualified()) {
-                    path = File.Exists(filePath) ? filePath : path;
-                } else {
-                    filePath = filePath.TrimStart('/');
-                    filePath = filePath.TrimStart('\\');
-                    filePath = filePath.Replace("/", "\\");
+                    path = filePath;
+                    return File.Exists(filePath);
+                }
 
-                    foreach (var basePath in basePaths) {
-                        var testPath = Path.Combine(basePath, filePath);
-                        testPath = Path.GetFullPath(testPath);
+                filePath = filePath.TrimStart('/');
+                filePath = filePath.TrimStart('\\');
+                filePath = filePath.Replace("/", "\\");
 
-                        if (File.Exists(testPath)) {
-                            path = testPath;
-                            break;
-                        }
+                foreach (var basePath in basePaths) {
+                    var testPath = Path.Combine(basePath, filePath);
+                    testPath = Path.GetFullPath(testPath);
+
+                    if (File.Exists(testPath)) {
+                        path = testPath;
+                        return true;
                     }
                 }
             } catch (Exception e) {
                 logger.Info(e, e.Message);
-                return false;
             }
-            return true;
+            return false;
         }
 
         public static bool TryReadAllLines(string filePath, out IReadOnlyList<string> lines, Logger logger = null, params string[] basePaths) {

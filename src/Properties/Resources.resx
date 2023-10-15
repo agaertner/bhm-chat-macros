@@ -449,4 +449,23 @@
     <value>/reply</value>
     <comment>Switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
   </data>
+  <data name="Active File Sync" xml:space="preserve">
+    <value>Active File Sync</value>
+  </data>
+  <data name="File to monitor and synchronize lines with." xml:space="preserve">
+    <value>File to monitor and synchronize lines with.</value>
+  </data>
+  <data name="Enter a file path..." xml:space="preserve">
+    <value>Enter a file path…</value>
+  </data>
+  <data name="Inactive File Sync" xml:space="preserve">
+    <value>Inactive File Sync</value>
+  </data>
+  <data name="File not found or access denied." xml:space="preserve">
+    <value>File not found or access denied.</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>Something is not a requirement thus &quot;optional&quot;.</comment>
+  </data>
 </root>

@@ -277,6 +277,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Active File Sync.
+        /// </summary>
+        internal static string Active_File_Sync {
+            get {
+                return ResourceManager.GetString("Active File Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Line.
         /// </summary>
         internal static string Add_Line {
@@ -412,6 +421,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter a file path….
+        /// </summary>
+        internal static string Enter_a_file_path___ {
+            get {
+                return ResourceManager.GetString("Enter a file path...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter a message….
         /// </summary>
         internal static string Enter_a_message___ {
@@ -426,6 +444,24 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Enter_a_title___ {
             get {
                 return ResourceManager.GetString("Enter a title...", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File not found or access denied..
+        /// </summary>
+        internal static string File_not_found_or_access_denied_ {
+            get {
+                return ResourceManager.GetString("File not found or access denied.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File to monitor and synchronize lines with..
+        /// </summary>
+        internal static string File_to_monitor_and_synchronize_lines_with_ {
+            get {
+                return ResourceManager.GetString("File to monitor and synchronize lines with.", resourceCulture);
             }
         }
         
@@ -480,6 +516,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Hold_to_recognize_voice_commands_ {
             get {
                 return ResourceManager.GetString("Hold to recognize voice commands.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inactive File Sync.
+        /// </summary>
+        internal static string Inactive_File_Sync {
+            get {
+                return ResourceManager.GetString("Inactive File Sync", resourceCulture);
             }
         }
         
@@ -588,6 +633,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Open_Quick_Access {
             get {
                 return ResourceManager.GetString("Open Quick Access", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Optional.
+        /// </summary>
+        internal static string Optional {
+            get {
+                return ResourceManager.GetString("Optional", resourceCulture);
             }
         }
         
