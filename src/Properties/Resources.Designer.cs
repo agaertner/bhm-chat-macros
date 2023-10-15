@@ -88,7 +88,25 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /d.
+        /// </summary>
+        internal static string _d {
+            get {
+                return ResourceManager.GetString("/d", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /e.
+        /// </summary>
+        internal static string _e {
+            get {
+                return ResourceManager.GetString("/e", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /emote.
         /// </summary>
         internal static string _emote {
             get {
@@ -99,6 +117,24 @@ namespace Nekres.ChatMacros.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /g.
         /// </summary>
+        internal static string _g {
+            get {
+                return ResourceManager.GetString("/g", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /g{0}.
+        /// </summary>
+        internal static string _g_0_ {
+            get {
+                return ResourceManager.GetString("/g{0}", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /guild.
+        /// </summary>
         internal static string _guild {
             get {
                 return ResourceManager.GetString("/guild", resourceCulture);
@@ -106,7 +142,7 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /g{0}.
+        ///   Looks up a localized string similar to /guild{0}.
         /// </summary>
         internal static string _guild_0_ {
             get {
@@ -117,6 +153,15 @@ namespace Nekres.ChatMacros.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /m.
         /// </summary>
+        internal static string _m {
+            get {
+                return ResourceManager.GetString("/m", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /map.
+        /// </summary>
         internal static string _map {
             get {
                 return ResourceManager.GetString("/map", resourceCulture);
@@ -125,6 +170,15 @@ namespace Nekres.ChatMacros.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to /p.
+        /// </summary>
+        internal static string _p {
+            get {
+                return ResourceManager.GetString("/p", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /party.
         /// </summary>
         internal static string _party {
             get {
@@ -135,6 +189,15 @@ namespace Nekres.ChatMacros.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /r.
         /// </summary>
+        internal static string _r {
+            get {
+                return ResourceManager.GetString("/r", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /reply.
+        /// </summary>
         internal static string _reply {
             get {
                 return ResourceManager.GetString("/reply", resourceCulture);
@@ -142,7 +205,16 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /l.
+        ///   Looks up a localized string similar to /s.
+        /// </summary>
+        internal static string _s {
+            get {
+                return ResourceManager.GetString("/s", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /say.
         /// </summary>
         internal static string _say {
             get {
@@ -151,7 +223,7 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /d.
+        ///   Looks up a localized string similar to /squad.
         /// </summary>
         internal static string _squad {
             get {
@@ -162,6 +234,15 @@ namespace Nekres.ChatMacros.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /t.
         /// </summary>
+        internal static string _t {
+            get {
+                return ResourceManager.GetString("/t", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /team.
+        /// </summary>
         internal static string _team {
             get {
                 return ResourceManager.GetString("/team", resourceCulture);
@@ -170,6 +251,15 @@ namespace Nekres.ChatMacros.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to /w.
+        /// </summary>
+        internal static string _w {
+            get {
+                return ResourceManager.GetString("/w", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /whisper.
         /// </summary>
         internal static string _whisper {
             get {

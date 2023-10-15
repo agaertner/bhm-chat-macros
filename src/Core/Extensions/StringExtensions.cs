@@ -38,5 +38,22 @@ namespace Nekres.ChatMacros.Core {
             }
             return input;
         }
+
+        public static string Replace(this string text, string search, string replace, int count, bool ignoreCase = true) {
+            if (string.IsNullOrEmpty(text)) {
+                return text;
+            }
+
+            var comparison = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+            var pos = text.IndexOf(search, comparison);
+
+            while (pos > -1 && count > 0)
+            {
+                text = text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+                pos  = text.IndexOf(search, comparison);
+                --count;
+            }
+            return text;
+        }
     }
 }

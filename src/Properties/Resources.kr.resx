@@ -120,33 +120,33 @@
   <data name="Message exceeds limit of {0} characters." xml:space="preserve">
     <value>메시지가 {0}자 한도를 초과했습니다.</value>
   </data>
-  <data name="/say" xml:space="preserve">
+  <data name="/s" xml:space="preserve">
     <value>/l</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Say] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/map" xml:space="preserve">
+  <data name="/m" xml:space="preserve">
     <value>/m</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Map] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/party" xml:space="preserve">
+  <data name="/p" xml:space="preserve">
     <value>/p</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Party] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/squad" xml:space="preserve">
+  <data name="/d" xml:space="preserve">
     <value>/d</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Squad] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/team" xml:space="preserve">
+  <data name="/t" xml:space="preserve">
     <value>/t</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Team] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/reply" xml:space="preserve">
+  <data name="/r" xml:space="preserve">
     <value>/r</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/guild" xml:space="preserve">
+  <data name="/g" xml:space="preserve">
     <value>/g</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Guild] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Guild" xml:space="preserve">
     <value>Guild</value>
@@ -176,9 +176,9 @@
     <value>Whisper</value>
     <comment>Whisper chat channel display name</comment>
   </data>
-  <data name="/guild{0}" xml:space="preserve">
+  <data name="/g{0}" xml:space="preserve">
     <value>/g{0}</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [G{1-5}] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="G{0}" xml:space="preserve">
     <value>G{0}</value>
@@ -188,9 +188,9 @@
     <value>Reply</value>
     <comment>Reply to last whisper</comment>
   </data>
-  <data name="/whisper" xml:space="preserve">
+  <data name="/w" xml:space="preserve">
     <value>/w</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Whisper] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Voice Recognition" xml:space="preserve">
     <value>Voice Recognition</value>
@@ -227,9 +227,9 @@
   <data name="Select a command language..." xml:space="preserve">
     <value>Select a command language…</value>
   </data>
-  <data name="/emote" xml:space="preserve">
+  <data name="/e" xml:space="preserve">
     <value>/e</value>
-    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to use custom emote. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Emote" xml:space="preserve">
     <value>Emote</value>
@@ -408,5 +408,45 @@
   </data>
   <data name="{0} is not assigned a key!" xml:space="preserve">
     <value>{0} is not assigned a key!</value>
+  </data>
+  <data name="/say" xml:space="preserve">
+    <value>/say</value>
+    <comment>Switch to [Say] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/party" xml:space="preserve">
+    <value>/party</value>
+    <comment>Switch to [Party] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/team" xml:space="preserve">
+    <value>/team</value>
+    <comment>Switch to [Team] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/emote" xml:space="preserve">
+    <value>/emote</value>
+    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild" xml:space="preserve">
+    <value>/guild</value>
+    <comment>Switch to [Guild] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild{0}" xml:space="preserve">
+    <value>/guild{0}</value>
+    <comment>Switch to [Guild{1-5}] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/squad" xml:space="preserve">
+    <value>/squad</value>
+    <comment>Switch to [Squad] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/map" xml:space="preserve">
+    <value>/map</value>
+    <comment>Switch to [Map] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/whisper" xml:space="preserve">
+    <value>/whisper</value>
+    <comment>Switch to [Whisper] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/reply" xml:space="preserve">
+    <value>/reply</value>
+    <comment>Switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
   </data>
 </root>
