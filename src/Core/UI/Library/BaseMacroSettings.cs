@@ -68,7 +68,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                 Map bestMatch;
 
-                if (int.TryParse(addActiveMap.Text, out var mapId)) {
+                if (int.TryParse(addActiveMap.Text.Trim(), out var mapId)) {
                     bestMatch = ChatMacros.Instance.Macro.AllMaps?.FirstOrDefault(x => x.Id == mapId);
 
                     if (bestMatch == null) {
@@ -77,7 +77,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         return;
                     }
                 } else {
-                    bestMatch = FastenshteinUtil.FindClosestMatchBy(addActiveMap.Text, ChatMacros.Instance.Macro.AllMaps, map => map.Name);
+                    bestMatch = FastenshteinUtil.FindClosestMatchBy(addActiveMap.Text.Trim(), ChatMacros.Instance.Macro.AllMaps, map => map.Name);
 
                     if (bestMatch == null) {
                         ScreenNotification.ShowNotification(string.Format(Resources._0__not_found__Check_your_spelling_, $"\"{addActiveMap.Text}\""), ScreenNotification.NotificationType.Warning);
