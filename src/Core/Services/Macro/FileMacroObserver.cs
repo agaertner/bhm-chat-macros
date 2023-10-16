@@ -107,9 +107,15 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
             var oldLines = macro.Lines.ToList();
             macro.Lines = lines.ToList();
 
-            if (!ChatMacros.Instance.Data.Insert(macro.Lines.ToArray()) || !ChatMacros.Instance.Data.Upsert(macro)) {
+            if (!macro.Lines.IsNullOrEmpty() && !ChatMacros.Instance.Data.Insert(macro.Lines.ToArray())) {
                 macro.Lines = oldLines;
-                ChatMacros.Logger.Warn($"Failed to upsert lines from file for macro {macro.Id} ('{macro.Title}')");
+                ChatMacros.Logger.Warn($"Failed to insert lines from file for macro {macro.Id} ('{macro.Title}')");
+                return;
+            }
+            
+            if (!ChatMacros.Instance.Data.Upsert(macro)) {
+                macro.Lines = oldLines;
+                ChatMacros.Logger.Warn($"Failed to upsert macro {macro.Id} ('{macro.Title}')");
                 return;
             }
 

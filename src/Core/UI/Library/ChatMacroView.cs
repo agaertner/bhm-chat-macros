@@ -1,20 +1,20 @@
 using Blish_HUD;
 using Blish_HUD.Content;
 using Blish_HUD.Controls;
+using Blish_HUD.Controls.Resources;
 using Blish_HUD.Extended;
 using Blish_HUD.Graphics.UI;
 using Blish_HUD.Input;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.TextureAtlases;
 using Nekres.ChatMacros.Core.Services.Data;
 using Nekres.ChatMacros.Core.UI.Configs;
 using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Blish_HUD.Controls.Resources;
-using MonoGame.Extended.TextureAtlases;
 using Control = Blish_HUD.Controls.Control;
 
 namespace Nekres.ChatMacros.Core.UI.Library {
@@ -197,10 +197,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             foreach (var entry in entries) {
                 entry.Visible  = filtered.IsNullOrEmpty() || filtered.Contains(entry);
                 entry.IsActive = ChatMacros.Instance.Macro
-                                           .ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id) && 
-                                                         // Macro has no key binding nor voice command.
-                                                         macro.VoiceCommands != null && macro.VoiceCommands.Any() ||
-                                                         macro.KeyBinding != null && !macro.KeyBinding.GetBindingDisplayText().Equals(string.Empty));
+                                           .ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
                 if (showActives) {
                     entry.Visible = entry.IsActive;
                 }
@@ -869,9 +866,18 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     messageInput.TextChanged += (_, _) => {
+                        var cmd = $"{_line.Channel.ToShortChatCommand()} ".TrimStart();
+                        var msg = $"{cmd}{messageInput.Text}";
+                        overlengthWarn.Visible        = msg.Length > ChatUtil.MAX_MESSAGE_LENGTH;
+                        messageInput.BasicTooltipText = string.IsNullOrEmpty(messageInput.Text) ? Resources.Enter_a_message___ : msg;
+                    };
+
+                    messageInput.InputFocusChanged += (_, e) => {
+                        if (e.Value) {
+                            return;
+                        }
                         _line.Message                 = messageInput.Text.TrimEnd();
-                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
-                        overlengthWarn.Visible        = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH;
+                        messageInput.BasicTooltipText = string.IsNullOrEmpty(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
                         Save();
                     };
 
