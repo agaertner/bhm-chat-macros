@@ -1,12 +1,30 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Modules.Managers;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.BitmapFonts;
-using System;
 using SpriteFontPlus;
+using System;
 
 namespace Nekres.ChatMacros.Core {
     internal static class ContentsManagerExtensions {
+
+        internal static CharacterRange GeneralPunctuation = new('\u2000', '\u206F');
+        internal static CharacterRange Arrows = new('\u2190', '\u21FF');
+        internal static CharacterRange MathematicalOperators = new('\u2200', '\u22FF');
+        internal static CharacterRange BoxDrawing = new('\u2500', '\u2570');
+        internal static CharacterRange GeometricShapes = new('\u25A0', '\u25FF');
+        internal static CharacterRange MiscellaneousSymbols = new('\u2600', '\u26FF');
+
+        public static readonly CharacterRange[] Gw2CharacterRange = {
+            CharacterRange.BasicLatin,
+            CharacterRange.Latin1Supplement,
+            CharacterRange.LatinExtendedA,
+            GeneralPunctuation,
+            Arrows,
+            MathematicalOperators,
+            BoxDrawing,
+            GeometricShapes,
+            MiscellaneousSymbols
+        };
 
         /// <summary>
         /// Loads a <see cref="SpriteFont"/> from a TrueTypeFont (*.ttf) file.
@@ -25,12 +43,8 @@ namespace Nekres.ChatMacros.Core {
             var fontDataLength = fontStream.Read(fontData, 0, fontData.Length);
 
             if (fontDataLength > 0) {
-                using var ctx = GameService.Graphics.LendGraphicsDeviceContext();
-                var bakeResult = TtfFontBaker.Bake(fontData, fontSize, textureSize, textureSize, new[] {
-                    CharacterRange.BasicLatin,
-                    CharacterRange.Latin1Supplement,
-                    CharacterRange.LatinExtendedA
-                });
+                using var ctx        = GameService.Graphics.LendGraphicsDeviceContext();
+                var       bakeResult = TtfFontBaker.Bake(fontData, fontSize, textureSize, textureSize, Gw2CharacterRange);
                 return bakeResult.CreateSpriteFont(ctx.GraphicsDevice);
             }
 

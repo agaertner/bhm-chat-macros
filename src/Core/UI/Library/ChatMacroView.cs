@@ -693,10 +693,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 private AsyncTexture2D _squadBroadcastActiveHover;
                 private AsyncTexture2D _squadBroadcastInactiveHover;
 
-                private MonoGame.Extended.BitmapFonts.BitmapFont _font;
                 public LineView(ChatLine line) {
                     _line                        = line;
-                    _font                        = GameService.Content.GetFont(ContentService.FontFace.Menomonia, ContentService.FontSize.Size18, ContentService.FontStyle.Bold);
                     _squadBroadcastActive        = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304068);
                     _squadBroadcastActiveHover   = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304069);
                     _squadBroadcastInactive      = GameService.Content.DatAssetCache.GetTextureFromAssetId(1234950);
@@ -728,7 +726,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             Width           = 100,
                             ForeColor       = _line.Channel.GetMessageColor(),
                             Left            = targetChannelDd.Right + Panel.RIGHT_PADDING,
-                            Font            = _font,
+                            Font            = ChatMacros.Instance.Resources.SourceCodePro24,
                             Text            = _line.WhisperTo,
                         };
 
@@ -793,7 +791,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Left             = targetChannelDd.Right + Panel.RIGHT_PADDING,
                         ForeColor        = _line.Channel.GetMessageColor(),
                         BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage(),
-                        Font             = _font
+                        Font             = ChatMacros.Instance.Resources.SourceCodePro24
                     };
 
                     var overlengthWarn = new Image(GameService.Content.DatAssetCache.GetTextureFromAssetId(1444522)) {

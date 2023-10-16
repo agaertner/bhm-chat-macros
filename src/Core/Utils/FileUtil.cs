@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Nekres.ChatMacros.Core {
     internal static class FileUtil {
@@ -61,11 +62,17 @@ namespace Nekres.ChatMacros.Core {
         }
 
         public static IEnumerable<string> ReadAllLines(string path) {
-            using var fil = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using var sr = new StreamReader(fil);
-            var file = new List<string>();
+            using var fil  = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var sr   = new StreamReader(fil);
+            var       file = new List<string>();
             while (!sr.EndOfStream) {
-                file.Add(sr.ReadLine());
+                var line = sr.ReadLine();
+
+                if (line == null) {
+                    continue;
+                }
+
+                file.Add(line);
             }
             return file;
         }
