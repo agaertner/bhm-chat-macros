@@ -1,6 +1,6 @@
-﻿using Blish_HUD;
-using Blish_HUD.Input;
+﻿using Blish_HUD.Input;
 using LiteDB;
+using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
@@ -57,6 +57,9 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonField("map_ids")]
         public List<int> MapIds { get; set; }
 
+        [BsonField("link_file")]
+        public string LinkFile { get; set; }
+
         protected BaseMacro() {
             Title         = string.Empty;
             KeyBinding    = new KeyBinding { Enabled = false };
@@ -87,6 +90,10 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         public bool HasMapId(int id) {
             return (!this.MapIds?.Any() ?? true) || this.MapIds.Contains(id); // Enable on all maps if no map ids are specified.
+        }
+
+        public virtual Color GetDisplayColor() {
+            return Color.White;
         }
 
         public static string[] GetCommands<T>(IEnumerable<T> macros) where T : BaseMacro {

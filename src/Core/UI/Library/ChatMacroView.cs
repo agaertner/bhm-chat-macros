@@ -1,8 +1,10 @@
 using Blish_HUD;
 using Blish_HUD.Content;
 using Blish_HUD.Controls;
+using Blish_HUD.Extended;
 using Blish_HUD.Graphics.UI;
 using Blish_HUD.Input;
+using LiteDB;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Nekres.ChatMacros.Core.Services.Data;
@@ -11,6 +13,9 @@ using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Blish_HUD.Controls.Resources;
+using MonoGame.Extended.TextureAtlases;
+using Control = Blish_HUD.Controls.Control;
 
 namespace Nekres.ChatMacros.Core.UI.Library {
     internal class LibraryView : View {
@@ -128,7 +133,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Height = 50,
                 Top = panel.Bottom,
                 Left = 10,
-                Text   = Resources.Create_Macro
+                Text = Resources.Create_Macro
             };
 
             var macros = ChatMacros.Instance.Data.GetAllMacros();
@@ -139,6 +144,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             createNewBttn.Click += (_,_) => {
                 var newMacro = new ChatMacro {
+                    Id = new ObjectId(),
                     Title = Resources.New_Macro,
                     Lines = new List<ChatLine>(),
                     VoiceCommands = new List<string>()
@@ -183,7 +189,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
         }
 
         private void UpdateFilter(string searchKey, bool showActives) {
-            var entries = MacroEntries.Children.Cast<MenuItem<ChatMacro>>().ToList();
+            var entries = MacroEntries.Children.Cast<MenuItem<ChatMacro>>()
+                                      .OrderBy(x => x.Item.Title.ToLowerInvariant()).ToList();
 
             var filtered = FastenshteinUtil.FindMatchesBy(searchKey, entries, entry => entry.Item.Title).ToList();
 
@@ -199,11 +206,12 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 }
             }
 
+            MacroEntries.GetPrivateField("_children").SetValue(MacroEntries, new ControlCollection<Control>(entries));
             MacroEntries.Invalidate();
         }
 
         private void AddMacroEntry(Menu parent, ChatMacro macro) {
-            var menuEntry = new MenuItem<ChatMacro>(macro, m => m.Title) {
+            var menuEntry = new MenuItem<ChatMacro>(macro, m => m.Title, m => m.GetDisplayColor()) {
                 Parent           = parent,
                 Width            = parent.ContentRegion.Width,
                 Height           = 50,
@@ -258,6 +266,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             }
 
             private Func<T, string> _basicTooltipText;
+            private Func<T, Color>  _color;
             private bool            _mouseOverDelete;
             private Rectangle       _deleteBounds;
 
@@ -269,9 +278,25 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             private AsyncTexture2D _deleteTexture;
             private AsyncTexture2D _deletePressedTexture;
 
-            public MenuItem(T item, Func<T, string> basicTooltipText) {
+            private readonly AsyncTexture2D _textureArrow = AsyncTexture2D.FromAssetId(156057);
+
+            private int LeftSidePadding {
+                get {
+                    int leftSidePadding = 10;
+                    if (!this._children.IsEmpty)
+                        leftSidePadding += 16;
+                    return leftSidePadding;
+                }
+            }
+
+            private bool _mouseOverIconBox;
+
+            private Rectangle FirstItemBoxRegion => new Rectangle(0, this.MenuItemHeight / 2 - 16, 32, 32);
+
+            public MenuItem(T item, Func<T, string> basicTooltipText, Func<T, Color> color) {
                 Item                  = item;
                 _basicTooltipText     = basicTooltipText;
+                _color                = color;
                 _deleteTexture        = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782);
                 _deleteHoverTexture   = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175784);
                 _deletePressedTexture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175783);
@@ -297,6 +322,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     _mouseOverActive      = false;
                     BasicTooltipText      = _basicTooltipText(Item);
                 }
+
+                this._mouseOverIconBox = _canCheck && _overSection && this.FirstItemBoxRegion.OffsetBy(this.LeftSidePadding, 0).Contains(this.RelativeMousePosition);
                 base.OnMouseMoved(e);
             }
 
@@ -322,6 +349,38 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 base.OnLeftMouseButtonReleased(e);
             }
 
+            private void DrawDropdownArrow(SpriteBatch spriteBatch) {
+                Vector2   origin               = new Vector2(8f, 8f);
+                Rectangle destinationRectangle = new Rectangle(13, this.MenuItemHeight / 2, 16, 16);
+                spriteBatch.DrawOnCtrl((Control)this, (Texture2D)_textureArrow, destinationRectangle, new Rectangle?(), Color.White, this.ArrowRotation, origin);
+            }
+
+            public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds) 
+            {
+                int leftSidePadding = this.LeftSidePadding;
+                if (!_children.IsEmpty) {
+                    this.DrawDropdownArrow(spriteBatch);
+                }
+                TextureRegion2D texture = null;
+                if (this.CanCheck) {
+                    string state     = this.Checked ? "-checked" : "-unchecked";
+                    string extension = "";
+                    extension = _mouseOverIconBox ? "-active" : extension;
+                    extension = !this.Enabled ? "-disabled" : extension;
+                    texture   = Checkable.TextureRegionsCheckbox.First<TextureRegion2D>(cb => cb.Name == "checkbox/cb" + state + extension);
+                } else if (this.Icon != null && _children.IsEmpty)
+                    texture = new TextureRegion2D(this.Icon);
+                if (texture != null)
+                    spriteBatch.DrawOnCtrl(this, texture, this.FirstItemBoxRegion.OffsetBy(leftSidePadding, 0));
+                if (_canCheck)
+                    leftSidePadding += 42;
+                else if (!_children.IsEmpty)
+                    leftSidePadding += 10;
+                else if (_icon != null)
+                    leftSidePadding += 42;
+                spriteBatch.DrawStringOnCtrl((Control)this, _text, Control.Content.DefaultFont16, new Rectangle(leftSidePadding, 0, this.Width - (leftSidePadding - 10), this.MenuItemHeight), _color(Item), true, true);
+            }
+
             public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds) {
                 var height = _menuItemHeight - Panel.TOP_PADDING - Panel.TOP_PADDING / 2;
                 _deleteBounds = new Rectangle(this.Width - height - Panel.RIGHT_PADDING - 15, (_menuItemHeight - height) / 2, height, height);
@@ -341,8 +400,58 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             private readonly ChatMacro _macro;
 
+            private FlowPanel _linesPanel;
+            private TextBox   _linkFile;
+            private Image     _linkFileState;
+
             public MacroView(ChatMacro macro) {
                 _macro = macro;
+            }
+
+            private void UpdateLinkFileState(bool showError = false) {
+                _linkFile.Text = _macro.LinkFile;
+
+                var linkFileExists = FileUtil.Exists(_macro.LinkFile, out string _, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray());
+                if (!linkFileExists) {
+                    _macro.LinkFile                 = string.Empty;
+                    _linkFile.Text                  = string.Empty;
+                    _linkFileState.Texture         = ChatMacros.Instance.Resources.LinkBrokenIcon;
+                    _linkFileState.BasicTooltipText = Resources.Inactive_File_Sync;
+                    if (showError) {
+                        ScreenNotification.ShowNotification(Resources.File_not_found_or_access_denied_, ScreenNotification.NotificationType.Warning);
+                    }
+                    return;
+                }
+                _linkFileState.Texture = ChatMacros.Instance.Resources.LinkIcon;
+                _linkFileState.BasicTooltipText = Resources.Active_File_Sync;
+            }
+
+            private void OnLinkFileUpdate(object sender, ValueEventArgs<BaseMacro> e) {
+                if (e.Value is not ChatMacro chatMacro) {
+                    return;
+                }
+
+                _macro.LinkFile = chatMacro.LinkFile;
+                UpdateLinkFileState();
+
+                if (_linesPanel == null || !_macro.Id.Equals(e.Value.Id)) {
+                    return;
+                }
+
+                _macro.Lines = chatMacro.Lines;
+
+                foreach (var ctrl in _linesPanel.Children.ToList()) {
+                    ctrl?.Dispose();
+                }
+
+                foreach (var line in _macro.Lines) {
+                    AddLine(_linesPanel, line);
+                }
+            }
+
+            protected override void Unload() {
+                ChatMacros.Instance.Macro.Observer.MacroUpdate -= OnLinkFileUpdate;
+                base.Unload();
             }
 
             protected override void Build(Container buildPanel) {
@@ -386,36 +495,77 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
                 macroConfig.Show(new BaseMacroSettings(_macro, () => ChatMacros.Instance.Data.Upsert(_macro)));
 
-                var linesPanel = new FlowPanel {
+                _linesPanel = new FlowPanel {
                     Parent              = buildPanel,
                     Width               = buildPanel.ContentRegion.Width,
-                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING - 50,
+                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING * 2 - 77,
                     FlowDirection       = ControlFlowDirection.SingleTopToBottom,
                     Top                 = macroConfig.Bottom,
                     ShowBorder          = true,
-                    ControlPadding      = new Vector2(0,                  4),
-                    OuterControlPadding = new Vector2(Panel.LEFT_PADDING, Panel.TOP_PADDING),
+                    ControlPadding      = new Vector2(0,                 2),
+                    OuterControlPadding = new Vector2(Panel.LEFT_PADDING, 4),
                     CanScroll           = true,
                     Title               = Resources.Message_Sequence
                 };
 
                 foreach (var line in _macro.Lines) {
-                    AddLine(linesPanel, line);
+                    AddLine(_linesPanel, line);
                 }
-                
+
+                _linkFile = new TextBox {
+                    Parent = buildPanel,
+                    Top    = _linesPanel.Bottom,
+                    Left   = 10,
+                    Width  = _linesPanel.Width - 47,
+                    Text   = _macro.LinkFile,
+                    PlaceholderText = $"({Resources.Optional}) {Resources.Enter_a_file_path___}",
+                    BasicTooltipText = Resources.File_to_monitor_and_synchronize_lines_with_
+                };
+
+                _linkFileState = new Image {
+                    Parent = buildPanel,
+                    Width  = _linkFile.Height,
+                    Height = _linkFile.Height,
+                    Left   = _linkFile.Right,
+                    Top    = _linkFile.Top + 1
+                };
+
+                UpdateLinkFileState();
+
+                _linkFile.InputFocusChanged += (_,e) => {
+                    if (e.Value || _linkFile.Text == null) {
+                        return;
+                    }
+
+                    var oldLinkFile = new string(_macro.LinkFile?.ToCharArray());
+
+                    _macro.LinkFile = _linkFile.Text.Trim();
+
+                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                        _macro.LinkFile = oldLinkFile;
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        return;
+                    }
+
+                    UpdateLinkFileState(true);
+
+                    ChatMacros.Instance.Data.LinkFileChanged(_macro);
+                };
+
                 var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
                     Parent = buildPanel,
-                    Width  = linesPanel.Width - 20,
-                    Top    = linesPanel.Bottom,
+                    Width  = _linesPanel.Width - 20,
+                    Top    = _linkFile.Bottom + Panel.TOP_PADDING,
                     Left   = 10,
                     Height = 50,
                     Text   = Resources.Add_Line
                 };
 
                 addLineBttn.Click += (_, _) => {
-                    CreateLine(linesPanel);
+                    CreateLine(_linesPanel);
                 };
 
+                ChatMacros.Instance.Macro.Observer.MacroUpdate += OnLinkFileUpdate;
                 base.Build(buildPanel);
             }
 
@@ -423,7 +573,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 var lineDisplay = new ViewContainer {
                     Parent = parent,
                     Width  = parent.ContentRegion.Width - 18,
-                    Height = 50
+                    Height = 32
                 };
 
                 var lineView = new LineView(line);
@@ -456,7 +606,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 void OnMouseMoved(object o, MouseEventArgs mouseEventArgs) {
                     if (lineView.IsDragging) {
                         var tempLines = _macro.Lines.ToList();
-                        var dropIndex = MathHelper.Clamp(parent.RelativeMousePosition.Y / lineDisplay.Height, 0, tempLines.Count - 1);
+                        var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
 
                         if (lineIndex != dropIndex) {
                             ChatMacros.Instance.Resources.PlayMenuItemClick();
@@ -479,7 +629,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
 
                 lineView.DragEnd += (_, _) => {
-                    var dropIndex = MathHelper.Clamp(parent.RelativeMousePosition.Y / lineDisplay.Height, 0, _macro.Lines.Count - 1);
+                    var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
 
                     var oldOrder = _macro.Lines.ToList();
 
@@ -633,8 +783,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
                         };
 
-                        messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 3 - 50;
-                        messageInput.Left  = squadBroadcast.Right;
+                        messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 2 - 50 - Panel.RIGHT_PADDING / 2;
+                        messageInput.Left  = squadBroadcast.Right + Panel.RIGHT_PADDING / 2;
                         messageInput.Invalidate();
                     }
 
@@ -645,8 +795,19 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         Width            = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 3 - 50,
                         Left             = targetChannelDd.Right + Panel.RIGHT_PADDING,
                         ForeColor        = _line.Channel.GetMessageColor(),
-                        BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.Message,
+                        BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage(),
                         Font             = _font
+                    };
+
+                    var overlengthWarn = new Image(GameService.Content.DatAssetCache.GetTextureFromAssetId(1444522)) {
+                        Parent           = buildPanel,
+                        Left             = messageInput.Right - 32,
+                        Width            = 32,
+                        Height           = 32,
+                        Top              = -2,
+                        BasicTooltipText = string.Format(Resources.Message_exceeds_limit_of__0__characters_, ChatUtil.MAX_MESSAGE_LENGTH),
+                        Visible          = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH,
+                        ZIndex           = messageInput.ZIndex + 1
                     };
 
                     if (targetChannelDd.SelectedItem == ChatChannel.Whisper) {
@@ -708,8 +869,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     messageInput.TextChanged += (_, _) => {
-                        _line.Message = messageInput.Text.TrimEnd();
-                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.Message;
+                        _line.Message                 = messageInput.Text.TrimEnd();
+                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
+                        overlengthWarn.Visible        = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH;
                         Save();
                     };
 
@@ -719,8 +881,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     };
 
                     targetChannelDd.ValueChanged += (_, e) => {
-                        _line.Channel          = e.NewValue;
-                        messageInput.ForeColor = _line.Channel.GetMessageColor();
+                        _line.Channel                 = e.NewValue;
+                        messageInput.ForeColor        = _line.Channel.GetMessageColor();
+                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
+                        overlengthWarn.Visible        = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH;
                         Save();
 
                         whisperTo?.Dispose();

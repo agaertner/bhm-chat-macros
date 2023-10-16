@@ -1,11 +1,14 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Extended;
+using Gw2Sharp.WebApi;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,8 +33,29 @@ namespace Nekres.ChatMacros.Core.Services.Data {
     }
 
     public static class ChannelExtensions {
+        public static string ToShortChatCommand(this ChatChannel channel) {
+            return channel switch {
+                ChatChannel.Current => string.Empty,
+                ChatChannel.Emote   => Resources._e,
+                ChatChannel.Say     => Resources._s,
+                ChatChannel.Map     => Resources._m,
+                ChatChannel.Party   => Resources._p,
+                ChatChannel.Squad   => Resources._d,
+                ChatChannel.Team    => Resources._t,
+                ChatChannel.Reply   => Resources._r,
+                ChatChannel.Whisper => Resources._w,
+                ChatChannel.Guild   => Resources._g,
+                ChatChannel.Guild1  => string.Format(Resources._g_0_, 1),
+                ChatChannel.Guild2  => string.Format(Resources._g_0_, 2),
+                ChatChannel.Guild3  => string.Format(Resources._g_0_, 3),
+                ChatChannel.Guild4  => string.Format(Resources._g_0_, 4),
+                ChatChannel.Guild5  => string.Format(Resources._g_0_, 5),
+                _                   => string.Empty
+            };
+        }
+
         public static string ToChatCommand(this ChatChannel channel) {
-            var ch = channel switch {
+            return channel switch {
                 ChatChannel.Current => string.Empty,
                 ChatChannel.Emote   => Resources._emote,
                 ChatChannel.Say     => Resources._say,
@@ -49,7 +73,6 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild5  => string.Format(Resources._guild_0_, 5),
                 _                   => string.Empty
             };
-            return $"{ch} ".TrimStart();
         }
 
         public static string ToDisplayName(this ChatChannel channel, bool brackets = true) {
@@ -92,7 +115,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild4  => new Color(141, 129, 86),
                 ChatChannel.Guild5  => new Color(141, 129, 86),
                 _                   => Color.White
-            };
+            } * 1.25f;
         }
 
         public static Color GetMessageColor(this ChatChannel channel) {
@@ -118,11 +141,16 @@ namespace Nekres.ChatMacros.Core.Services.Data {
     }
 
     internal class ChatMacro : BaseMacro {
+
         [BsonRef(DataService.TBL_CHATLINES), BsonField("lines")]
         public List<ChatLine> Lines { get; set; }
 
         public ChatMacro() {
             Lines = new List<ChatLine>();
+        }
+
+        public override Color GetDisplayColor() {
+            return this.Lines.IsNullOrEmpty() ? base.GetDisplayColor() : this.Lines[0].Channel.GetHeadingColor();
         }
 
         public List<string> ToChatMessage() {
@@ -189,7 +217,93 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         public string Message { get; set; }
 
         public string ToChatMessage() {
-            return $"{Channel.ToChatCommand()}{Message}";
+            var cmd = $"{Channel.ToShortChatCommand()} ".TrimStart();
+            return $"{cmd}{Message}";
+        }
+
+        private static Regex _whisperRecipientPattern = new (@"^\[(?<name>.*)\]", RegexOptions.Compiled);
+        private const string _squadBroadcastPattern   = "!";
+        public static ChatLine Parse(string input) {
+
+            var line = new ChatLine {
+                Id = new ObjectId()
+            };
+
+            if (input.IsNullOrEmpty()) {
+                return line;
+            }
+
+            var channel = ParseChannel(ref input);
+            line.Channel = channel;
+
+            if (channel == ChatChannel.Current) {
+                line.Message = input.TrimEnd();
+                return line;
+            }
+
+            string message = input;
+
+            if (channel == ChatChannel.Whisper) {
+                    var recipientMatch = _whisperRecipientPattern.Match(input);
+
+                    if (recipientMatch.Success) {
+                        line.WhisperTo = recipientMatch.Groups["name"].Value;
+                        message        = input.Remove(0, recipientMatch.Length);
+                    }
+
+            } else if (channel == ChatChannel.Squad) {
+
+                line.SquadBroadcast = input.StartsWith(_squadBroadcastPattern);
+                message             = input.Remove(0, Convert.ToInt32(line.SquadBroadcast));
+
+            }
+
+            line.Message = message.TrimEnd().TrimStart(1);
+            return line;
+        }
+
+        private static ChatChannel ParseChannel(ref string input) {
+            if (string.IsNullOrEmpty(input)) {
+                return ChatChannel.Current;
+            }
+
+            var currentCulture = Resources.Culture;
+            var channel        = ChatChannel.Current;
+
+            foreach (var culture in Enum.GetValues(typeof(Locale)).Cast<Locale>().Select(l => l.GetCulture())) {
+                Resources.Culture = culture;
+
+                foreach (var chatChannel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>().Skip(1)) {
+                    var shortcmd = chatChannel.ToShortChatCommand();
+                    var cmd      = chatChannel.ToChatCommand();
+
+                    var command = input.Split(' ')[0];
+
+                    if (chatChannel == ChatChannel.Whisper) {
+                        command = command.Split('[')[0];
+                    }
+
+                    if (chatChannel == ChatChannel.Squad) {
+                        command = command.Split('!')[0];
+                    }
+
+                    if (command.Equals(shortcmd, StringComparison.InvariantCultureIgnoreCase)) {
+                        channel           = chatChannel;
+                        input             = input.Replace(shortcmd, string.Empty, 1);
+                        Resources.Culture = currentCulture;
+                        return channel;
+                    }
+
+                    if (command.Equals(cmd, StringComparison.InvariantCultureIgnoreCase)) {
+                        channel           = chatChannel;
+                        input             = input.Replace(cmd, string.Empty, 1);
+                        Resources.Culture = currentCulture;
+                        return channel;
+                    }
+                }
+            }
+            Resources.Culture = currentCulture;
+            return channel;
         }
     }
 }

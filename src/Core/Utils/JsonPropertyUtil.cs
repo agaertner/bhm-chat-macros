@@ -36,7 +36,7 @@ namespace Nekres.ChatMacros.Core {
                 }
                 return string.Empty;
             } catch (JsonReaderException) {
-                // Invalid json<y
+                // Invalid json
                 return string.Empty;
             }
         }

@@ -4,10 +4,11 @@ using Flurl.Http;
 using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Core.Services.Data;
+using Nekres.ChatMacros.Core.Services.Macro;
+using Nekres.ChatMacros.Core.UI;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -39,6 +40,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private          ContextMenuStrip     _quickAccessWindow;
 
+        public readonly FileMacroObserver Observer;
+
         public MacroService() {
             ActiveMacros =  new List<BaseMacro>();
 
@@ -53,6 +56,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
             GameService.Gw2Mumble.CurrentMap.MapChanged += OnMapChanged;
             GameService.Overlay.UserLocaleChanged       += OnUserLocaleChanged;
+
+            Observer = new FileMacroObserver();
         }
 
         private async void OnUserLocaleChanged(object sender, ValueEventArgs<CultureInfo> e) {
@@ -84,11 +89,12 @@ namespace Nekres.ChatMacros.Core.Services {
             _quickAccessWindow.ClearChildren();
             _quickAccessWindow.Width = 1; // Reset width; otherwise WidthSizingMode Auto will never shrink the width when appropriate.
 
-            foreach (var macro in macros) {
-                var menuItem = new ContextMenuStripItem {
+            foreach (var macro in macros.OrderBy(x => x.Title.ToLowerInvariant())) {
+                var menuItem = new ContextMenuStripItem<BaseMacro>(macro) {
                     Parent = _quickAccessWindow,
                     Text   = AssetUtil.Truncate(macro.Title, 300, GameService.Content.DefaultFont14),
-                    BasicTooltipText = macro.Title
+                    BasicTooltipText = macro.Title,
+                    FontColor = macro.GetDisplayColor()
                 };
                 menuItem.Click += async (_, _) => {
                     GameService.Content.PlaySoundEffectByName("button-click");
@@ -253,53 +259,18 @@ namespace Nekres.ChatMacros.Core.Services {
             }
 
             var relativePath = args[0] ?? string.Empty;
-            relativePath = relativePath.Replace("%20", " ");
 
-            try {
-                var basePaths = new [] {
-                    ChatMacros.Instance.ModuleDirectory,
-                    AppDomain.CurrentDomain.BaseDirectory
-                };
-
-                string path = string.Empty;
-                if (relativePath.IsPathFullyQualified()) {
-                    path = System.IO.File.Exists(relativePath) ? relativePath : path;
-                } else {
-                    relativePath = relativePath.TrimStart('/');
-                    relativePath = relativePath.TrimStart('\\');
-                    relativePath = relativePath.Replace("/", "\\");
-                    foreach (var basePath in basePaths) {
-                        var testPath = Path.Combine(basePath, relativePath);
-                        testPath = Path.GetFullPath(testPath);
-                        if (System.IO.File.Exists(testPath)) {
-                            path = testPath;
-                            break;
-                        }
-                    }
-                }
-                
-                // File not found
-                if (string.IsNullOrEmpty(path)) {
-                    ChatMacros.Logger.Info($"File Not Found: {relativePath}", ScreenNotification.NotificationType.Error);
-                    return string.Empty;
-                }
-
-                var lines = System.IO.File.ReadAllLines(path);
-
-                if (lines.IsNullOrEmpty()) {
-                    return string.Empty;
-                }
-
-                int line = RandomUtil.GetRandom(0, lines.Length - 1);
-
-                if (args.Count == 2 && int.TryParse(args[1], out line)) {
-                    line = line < lines.Length ? line : RandomUtil.GetRandom(0, lines.Length - 1);
-                }
-                return lines[line];
-            } catch (Exception e) {
-                ChatMacros.Logger.Info(e, e.Message);
+            if (!FileUtil.TryReadAllLines(relativePath, out var lines, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray())) {
                 return string.Empty;
             }
+
+            int line = RandomUtil.GetRandom(0, lines.Count - 1);
+
+            if (args.Count == 2 && int.TryParse(args[1], out line)) {
+                line = line < lines.Count ? line : RandomUtil.GetRandom(0, lines.Count - 1);
+            }
+            return lines[line];
+
         }
 
         private string GetVersion() {
@@ -340,10 +311,24 @@ namespace Nekres.ChatMacros.Core.Services {
             return JsonPropertyUtil.GetPropertyFromJson(response, path);
         }
 
+        public bool TryImportFromFile(string filePath, out IReadOnlyList<ChatLine> messages) {
+            var msgs = new List<ChatLine>();
+            messages = msgs;
+
+            if (!FileUtil.TryReadAllLines(filePath, out var lines, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray())) {
+                return false;
+            }
+
+            msgs.AddRange(lines.Select(ChatLine.Parse));
+            return true;
+        }
+
         public void Dispose() {
             GameService.Gw2Mumble.CurrentMap.MapChanged -= OnMapChanged;
             GameService.Overlay.UserLocaleChanged       -= OnUserLocaleChanged;
             ToggleMacros(false);
+
+            Observer.Dispose();
 
             // Wait for the lock to be released
             if (_lockAcquired) {

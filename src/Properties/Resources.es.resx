@@ -120,33 +120,33 @@
   <data name="Message exceeds limit of {0} characters." xml:space="preserve">
     <value>El mensaje excede el límite de {0} caracteres.</value>
   </data>
-  <data name="/say" xml:space="preserve">
+  <data name="/s" xml:space="preserve">
     <value>/l</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Say] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/map" xml:space="preserve">
+  <data name="/m" xml:space="preserve">
     <value>/m</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Map] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/party" xml:space="preserve">
+  <data name="/p" xml:space="preserve">
     <value>/gr</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Party] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/squad" xml:space="preserve">
+  <data name="/d" xml:space="preserve">
     <value>/es</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Squad] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/team" xml:space="preserve">
+  <data name="/t" xml:space="preserve">
     <value>/eq</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Team] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/reply" xml:space="preserve">
+  <data name="/r" xml:space="preserve">
     <value>/r</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
   </data>
-  <data name="/guild" xml:space="preserve">
+  <data name="/g" xml:space="preserve">
     <value>/c</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Guild] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Guild" xml:space="preserve">
     <value>Clan</value>
@@ -176,9 +176,9 @@
     <value>Susurro</value>
     <comment>Whisper chat channel display name</comment>
   </data>
-  <data name="/guild{0}" xml:space="preserve">
+  <data name="/g{0}" xml:space="preserve">
     <value>/c{0}</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [G{1-5}] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="G{0}" xml:space="preserve">
     <value>C{0}</value>
@@ -188,9 +188,9 @@
     <value>Responder</value>
     <comment>Reply to last whisper</comment>
   </data>
-  <data name="/whisper" xml:space="preserve">
+  <data name="/w" xml:space="preserve">
     <value>/su</value>
-    <comment>Switch to chat channel. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to switch to [Whisper] chat channel. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Voice Recognition" xml:space="preserve">
     <value>Reconocimiento de voz</value>
@@ -227,9 +227,9 @@
   <data name="Select a command language..." xml:space="preserve">
     <value>Seleccionar un idioma de mando…</value>
   </data>
-  <data name="/emote" xml:space="preserve">
+  <data name="/e" xml:space="preserve">
     <value>/e</value>
-    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+    <comment>Shortcut to use custom emote. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Emote" xml:space="preserve">
     <value>Emote</value>
@@ -408,5 +408,79 @@
   </data>
   <data name="{0} is not assigned a key!" xml:space="preserve">
     <value>{0} no tiene asignada una tecla.</value>
+  </data>
+  <data name="/say" xml:space="preserve">
+    <value>/local</value>
+    <comment>Switch to [Say] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/party" xml:space="preserve">
+    <value>/grupo</value>
+    <comment>Switch to [Party] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/team" xml:space="preserve">
+    <value>/equipo</value>
+    <comment>Switch to [Team] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/emote" xml:space="preserve">
+    <value>/emote</value>
+    <comment>Use custom emote. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild" xml:space="preserve">
+    <value>/clan</value>
+    <comment>Switch to [Guild] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/guild{0}" xml:space="preserve">
+    <value>/clan{0}</value>
+    <comment>Switch to [Guild{1-5}] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/squad" xml:space="preserve">
+    <value>/escuadrón</value>
+    <comment>Switch to [Squad] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/map" xml:space="preserve">
+    <value>/mapa</value>
+    <comment>Switch to [Map] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/whisper" xml:space="preserve">
+    <value>/susurrar</value>
+    <comment>Switch to [Whisper] chat channel. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="/reply" xml:space="preserve">
+    <value>/responder</value>
+    <comment>Switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
+  </data>
+  <data name="Active File Sync" xml:space="preserve">
+    <value>Sincronización activa de archivos</value>
+  </data>
+  <data name="File to monitor and synchronize lines with." xml:space="preserve">
+    <value>Archivo con el que supervisar y sincronizar las líneas.</value>
+  </data>
+  <data name="Enter a file path..." xml:space="preserve">
+    <value>Introduzca una ruta de archivo…</value>
+  </data>
+  <data name="Inactive File Sync" xml:space="preserve">
+    <value>Sincronización de archivos inactivos</value>
+  </data>
+  <data name="File not found or access denied." xml:space="preserve">
+    <value>Archivo no encontrado o acceso denegado.</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Opcional</value>
+    <comment>Something is not a requirement thus &quot;optional&quot;.</comment>
+  </data>
+  <data name="{0} not found." xml:space="preserve">
+    <value>{0} no encontrado.</value>
+  </data>
+  <data name="Check your spelling." xml:space="preserve">
+    <value>Revisa tu ortografía.</value>
+  </data>
+  <data name="Current Map ID: {0}" xml:space="preserve">
+    <value>ID del mapa actual: {0}</value>
+  </data>
+  <data name="{0} does not exist." xml:space="preserve">
+    <value>{0} no existe.</value>
+  </data>
+  <data name="Map ID {0}" xml:space="preserve">
+    <value>Mapa ID {0}</value>
   </data>
 </root>

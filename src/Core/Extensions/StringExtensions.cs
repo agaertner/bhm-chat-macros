@@ -27,5 +27,33 @@ namespace Nekres.ChatMacros.Core {
             var root = Path.GetPathRoot(path);
             return root.StartsWith(@"\\") || root.EndsWith(@"\") && root != @"\";
         }
+
+        public static string TrimStart(this string input, int count) {
+            if (string.IsNullOrEmpty(input)) {
+                return input;
+            }
+            while (count > 0 && input.Length > 0 && input.StartsWith(" ")) {
+                input = input.Substring(1);
+                --count;
+            }
+            return input;
+        }
+
+        public static string Replace(this string text, string search, string replace, int count, bool ignoreCase = true) {
+            if (string.IsNullOrEmpty(text)) {
+                return text;
+            }
+
+            var comparison = ignoreCase ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+            var pos = text.IndexOf(search, comparison);
+
+            while (pos > -1 && count > 0)
+            {
+                text = text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+                pos  = text.IndexOf(search, comparison);
+                --count;
+            }
+            return text;
+        }
     }
 }
