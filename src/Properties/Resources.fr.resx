@@ -450,7 +450,7 @@
     <comment>Switch to [Whisper] chat channel in order to reply. Do NOT translate unless translated command exists.</comment>
   </data>
   <data name="Active File Sync" xml:space="preserve">
-    <value>Synchronisation active des fichiers</value>
+    <value>Synchronisation des fichiers active</value>
   </data>
   <data name="File to monitor and synchronize lines with." xml:space="preserve">
     <value>Fichier avec lequel contrôler et synchroniser les lignes.</value>
@@ -459,7 +459,7 @@
     <value>Saisir un chemin d&apos;accès au fichier…</value>
   </data>
   <data name="Inactive File Sync" xml:space="preserve">
-    <value>Synchronisation des fichiers inactifs</value>
+    <value>Synchronisation des fichiers inactive</value>
   </data>
   <data name="File not found or access denied." xml:space="preserve">
     <value>Fichier introuvable ou accès refusé.</value>
