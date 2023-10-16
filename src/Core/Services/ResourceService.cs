@@ -17,6 +17,7 @@ namespace Nekres.ChatMacros.Core.Services {
         public Texture2D  LinkBrokenIcon  { get; private set; }
         public BitmapFont RubikRegular26  { get; private set; }
         public BitmapFont LatoRegular24   { get; private set; }
+        public BitmapFont SourceCodePro24     { get; private set; }
 
         private IReadOnlyList<SoundEffect> _menuClicks;
         private SoundEffect                _menuItemClickSfx;
@@ -46,7 +47,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
         private void LoadFonts() {
             this.RubikRegular26 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Rubik-Regular.ttf", 26);
-            this.LatoRegular24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf", 24);
+            this.LatoRegular24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/Lato-Regular.ttf",  24);
+            this.SourceCodePro24 = ChatMacros.Instance.ContentsManager.GetBitmapFont("fonts/SourceCodePro-SemiBold.ttf", 24);
         }
 
         private void LoadSounds() {
@@ -62,6 +64,7 @@ namespace Nekres.ChatMacros.Core.Services {
         public void Dispose() {
             this.RubikRegular26?.Dispose();
             this.LatoRegular24?.Dispose();
+            this.SourceCodePro24?.Dispose();
             this.DragReorderIcon?.Dispose();
             this.EditIcon?.Dispose();
             this.LinkIcon?.Dispose();
