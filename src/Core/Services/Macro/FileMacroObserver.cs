@@ -17,7 +17,10 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
 
             var macros = ChatMacros.Instance.Data.GetAllMacros();
             foreach (var macro in macros) {
-                AddOrRemove(macro.Id, macro.LinkFile);
+                if (!AddOrRemove(macro.Id, macro.LinkFile)) {
+                    macro.LinkFile = string.Empty;
+                    ChatMacros.Instance.Data.Upsert(macro);
+                }
             }
 
             ChatMacros.Instance.Data.LinkFileChange += OnLinkFileChanged;
@@ -27,10 +30,10 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
             AddOrRemove(e.Value.Id, e.Value.LinkFile);
         }
 
-        public void AddOrRemove(ObjectId id, string path) {
+        public bool AddOrRemove(ObjectId id, string path) {
             if (!FileUtil.Exists(path, out var qualifiedPath, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray())) {
                 Remove(id);
-                return;
+                return false;
             }
 
             try {
@@ -53,7 +56,9 @@ namespace Nekres.ChatMacros.Core.Services.Macro {
                 });
             } catch (Exception e) {
                 ChatMacros.Logger.Info(e, e.Message);
+                return false;
             }
+            return true;
         }
 
         private void RegisterEvents(FileSystemWatcher fw) {

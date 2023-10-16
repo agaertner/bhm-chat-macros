@@ -5,6 +5,7 @@ using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Core.Services.Data;
 using Nekres.ChatMacros.Core.Services.Macro;
+using Nekres.ChatMacros.Core.UI;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -89,10 +90,11 @@ namespace Nekres.ChatMacros.Core.Services {
             _quickAccessWindow.Width = 1; // Reset width; otherwise WidthSizingMode Auto will never shrink the width when appropriate.
 
             foreach (var macro in macros.OrderBy(x => x.Title.ToLowerInvariant())) {
-                var menuItem = new ContextMenuStripItem {
+                var menuItem = new ContextMenuStripItem<BaseMacro>(macro) {
                     Parent = _quickAccessWindow,
                     Text   = AssetUtil.Truncate(macro.Title, 300, GameService.Content.DefaultFont14),
-                    BasicTooltipText = macro.Title
+                    BasicTooltipText = macro.Title,
+                    FontColor = macro.GetDisplayColor()
                 };
                 menuItem.Click += async (_, _) => {
                     GameService.Content.PlaySoundEffectByName("button-click");

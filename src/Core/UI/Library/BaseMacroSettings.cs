@@ -52,22 +52,38 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Parent           = activeMapsWrap,
                 Width            = activeMapsWrap.ContentRegion.Width - 2,
                 Height           = 30,
-                BasicTooltipText = Resources.Add_Map___,
+                BasicTooltipText = $"{Resources.Add_Map___}\n{string.Format(Resources.Current_Map_ID___0_, GameService.Gw2Mumble.CurrentMap.Id)}",
                 PlaceholderText  = Resources.Add_Map___
             };
 
-            addActiveMap.EnterPressed += (_, _) => {
+            addActiveMap.InputFocusChanged += (_, e) => {
+                if (e.Value) {
+                    return;
+                }
+
                 if (string.IsNullOrWhiteSpace(addActiveMap.Text)) {
                     addActiveMap.Text = string.Empty;
                     return;
                 }
 
-                var bestMatch = FastenshteinUtil.FindClosestMatchBy(addActiveMap.Text, ChatMacros.Instance.Macro.AllMaps, map => map.Name);
+                Map bestMatch;
 
-                if (bestMatch == null) {
-                    ScreenNotification.ShowNotification(string.Format(Resources._0__not_found__Check_your_spelling_, $"\"{addActiveMap.Text}\""), ScreenNotification.NotificationType.Warning);
-                    addActiveMap.Text = string.Empty;
-                    return;
+                if (int.TryParse(addActiveMap.Text, out var mapId)) {
+                    bestMatch = ChatMacros.Instance.Macro.AllMaps?.FirstOrDefault(x => x.Id == mapId);
+
+                    if (bestMatch == null) {
+                        ScreenNotification.ShowNotification(string.Format(Resources._0__does_not_exist_, string.Format(Resources.Map_ID__0_, mapId)), ScreenNotification.NotificationType.Warning);
+                        addActiveMap.Text = string.Empty;
+                        return;
+                    }
+                } else {
+                    bestMatch = FastenshteinUtil.FindClosestMatchBy(addActiveMap.Text, ChatMacros.Instance.Macro.AllMaps, map => map.Name);
+
+                    if (bestMatch == null) {
+                        ScreenNotification.ShowNotification(string.Format(Resources._0__not_found__Check_your_spelling_, $"\"{addActiveMap.Text}\""), ScreenNotification.NotificationType.Warning);
+                        addActiveMap.Text = string.Empty;
+                        return;
+                    }
                 }
 
                 addActiveMap.Text = string.Empty;
@@ -174,7 +190,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 AddVoiceCommand(commandsPanel, cmd);
             }
 
-            addVoiceCmd.EnterPressed += (_, _) => {
+            addVoiceCmd.InputFocusChanged += (_, e) => {
+                if (e.Value) {
+                    return;
+                }
+
                 if (string.IsNullOrWhiteSpace(addVoiceCmd.Text)) {
                     addVoiceCmd.Text   = string.Empty;
                     return;
@@ -225,7 +245,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Height = 32
             };
 
-            var view = new ItemEntry<string>(command, x => x);
+            var view = new ItemEntry<string>(command, x => x, x => x);
             view.Remove += (_, _) => {
                 _macro.VoiceCommands.Remove(command);
 
@@ -245,10 +265,11 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             var entry = new ViewContainer {
                 Parent = parent,
                 Width  = parent.ContentRegion.Width,
-                Height = 32
+                Height = 32,
+                BasicTooltipText = string.Format(Resources.Map_ID__0_, map.Id)
             };
 
-            var view = new ItemEntry<Map>(map, x => $"{x.Name} ({x.Id})");
+            var view = new ItemEntry<Map>(map, x => x.Name, x => $"{x.Name} ({x.Id})");
             view.Remove += (_, _) => {
                 _macro.MapIds.Remove(map.Id);
                 
@@ -270,15 +291,17 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             
             private readonly T               _item;
             private          Func<T, string> _displayString;
-            public ItemEntry(T item, Func<T, string> displayString) {
+            private          Func<T, string> _basicTooltipText;
+            public ItemEntry(T item, Func<T, string> displayString, Func<T, string> basicTooltipText) {
                 _item = item;
                 _displayString = displayString;
+                _basicTooltipText = basicTooltipText;
             }
             protected override void Build(Container buildPanel) {
                 var title = new Label {
                     Parent            = buildPanel,
+                    BasicTooltipText  = _basicTooltipText(_item),
                     Text              = AssetUtil.Truncate(_displayString(_item), buildPanel.ContentRegion.Width - 60, GameService.Content.DefaultFont14),
-                    BasicTooltipText  = _displayString(_item),
                     Font              = GameService.Content.DefaultFont14,
                     Width             = buildPanel.ContentRegion.Width - 47,
                     Height            = 24,

@@ -70,11 +70,29 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} does not exist..
+        /// </summary>
+        internal static string _0__does_not_exist_ {
+            get {
+                return ResourceManager.GetString("{0} does not exist.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is not assigned a key!.
         /// </summary>
         internal static string _0__is_not_assigned_a_key_ {
             get {
                 return ResourceManager.GetString("{0} is not assigned a key!", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} not found..
+        /// </summary>
+        internal static string _0__not_found_ {
+            get {
+                return ResourceManager.GetString("{0} not found.", resourceCulture);
             }
         }
         
@@ -358,6 +376,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Check your spelling..
+        /// </summary>
+        internal static string Check_your_spelling_ {
+            get {
+                return ResourceManager.GetString("Check your spelling.", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Control Options.
         /// </summary>
         internal static string Control_Options {
@@ -381,6 +408,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Credits_and_Thanks {
             get {
                 return ResourceManager.GetString("Credits and Thanks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current Map ID: {0}.
+        /// </summary>
+        internal static string Current_Map_ID___0_ {
+            get {
+                return ResourceManager.GetString("Current Map ID: {0}", resourceCulture);
             }
         }
         
@@ -561,6 +597,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Map {
             get {
                 return ResourceManager.GetString("Map", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Map ID {0}.
+        /// </summary>
+        internal static string Map_ID__0_ {
+            get {
+                return ResourceManager.GetString("Map ID {0}", resourceCulture);
             }
         }
         

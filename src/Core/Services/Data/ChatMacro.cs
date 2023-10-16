@@ -115,7 +115,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild4  => new Color(141, 129, 86),
                 ChatChannel.Guild5  => new Color(141, 129, 86),
                 _                   => Color.White
-            };
+            } * 1.25f;
         }
 
         public static Color GetMessageColor(this ChatChannel channel) {
@@ -147,6 +147,10 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         public ChatMacro() {
             Lines = new List<ChatLine>();
+        }
+
+        public override Color GetDisplayColor() {
+            return this.Lines.IsNullOrEmpty() ? base.GetDisplayColor() : this.Lines[0].Channel.GetHeadingColor();
         }
 
         public List<string> ToChatMessage() {

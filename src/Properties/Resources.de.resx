@@ -468,4 +468,19 @@
     <value>Optional</value>
     <comment>Something is not a requirement thus &quot;optional&quot;.</comment>
   </data>
+  <data name="{0} not found." xml:space="preserve">
+    <value>{0} nicht gefunden.</value>
+  </data>
+  <data name="Check your spelling." xml:space="preserve">
+    <value>Prüfe deine Rechtschreibung.</value>
+  </data>
+  <data name="Current Map ID: {0}" xml:space="preserve">
+    <value>ID der derzeitigen Karte: {0}</value>
+  </data>
+  <data name="{0} does not exist." xml:space="preserve">
+    <value>{0} existiert nicht.</value>
+  </data>
+  <data name="Map ID {0}" xml:space="preserve">
+    <value>Karten-ID {0}</value>
+  </data>
 </root>
