@@ -1,7 +1,4 @@
-﻿using Blish_HUD;
-using Blish_HUD.Controls;
-using Blish_HUD.Extended;
-using Gw2Sharp.WebApi;
+﻿using Gw2Sharp.WebApi;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Properties;
@@ -9,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services.Data {
 
@@ -155,48 +150,6 @@ namespace Nekres.ChatMacros.Core.Services.Data {
 
         public List<string> ToChatMessage() {
             return Lines.Select(line => line.ToChatMessage()).ToList();
-        }
-
-        public override async Task Fire() {
-            ChatMacros.Instance.Macro.ToggleMacros(false);
-            foreach (var line in Lines) {
-                Thread.Sleep(2);
-
-                var message = await ChatMacros.Instance.Macro.ReplaceCommands(line.ToChatMessage());
-
-                if (string.IsNullOrWhiteSpace(message)) {
-                    break;
-                }
-
-                if (line.Channel == ChatChannel.Squad && line.SquadBroadcast && 
-                    GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
-                    if (ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage == null || ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage.GetBindingDisplayText().Equals(string.Empty)) {
-                        ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Squad_Broadcast_Message), ScreenNotification.NotificationType.Warning);
-                        break;
-                    }
-                    ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
-                    continue;
-                }
-
-                if (ChatMacros.Instance.ControlsConfig.Value.ChatMessage == null || ChatMacros.Instance.ControlsConfig.Value.ChatMessage.GetBindingDisplayText().Equals(string.Empty)) {
-                    ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Chat_Message), ScreenNotification.NotificationType.Warning);
-                    break;
-                }
-
-                if (line.Channel == ChatChannel.Whisper) {
-                    if (string.IsNullOrWhiteSpace(line.WhisperTo)) {
-                        ScreenNotification.ShowNotification(Resources.Unable_to_whisper__No_recipient_specified_, ScreenNotification.NotificationType.Warning);
-                        break;
-                    }
-
-                    ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
-                    continue;
-                }
-
-                ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
-            }
-            await Task.Delay(200);
-            ChatMacros.Instance.Macro.ToggleMacros(true);
         }
     }
 

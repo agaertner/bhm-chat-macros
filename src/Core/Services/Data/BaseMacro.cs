@@ -5,7 +5,6 @@ using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Nekres.ChatMacros.Core.Services.Data {
 
@@ -67,8 +66,6 @@ namespace Nekres.ChatMacros.Core.Services.Data {
             VoiceCommands = new List<string>();
             GameModes     = GameMode.PvE | GameMode.WvW | GameMode.PvP;
         }
-
-        public abstract Task Fire();
 
         public void Toggle(bool enable) {
             KeyBinding.Enabled = enable;
