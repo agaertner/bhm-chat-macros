@@ -1,11 +1,13 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Extended;
 using Flurl.Http;
 using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
 using Nekres.ChatMacros.Core.Services.Data;
 using Nekres.ChatMacros.Core.Services.Macro;
 using Nekres.ChatMacros.Core.UI;
+using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -152,7 +154,59 @@ namespace Nekres.ChatMacros.Core.Services {
                 return;
             }
 
-            await macro.Fire();
+            if (macro is ChatMacro chatMacro) {
+                await Fire(chatMacro);
+            }
+        }
+
+        public async Task Fire(ChatMacro macro) {
+            ToggleMacros(false);
+            foreach (var line in macro.Lines.ToList()) {
+                Thread.Sleep(1);
+
+                var message = await ReplaceCommands(line.ToChatMessage());
+
+                if (string.IsNullOrEmpty(message)) {
+                    break;
+                }
+
+                // Is squad broadcast and user can broadcast (is commander).
+                if (line.Channel == ChatChannel.Squad && line.SquadBroadcast 
+                                                      && GameService.Gw2Mumble.PlayerCharacter.IsCommander) {
+
+                    // Check if squadbroadcast key is assigned
+                    if (ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage == null || 
+                        ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage.GetBindingDisplayText().Equals(string.Empty)) {
+
+                        ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Squad_Broadcast_Message), ScreenNotification.NotificationType.Warning);
+                        break;
+                    }
+                    ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
+                    continue;
+                }
+
+                if (ChatMacros.Instance.ControlsConfig.Value.ChatMessage == null 
+                 || ChatMacros.Instance.ControlsConfig.Value.ChatMessage.GetBindingDisplayText().Equals(string.Empty)) {
+                    ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Chat_Message), ScreenNotification.NotificationType.Warning);
+                    break;
+                }
+
+                // Is whisper and has recipient specified.
+                if (line.Channel == ChatChannel.Whisper) {
+                    if (string.IsNullOrWhiteSpace(line.WhisperTo)) {
+                        ScreenNotification.ShowNotification(Resources.Unable_to_whisper__No_recipient_specified_, ScreenNotification.NotificationType.Warning);
+                        break;
+                    }
+
+                    ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                    continue;
+                }
+
+                // Send message to chat.
+                ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+            }
+            await Task.Delay(200);
+            ToggleMacros(true);
         }
 
         public void Update(GameTime gameTime) {
