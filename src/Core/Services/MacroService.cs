@@ -181,7 +181,7 @@ namespace Nekres.ChatMacros.Core.Services {
                         ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Squad_Broadcast_Message), ScreenNotification.NotificationType.Warning);
                         break;
                     }
-                    ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
+                    await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
                     continue;
                 }
 
@@ -198,12 +198,12 @@ namespace Nekres.ChatMacros.Core.Services {
                         break;
                     }
 
-                    ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                    await ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
                     continue;
                 }
 
                 // Send message to chat.
-                ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
             }
             await Task.Delay(200);
             ToggleMacros(true);
