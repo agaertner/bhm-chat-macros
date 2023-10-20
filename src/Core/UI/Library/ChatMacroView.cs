@@ -183,9 +183,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 ChatMacros.Instance.Macro.ActiveMacrosChange -= OnMacroOnActiveMacrosChange;
             };
 
-            UpdateFilter(searchBar.Text, showActivesOnly.Checked);
-
             base.Build(buildPanel);
+
+            UpdateFilter(searchBar.Text, showActivesOnly.Checked);
         }
 
         private void UpdateFilter(string searchKey, bool showActives) {
@@ -203,7 +203,6 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 }
             }
 
-            MacroEntries.GetPrivateField("_children").SetValue(MacroEntries, new ControlCollection<Control>(entries));
             MacroEntries.Invalidate();
         }
 
