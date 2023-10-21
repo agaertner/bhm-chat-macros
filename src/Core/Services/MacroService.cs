@@ -47,12 +47,6 @@ namespace Nekres.ChatMacros.Core.Services {
         public MacroService() {
             ActiveMacros =  new List<BaseMacro>();
 
-            _quickAccessWindow = new ContextMenuStrip {
-                Parent  = GameService.Graphics.SpriteScreen,
-                Visible = false,
-                WidthSizingMode = SizingMode.AutoSize
-            };
-
             OnMapChanged(this, new ValueEventArgs<int>(GameService.Gw2Mumble.CurrentMap.Id));
             UpdateMacros();
 
@@ -70,6 +64,15 @@ namespace Nekres.ChatMacros.Core.Services {
             if (!Gw2Util.IsInGame()) {
                 return;
             }
+
+            _quickAccessWindow ??= new ContextMenuStrip {
+                Parent          = GameService.Graphics.SpriteScreen,
+                Visible         = false,
+                WidthSizingMode = SizingMode.AutoSize
+            };
+
+            AddMacrosToQuickAccess(ActiveMacros.ToList());
+
             GameService.Content.PlaySoundEffectByName("numeric-spinner");
             if (_quickAccessWindow.Visible) {
                 _quickAccessWindow.Hide();
@@ -91,7 +94,7 @@ namespace Nekres.ChatMacros.Core.Services {
             _quickAccessWindow.ClearChildren();
             _quickAccessWindow.Width = 1; // Reset width; otherwise WidthSizingMode Auto will never shrink the width when appropriate.
 
-            foreach (var macro in macros.OrderBy(x => x.Title.ToLowerInvariant())) {
+            foreach (var macro in SortMacros(ActiveMacros.ToList())) {
                 var menuItem = new ContextMenuStripItem<BaseMacro>(macro) {
                     Parent = _quickAccessWindow,
                     Text   = AssetUtil.Truncate(macro.Title, 300, GameService.Content.DefaultFont14),
@@ -107,12 +110,23 @@ namespace Nekres.ChatMacros.Core.Services {
             }
         }
 
+        public IEnumerable<BaseMacro> SortMacros(List<BaseMacro> toSort) {
+            return toSort.OrderBy(x => {
+                              if (x is ChatMacro macro && !macro.Lines.IsNullOrEmpty()) {
+                                  return ChatMacros.Instance.LibraryConfig.Value.IndexChannelHistory(macro.Lines[0].Channel);
+                              }
+
+                              return -1;
+                          })
+                         .ThenBy(x => x is ChatMacro macro ? macro.Lines?.FirstOrDefault()?.Channel : ChatChannel.Current)
+                         .ThenBy(x => x.Title.ToLowerInvariant());
+        }
+
         public void UpdateMacros() {
             ToggleMacros(false);
             _quickAccessWindow?.Hide();
             ActiveMacros = ChatMacros.Instance.Data.GetActiveMacros();
             ActiveMacrosChange?.Invoke(this, new ValueEventArgs<IReadOnlyList<BaseMacro>>(ActiveMacros.ToList()));
-            AddMacrosToQuickAccess(ActiveMacros.ToList());
             ToggleMacros(true);
         }
 
@@ -162,9 +176,14 @@ namespace Nekres.ChatMacros.Core.Services {
         public async Task Fire(ChatMacro macro) {
             ToggleMacros(false);
 
-            bool isSquadbroadcastCleared = false;
-            bool isChatCleared = false;
+            var firstLine = macro.Lines.FirstOrDefault();
 
+            if (firstLine != null) {
+                ChatMacros.Instance.LibraryConfig.Value.UpdateChannelHistory(firstLine.Channel);
+            }
+            
+            bool isSquadbroadcastCleared = false;
+            bool isChatCleared           = false;
             foreach (var line in macro.Lines.ToList()) {
                 await Task.Delay(1);
 

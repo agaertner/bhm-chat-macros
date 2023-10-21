@@ -189,21 +189,32 @@ namespace Nekres.ChatMacros.Core.UI.Library {
         }
 
         private void UpdateFilter(string searchKey, bool showActives) {
-            var entries = MacroEntries.Children.Cast<MenuItem<ChatMacro>>()
-                                      .OrderBy(x => x.Item.Title.ToLowerInvariant()).ToList();
+            //TODO: Sorting works but Menu doesn't update properly even if children are overwritten or Parent is reset.
+            var entries = SortMacroMenuEntries(MacroEntries.Children.Cast<MenuItem<ChatMacro>>()).ToList();
 
             var filtered = FastenshteinUtil.FindMatchesBy(searchKey, entries, entry => entry.Item.Title).ToList();
 
             foreach (var entry in entries) {
-                entry.Visible  = filtered.IsNullOrEmpty() || filtered.Contains(entry);
                 entry.IsActive = ChatMacros.Instance.Macro
                                            .ActiveMacros.Any(macro => macro.Id.Equals(entry.Item.Id));
-                if (showActives) {
-                    entry.Visible = entry.IsActive;
-                }
-            }
 
+                var match = string.IsNullOrEmpty(searchKey) || filtered.IsNullOrEmpty() || filtered.Any(x => x.Item.Id.Equals(entry.Item.Id));
+
+                if (showActives) {
+                    entry.Visible = entry.IsActive && match;
+                } else {
+                    entry.Visible = match;
+                }
+
+                entry.Enabled = entry.Visible;
+            }
             MacroEntries.Invalidate();
+        }
+
+        private IEnumerable<MenuItem<ChatMacro>> SortMacroMenuEntries(IEnumerable<MenuItem<ChatMacro>> toSort) {
+            return toSort.OrderBy(x => ChatMacros.Instance.LibraryConfig.Value.IndexChannelHistory(x.Item.Lines.FirstOrDefault()?.Channel ?? ChatChannel.Current))
+                         .ThenBy(x => x.Item.Lines?.FirstOrDefault()?.Channel ?? ChatChannel.Current)
+                         .ThenBy(x => x.Item.Title.ToLowerInvariant());
         }
 
         private void AddMacroEntry(Menu parent, ChatMacro macro) {

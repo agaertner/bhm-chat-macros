@@ -1,5 +1,4 @@
 ﻿using Blish_HUD.Input;
-using Microsoft.Xna.Framework.Input;
 using Nekres.ChatMacros.Properties;
 using Newtonsoft.Json;
 using System;
@@ -49,8 +48,9 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
         public Guid InputDevice {
             get => _inputDevice;
             set {
-                _inputDevice = value;
-                this.SaveConfig(ChatMacros.Instance.InputConfig);
+                if (SetProperty(ref _inputDevice, value)) {
+                    this.SaveConfig(ChatMacros.Instance.InputConfig);
+                }
             }
         }
 
@@ -59,8 +59,9 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
         public VoiceLanguage VoiceLanguage {
             get => _voiceLang;
             set {
-                _voiceLang = value;
-                this.SaveConfig(ChatMacros.Instance.InputConfig);
+                if (SetProperty(ref _voiceLang, value)) {
+                    this.SaveConfig(ChatMacros.Instance.InputConfig);
+                }
             }
         }
 
@@ -69,8 +70,9 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
         public VoiceLanguage SecondaryVoiceLanguage {
             get => _secondaryVoiceLang;
             set {
-                _secondaryVoiceLang = value;
-                this.SaveConfig(ChatMacros.Instance.InputConfig);
+                if (SetProperty(ref _secondaryVoiceLang, value)) {
+                    this.SaveConfig(ChatMacros.Instance.InputConfig);
+                }
             }
         }
 
