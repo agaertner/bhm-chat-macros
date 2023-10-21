@@ -85,37 +85,11 @@ namespace Nekres.ChatMacros {
             Macro     = new MacroService();
             Speech    = new SpeechService();
 
-            var windowRegion  = new Rectangle(40, 26, 913, 691);
-            _moduleWindow = new TabbedWindow2(GameService.Content.DatAssetCache.GetTextureFromAssetId(155985),
-                                              windowRegion, 
-                                              new Rectangle(100, 36, 839, 605))
-            {
-                Parent        = GameService.Graphics.SpriteScreen,
-                Emblem        = _cornerTexture,
-                SavesPosition = true,
-                SavesSize     = true,
-                Title         = this.Name,
-                Id            = $"{nameof(ChatMacros)}_42d3a11e-ffa7-4c82-8fd9-ee9d9a118914",
-                Left          = (GameService.Graphics.SpriteScreen.Width  - windowRegion.Width)  / 2,
-                Top           = (GameService.Graphics.SpriteScreen.Height - windowRegion.Height) / 2
-            };
-
-            _cornerIcon = new CornerIcon
-            {
-                Icon = ContentsManager.GetTexture("corner_icon.png"),
+            _cornerIcon = new CornerIcon {
+                Icon             = _cornerTexture,
                 BasicTooltipText = this.Name
             };
             _cornerIcon.Click += OnModuleIconClick;
-
-            _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
-                                  () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
-            _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
-                                   () => new SettingsView(), Properties.Resources.Settings);
-            _moduleWindow.Tabs.Add(_libraryTab);
-            _moduleWindow.Tabs.Add(_settingsTab);
-            _moduleWindow.TabChanged += OnTabChanged;
-
-            GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
 
             // Base handler must be called
             base.OnModuleLoaded(e);
@@ -146,7 +120,32 @@ namespace Nekres.ChatMacros {
         }
 
         public void OnModuleIconClick(object o, MouseEventArgs e) {
-            _moduleWindow.Show();
+            if (_moduleWindow == null) {
+                var windowRegion = new Rectangle(40, 26, 913, 691);
+                _moduleWindow = new TabbedWindow2(GameService.Content.DatAssetCache.GetTextureFromAssetId(155985),
+                                                  windowRegion,
+                                                  new Rectangle(100, 36, 839, 605)) {
+                    Parent        = GameService.Graphics.SpriteScreen,
+                    Emblem        = _cornerTexture,
+                    SavesPosition = true,
+                    SavesSize     = true,
+                    Title         = this.Name,
+                    Id            = $"{nameof(ChatMacros)}_42d3a11e-ffa7-4c82-8fd9-ee9d9a118914",
+                    Left          = (GameService.Graphics.SpriteScreen.Width  - windowRegion.Width)  / 2,
+                    Top           = (GameService.Graphics.SpriteScreen.Height - windowRegion.Height) / 2
+                };
+
+                _libraryTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155156),
+                                      () => new LibraryView(LibraryConfig.Value), Properties.Resources.Library);
+                _settingsTab = new Tab(GameService.Content.DatAssetCache.GetTextureFromAssetId(155052),
+                                       () => new SettingsView(), Properties.Resources.Settings);
+                _moduleWindow.Tabs.Add(_libraryTab);
+                _moduleWindow.Tabs.Add(_settingsTab);
+                _moduleWindow.TabChanged += OnTabChanged;
+
+                GameService.Overlay.UserLocaleChanged += OnUserLocaleChanged;
+            }
+            _moduleWindow.ToggleWindow();
         }
 
         protected override void Update(GameTime gameTime) {

@@ -19,6 +19,14 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             setting.Value = this as T;
         }
 
+        protected bool SetProperty<T>(ref T property, T value) {
+            if (Equals(property, value)) {
+                return false;
+            }
+            property = value;
+            return true;
+        }
+
         protected KeyBinding ResetDelegates(KeyBinding oldBinding, KeyBinding newBinding) {
             if (oldBinding != null) {
                 oldBinding.Enabled        =  false;
