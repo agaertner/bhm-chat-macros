@@ -1,6 +1,6 @@
 {
   "name": "Chat Shorts",
-  "version": "0.13.8",
+  "version": "0.13.9",
   "namespace": "Nekres.Chat_Shorts",
   "package": "ChatMacros.dll",
   "manifest_version": 1,
