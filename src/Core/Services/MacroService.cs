@@ -161,8 +161,12 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public async Task Fire(ChatMacro macro) {
             ToggleMacros(false);
+
+            bool isSquadbroadcastCleared = false;
+            bool isChatCleared = false;
+
             foreach (var line in macro.Lines.ToList()) {
-                Thread.Sleep(1);
+                await Task.Delay(1);
 
                 var message = await ReplaceCommands(line.ToChatMessage());
 
@@ -181,7 +185,12 @@ namespace Nekres.ChatMacros.Core.Services {
                         ScreenNotification.ShowNotification(string.Format(Resources._0__is_not_assigned_a_key_, Resources.Squad_Broadcast_Message), ScreenNotification.NotificationType.Warning);
                         break;
                     }
-                    await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
+
+                    if (!isSquadbroadcastCleared) {
+                        isSquadbroadcastCleared = await ChatUtil.Clear(ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage);
+                    }
+
+                    await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage, ChatMacros.Logger);
                     continue;
                 }
 
@@ -191,6 +200,10 @@ namespace Nekres.ChatMacros.Core.Services {
                     break;
                 }
 
+                if (!isChatCleared) {
+                    isChatCleared = await ChatUtil.Clear(ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                }
+
                 // Is whisper and has recipient specified.
                 if (line.Channel == ChatChannel.Whisper) {
                     if (string.IsNullOrWhiteSpace(line.WhisperTo)) {
@@ -198,12 +211,12 @@ namespace Nekres.ChatMacros.Core.Services {
                         break;
                     }
 
-                    await ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                    await ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage, ChatMacros.Logger);
                     continue;
                 }
 
                 // Send message to chat.
-                await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage);
+                await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage, ChatMacros.Logger);
             }
             await Task.Delay(200);
             ToggleMacros(true);
