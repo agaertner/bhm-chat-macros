@@ -177,6 +177,17 @@ namespace Nekres.ChatMacros.Core.Services {
             return regionMaps;
         }
 
+        public async Task<List<ContinentFloorRegionMapSector>> GetMapSectors(Map map) {
+            var result = new List<ContinentFloorRegionMapSector>();
+            foreach (var floor in map.Floors) {
+                var sectors = await TaskUtil.RetryAsync(() => ChatMacros.Instance.Gw2ApiManager.Gw2ApiClient.V2.Continents[map.ContinentId].Floors[floor].Regions[map.RegionId].Maps[map.Id].Sectors.AllAsync());
+                if (sectors != null && sectors.Any()) {
+                    result.AddRange(sectors.DistinctBy(sector => sector.Id));
+                }
+            }
+            return result;
+        }
+
         private async Task<IEnumerable<Character>> GetCharacters() {
             var characters = await TaskUtil.TryAsync(() => ChatMacros.Instance.Gw2ApiManager.Gw2ApiClient.V2.Characters.AllAsync());
             return characters ?? Enumerable.Empty<Character>();
