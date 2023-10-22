@@ -1,6 +1,7 @@
 ﻿using Gw2Sharp.Models;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using Rectangle = Gw2Sharp.WebApi.V2.Models.Rectangle;
 
 namespace Nekres.ChatMacros.Core {
@@ -44,6 +45,26 @@ namespace Nekres.ChatMacros.Core {
 
         public static Vector2 ToVector2(this Coordinates2 coords) {
             return new Vector2((float)coords.X, (float)coords.Y);
+        }
+
+        public static bool Inside(this Coordinates2 targetPoint, IReadOnlyList<Coordinates2> polygon) {
+            if (polygon.Count < 3) {
+                // Must have at least 3 vertices to be valid.
+                return false;
+            }
+
+            double x        = targetPoint.X;
+            double y        = targetPoint.Y;
+            bool   isInside = false;
+
+            for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++) {
+                if ((polygon[i].Y > y) != (polygon[j].Y > y) &&
+                    x                  < (polygon[j].X - polygon[i].X) * (y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X) {
+                    isInside = !isInside;
+                }
+            }
+
+            return isInside;
         }
     }
 

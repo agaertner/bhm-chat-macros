@@ -28,13 +28,16 @@ namespace Nekres.ChatMacros.Core.Services {
         private       Regex _commandRegex = new (@$"\{COMMAND_START}(?<command>[^\{COMMAND_END}]+)\{COMMAND_END}", RegexOptions.Compiled);
         private       Regex _paramRegex   = new($"{PARAM_CHAR}(?<param>[^{PARAM_CHAR}]+)", RegexOptions.Compiled);
 
-        private IReadOnlyList<ContinentFloorRegionMap> _regionMaps;
+        private IReadOnlyList<ContinentFloorRegionMap>       _regionMaps;
+        private IReadOnlyList<ContinentFloorRegionMapSector> _mapSectors;
 
-        public IReadOnlyList<Map>         AllMaps         { get; private set; }
-        public Map                        CurrentMap      { get; private set; }
-        public ContinentFloorRegionMapPoi ClosestWaypoint { get; private set; }
-        public ContinentFloorRegionMapPoi ClosestPoi      { get; private set; }
-        public IReadOnlyList<BaseMacro>   ActiveMacros    { get; private set; }
+        public IReadOnlyList<Map>            AllMaps         { get; private set; }
+        public Map                           CurrentMap      { get; private set; }
+        public ContinentFloorRegionMapSector CurrentSector   { get; private set; }
+        public string                        CurrentMapName  { get; private set; }
+        public ContinentFloorRegionMapPoi    ClosestWaypoint { get; private set; }
+        public ContinentFloorRegionMapPoi    ClosestPoi      { get; private set; }
+        public IReadOnlyList<BaseMacro>      ActiveMacros    { get; private set; }
 
         private readonly ReaderWriterLockSlim _rwLock       = new();
         private          ManualResetEvent     _lockReleased = new(false);
@@ -78,8 +81,8 @@ namespace Nekres.ChatMacros.Core.Services {
                 _quickAccessWindow.Hide();
                 return;
             }
-            _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X;
-            _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y;
+            _quickAccessWindow.Left = GameService.Graphics.SpriteScreen.RelativeMousePosition.X - _quickAccessWindow.Width  / 2;
+            _quickAccessWindow.Top  = GameService.Graphics.SpriteScreen.RelativeMousePosition.Y - (int)Math.Round(0.25f * _quickAccessWindow.Height);
             _quickAccessWindow.Show();
         }
 
@@ -115,8 +118,7 @@ namespace Nekres.ChatMacros.Core.Services {
                               if (x is ChatMacro macro && !macro.Lines.IsNullOrEmpty()) {
                                   return ChatMacros.Instance.LibraryConfig.Value.IndexChannelHistory(macro.Lines[0].Channel);
                               }
-
-                              return -1;
+                              return int.MaxValue;
                           })
                          .ThenBy(x => x is ChatMacro macro ? macro.Lines?.FirstOrDefault()?.Channel : ChatChannel.Current)
                          .ThenBy(x => x.Title.ToLowerInvariant());
@@ -260,36 +262,57 @@ namespace Nekres.ChatMacros.Core.Services {
             if (currentMap == null) {
                 return;
             }
-            CurrentMap = currentMap;
-            _regionMaps = await ChatMacros.Instance.Gw2Api.GetRegionMap(CurrentMap);
+            CurrentMap  = currentMap;
+
+            if (CurrentMap != null) {
+                _regionMaps = await ChatMacros.Instance.Gw2Api.GetRegionMap(CurrentMap);
+                _mapSectors = await ChatMacros.Instance.Gw2Api.GetMapSectors(CurrentMap);
+            }
         }
 
         private void GetClosestPoints() {
-            if (_regionMaps.IsNullOrEmpty() || CurrentMap == null) {
+            if (CurrentMap == null) {
                 return;
             }
-            var pois = _regionMaps.Where(x => x != null).SelectMany(x => x.PointsOfInterest.Values.Distinct()).ToList();
 
-            var continentPosition = GameService.Gw2Mumble.RawClient.AvatarPosition.ToContinentCoords(CoordsUnit.MUMBLE, CurrentMap.MapRect, CurrentMap.ContinentRect);
-            
-            double closestPoiDistance      = double.MaxValue;
-            double closestWaypointDistance = double.MaxValue;
-            foreach (var poi in pois) {
-                double distanceX               = Math.Abs(continentPosition.X     - poi.Coord.X);
-                double distanceZ               = Math.Abs(continentPosition.Z     - poi.Coord.Y);
-                double distance                = Math.Sqrt(Math.Pow(distanceX, 2) + Math.Pow(distanceZ, 2));
+            var pois = _regionMaps?.Where(x => x != null).SelectMany(x => x.PointsOfInterest.Values.Distinct()).ToList();
+            if (!pois.IsNullOrEmpty()) {
+                var continentPosition = GameService.Gw2Mumble.RawClient.AvatarPosition.ToContinentCoords(CoordsUnit.MUMBLE, CurrentMap.MapRect, CurrentMap.ContinentRect);
 
-                switch (poi.Type.Value) {
-                    case PoiType.Waypoint when distance < closestWaypointDistance:
-                        closestWaypointDistance = distance;
-                        ClosestWaypoint         = poi;
-                        break;
-                    case PoiType.Landmark when distance < closestPoiDistance:
-                        closestPoiDistance = distance;
-                        ClosestPoi         = poi;
-                        break;
+                double closestPoiDistance      = double.MaxValue;
+                double closestWaypointDistance = double.MaxValue;
+
+                ContinentFloorRegionMapPoi closestPoi      = null;
+                ContinentFloorRegionMapPoi closestWaypoint = null;
+                // ReSharper disable once PossibleNullReferenceException
+                foreach (var poi in pois) {
+                    double distanceX = Math.Abs(continentPosition.X     - poi.Coord.X);
+                    double distanceZ = Math.Abs(continentPosition.Z     - poi.Coord.Y);
+                    double distance  = Math.Sqrt(Math.Pow(distanceX, 2) + Math.Pow(distanceZ, 2));
+
+                    switch (poi.Type.Value) {
+                        case PoiType.Waypoint when distance < closestWaypointDistance:
+                            closestWaypointDistance = distance;
+                            closestWaypoint         = poi;
+                            break;
+                        case PoiType.Landmark when distance < closestPoiDistance:
+                            closestPoiDistance = distance;
+                            closestPoi         = poi;
+                            break;
+                    }
                 }
+                ClosestWaypoint = closestWaypoint;
+                ClosestPoi      = closestPoi;
+            } else {
+                ClosestWaypoint = null;
+                ClosestPoi      = null;
             }
+            
+            // Some maps consist of just a single sector and hide their actual name in it.
+            CurrentMapName = _mapSectors is {Count: 1} ? _mapSectors[0].Name : CurrentMap.Name;
+            
+            var playerLocation = GameService.Gw2Mumble.RawClient.AvatarPosition.ToContinentCoords(CoordsUnit.MUMBLE, CurrentMap.MapRect, CurrentMap.ContinentRect).SwapYz().ToPlane();
+            CurrentSector = _mapSectors?.FirstOrDefault(sector => playerLocation.Inside(sector.Bounds));
         }
 
         public async Task<string> ReplaceCommands(string text) {
@@ -329,9 +352,10 @@ namespace Nekres.ChatMacros.Core.Services {
                 "blish"  => GetVersion(),
                 "time"   => DateTime.Now.ToString("HH:mm",          CultureInfo.CurrentUICulture),
                 "today"  => DateTime.Now.ToString("dddd, d.M.yyyy", CultureInfo.CurrentUICulture),
-                "wp"     => ClosestWaypoint != null ? ClosestWaypoint.ChatLink : string.Empty,
-                "poi"    => ClosestPoi      != null ? ClosestPoi.ChatLink : string.Empty,
-                "map"    => CurrentMap      != null ? CurrentMap.Name : string.Empty,
+                "wp"     => ClosestWaypoint?.ChatLink ?? string.Empty,
+                "poi"    => ClosestPoi?.ChatLink      ?? string.Empty,
+                "map"    => CurrentMapName            ?? string.Empty,
+                "sector" => CurrentSector?.Name       ?? string.Empty,
                 "random" => GetRandom(args).ToString(),
                 "json"   => await GetJson(args),
                 "txt"    => ReadTextFile(args),
@@ -352,8 +376,8 @@ namespace Nekres.ChatMacros.Core.Services {
 
             int line = RandomUtil.GetRandom(0, lines.Count - 1);
 
-            if (args.Count == 2 && int.TryParse(args[1], out line)) {
-                line = line < lines.Count ? line : RandomUtil.GetRandom(0, lines.Count - 1);
+            if (args.Count == 2 && int.TryParse(args[1], out int lineArg)) {
+                line = lineArg <= lines.Count && lineArg > 0 ? lineArg - 1 : line;
             }
             return lines[line];
 

@@ -39,7 +39,7 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
 
         public int IndexChannelHistory(ChatChannel channel) {
             int indexInHistory = ChannelHistory.IndexOf(channel);
-            return indexInHistory != -1 ? indexInHistory : -1;
+            return indexInHistory != -1 ? indexInHistory : int.MaxValue;
         }
     }
 }
