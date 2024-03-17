@@ -61,6 +61,8 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void LinkFileChanged(ChatMacro macro) {
+            Upsert(macro);
+
             if (!macro.LinkFile.IsNullOrWhiteSpace() && !macro.LinkFile.IsWebLink()) {
                 LinkFileChange?.Invoke(this, new ValueEventArgs<BaseMacro>(macro));
             }
@@ -148,14 +150,14 @@ namespace Nekres.ChatMacros.Core.Services {
             return default;
         }
 
-        private bool Delete<T>(BsonValue id, string table) {
+        private bool Delete<T>(string table, params BsonValue[] ids) {
             LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
 
             try {
                 using var db = new LiteDatabase(_connectionString);
-
+                
                 var collection = db.GetCollection<T>(table);
-                return collection.Delete(id);
+                return collection.DeleteMany(Query.In("_id", ids)) == ids.Length;
             } catch (Exception e) {
                 ChatMacros.Logger.Warn(e, e.Message);
                 return false;
@@ -166,10 +168,14 @@ namespace Nekres.ChatMacros.Core.Services {
 
         public bool Delete(ChatMacro macro) {
             ChatMacros.Instance.Macro.Observer.Remove(macro.Id);
-            return Delete<ChatMacro>(macro.Id, TBL_CHATMACROS);
+            return Delete<ChatMacro>(TBL_CHATMACROS, macro.Id);
         }
         public bool Delete(ChatLine line) {
-            return Delete<ChatLine>(line.Id, TBL_CHATLINES);
+            return Delete<ChatLine>(TBL_CHATLINES, line.Id);
+        }
+
+        public bool DeleteMany(IEnumerable<ChatLine> lines) {
+            return Delete<ChatLine>(TBL_CHATLINES, lines.Select(line => new BsonValue(line.Id)).ToArray());
         }
 
         public void Dispose() {

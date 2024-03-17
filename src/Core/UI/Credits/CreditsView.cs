@@ -108,6 +108,10 @@ namespace Nekres.ChatMacros.Core.UI.Credits {
                     BasicTooltipText = string.Format(Resources.Supporter_since__0_, _donor.SupporterSince.ToShortDateString())
                 };
 
+                if (_donor.Socials == null) {
+                    return;
+                }
+
                 if (!string.IsNullOrEmpty(_donor.Socials.GuildWars2)) {
                     var gw2Acc = new Label {
                         Parent        = flow,

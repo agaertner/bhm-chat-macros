@@ -31,6 +31,17 @@ namespace Nekres.ChatMacros.Core.UI.Configs {
             }
         }
 
+        private bool _advancedEdit;
+        [JsonProperty("advanced_edit")]
+        public bool AdvancedEdit {
+            get => _advancedEdit;
+            set {
+                if (SetProperty(ref _advancedEdit, value)) {
+                    this.SaveConfig(ChatMacros.Instance.LibraryConfig);
+                }
+            }
+        }
+
         public void UpdateChannelHistory(ChatChannel usedChannel) {
             _channelHistory ??= new List<ChatChannel>();
             ChannelHistory.Remove(usedChannel);

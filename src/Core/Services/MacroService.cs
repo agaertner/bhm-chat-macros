@@ -192,7 +192,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 var message = await ReplaceCommands(line.ToChatMessage());
 
                 if (string.IsNullOrEmpty(message)) {
-                    break;
+                    message = " ";
                 }
 
                 // Is squad broadcast and user can broadcast (is commander).
@@ -212,6 +212,7 @@ namespace Nekres.ChatMacros.Core.Services {
                     }
 
                     await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage, ChatMacros.Logger);
+                    await Task.Delay(100);
                     continue;
                 }
 
