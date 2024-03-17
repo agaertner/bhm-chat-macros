@@ -3,8 +3,6 @@ using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Controls.Resources;
 using Blish_HUD.Extended;
-using Blish_HUD.Graphics.UI;
-using Blish_HUD.Input;
 using LiteDB;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,8 +12,21 @@ using Nekres.ChatMacros.Core.UI.Configs;
 using Nekres.ChatMacros.Properties;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms;
+using Color = Microsoft.Xna.Framework.Color;
+using ContextMenuStrip = Blish_HUD.Controls.ContextMenuStrip;
 using Control = Blish_HUD.Controls.Control;
+using File = System.IO.File;
+using HorizontalAlignment = Blish_HUD.Controls.HorizontalAlignment;
+using Menu = Blish_HUD.Controls.Menu;
+using MenuItem = Blish_HUD.Controls.MenuItem;
+using MouseEventArgs = Blish_HUD.Input.MouseEventArgs;
+using Panel = Blish_HUD.Controls.Panel;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using TextBox = Blish_HUD.Controls.TextBox;
+using View = Blish_HUD.Graphics.UI.View;
 
 namespace Nekres.ChatMacros.Core.UI.Library {
     internal class LibraryView : View {
@@ -407,30 +418,27 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             private readonly ChatMacro _macro;
 
-            private FlowPanel _linesPanel;
-            private TextBox   _linkFile;
-            private Image     _linkFileState;
+            private ViewContainer _editField;
+            private Image         _linkFileState;
 
             public MacroView(ChatMacro macro) {
                 _macro = macro;
             }
 
-            private void UpdateLinkFileState(bool showError = false) {
-                _linkFile.Text = _macro.LinkFile;
 
+            private void UpdateLinkFileState(bool showError = false) {
                 var linkFileExists = FileUtil.Exists(_macro.LinkFile, out string _, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray());
                 if (!linkFileExists) {
-                    _macro.LinkFile                 = string.Empty;
-                    _linkFile.Text                  = string.Empty;
-                    _linkFileState.Texture         = ChatMacros.Instance.Resources.LinkBrokenIcon;
-                    _linkFileState.BasicTooltipText = Resources.Inactive_File_Sync;
+                    _macro.LinkFile = string.Empty;
+                    _linkFileState.Texture          = ChatMacros.Instance.Resources.LinkBrokenIcon;
+                    _linkFileState.BasicTooltipText = $"{Resources.Inactive_File_Sync}: {Resources.Enter_a_file_path___} ({Resources.Optional})";
                     if (showError) {
                         ScreenNotification.ShowNotification(Resources.File_not_found_or_access_denied_, ScreenNotification.NotificationType.Warning);
                     }
                     return;
                 }
-                _linkFileState.Texture = ChatMacros.Instance.Resources.LinkIcon;
-                _linkFileState.BasicTooltipText = Resources.Active_File_Sync;
+                _linkFileState.Texture          = ChatMacros.Instance.Resources.LinkIcon;
+                _linkFileState.BasicTooltipText = $"{Resources.Active_File_Sync}: {Path.GetFileName(_macro.LinkFile)}";
             }
 
             private void OnLinkFileUpdate(object sender, ValueEventArgs<BaseMacro> e) {
@@ -441,19 +449,15 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 _macro.LinkFile = chatMacro.LinkFile;
                 UpdateLinkFileState();
 
-                if (_linesPanel == null || !_macro.Id.Equals(e.Value.Id)) {
+                if (_editField == null || !_macro.Id.Equals(e.Value.Id)) {
                     return;
                 }
 
                 _macro.Lines = chatMacro.Lines;
 
-                foreach (var ctrl in _linesPanel.Children.ToList()) {
-                    ctrl?.Dispose();
-                }
-
-                foreach (var line in _macro.Lines) {
-                    AddLine(_linesPanel, line);
-                }
+                _editField.Show(ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit ?
+                                   new RawLinesEditView(_macro) :
+                                   new FancyLinesEditView(_macro));
             }
 
             protected override void Unload() {
@@ -502,426 +506,553 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 };
                 macroConfig.Show(new BaseMacroSettings(_macro, () => ChatMacros.Instance.Data.Upsert(_macro)));
 
-                _linesPanel = new FlowPanel {
-                    Parent              = buildPanel,
-                    Width               = buildPanel.ContentRegion.Width,
-                    Height              = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING * 2 - 77,
-                    FlowDirection       = ControlFlowDirection.SingleTopToBottom,
-                    Top                 = macroConfig.Bottom,
-                    ShowBorder          = true,
-                    ControlPadding      = new Vector2(0,                 2),
-                    OuterControlPadding = new Vector2(Panel.LEFT_PADDING, 4),
-                    CanScroll           = true,
-                    Title               = Resources.Message_Sequence
+                _editField = new ViewContainer {
+                    Title  = Resources.Message_Sequence,
+                    Parent = buildPanel,
+                    Width  = buildPanel.ContentRegion.Width,
+                    Height = buildPanel.ContentRegion.Height - titleField.Bottom - macroConfig.Height - Panel.TOP_PADDING,
+                    Top    = macroConfig.Bottom,
+                    BasicTooltipText = "List of Placeholders\n\n"
+                                     + "Placeholders are executable commands inside your messages that get replaced with their result when the message is sent.\n"
+                                     + "Placeholders must be surrounded by paranthesis and their parameters are separated by whitespace.\n\n"
+                                     + string.Join("\n", ChatMacros.Instance.Resources.Placeholders)
                 };
 
-                foreach (var line in _macro.Lines) {
-                    AddLine(_linesPanel, line);
-                }
+                _editField.Show(ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit ? 
+                                    new RawLinesEditView(_macro) : 
+                                    new FancyLinesEditView(_macro));
 
-                _linkFile = new TextBox {
-                    Parent = buildPanel,
-                    Top    = _linesPanel.Bottom,
-                    Left   = 10,
-                    Width  = _linesPanel.Width - 47,
-                    Text   = _macro.LinkFile,
-                    PlaceholderText = $"({Resources.Optional}) {Resources.Enter_a_file_path___}",
-                    BasicTooltipText = Resources.File_to_monitor_and_synchronize_lines_with_
+                var openExternalBttn = new Image {
+                    Parent           = buildPanel,
+                    Width            = 22,
+                    Height           = 22,
+                    Left             = _editField.Right - 22 - Panel.RIGHT_PADDING,
+                    Top              = _editField.Top + 8,
+                    Texture          = ChatMacros.Instance.Resources.OpenExternalIcon,
+                    BasicTooltipText = "Open and Edit in default text editor."
+                };
+
+                openExternalBttn.Click += (_, _) => {
+                    var linkFileExists = FileUtil.Exists(_macro.LinkFile, out string _, ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray());
+                    if (linkFileExists) {
+                        FileUtil.OpenExternally(_macro.LinkFile);
+                        return;
+                    }
+
+                    var syncedPath = Path.Combine(ChatMacros.Instance.ModuleDirectory, "synced");
+                    Directory.CreateDirectory(syncedPath);
+                    var linkFilePath = Path.Combine(syncedPath, $"{_macro.Id}.txt");
+
+                    try {
+                        using var generatedLinkFile = File.CreateText(linkFilePath);
+                        generatedLinkFile.WriteAsync(string.Join("\n", _macro.Lines.Select(x => x.Serialize())));
+                    } catch (Exception) {
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        return;
+                    }
+                    _macro.LinkFile = linkFilePath;
+                    UpdateLinkFileState(true);
+                    ChatMacros.Instance.Data.LinkFileChanged(_macro);
+
+                    FileUtil.OpenExternally(_macro.LinkFile);
                 };
 
                 _linkFileState = new Image {
                     Parent = buildPanel,
-                    Width  = _linkFile.Height,
-                    Height = _linkFile.Height,
-                    Left   = _linkFile.Right,
-                    Top    = _linkFile.Top + 1
+                    Width  = 22,
+                    Height = 22,
+                    Left   = openExternalBttn.Left - 22 - Panel.RIGHT_PADDING,
+                    Top    = _editField.Top + 8
                 };
 
-                UpdateLinkFileState();
+                _linkFileState.LeftMouseButtonReleased += async (_, _) => {
+                    using var fileSelect = new AsyncFileDialog<OpenFileDialog>(Resources.File_to_monitor_and_synchronize_lines_with_, "txt files (*.txt)|*.txt", _macro.LinkFile);
+                    var       result     = await fileSelect.Show();
+                    if (result == DialogResult.OK) {
+                        var oldLinkFile = new string(_macro.LinkFile?.ToCharArray());
 
-                _linkFile.InputFocusChanged += (_,e) => {
-                    if (e.Value || _linkFile.Text == null) {
-                        return;
+                        _macro.LinkFile = fileSelect.Dialog.FileName;
+
+                        if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                            _macro.LinkFile = oldLinkFile;
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
+                            return;
+                        }
+
+                        GameService.Content.PlaySoundEffectByName("button-click");
+
+                        UpdateLinkFileState(true);
+                        ChatMacros.Instance.Data.LinkFileChanged(_macro);
                     }
+                };
 
-                    var oldLinkFile = new string(_macro.LinkFile?.ToCharArray());
-
-                    _macro.LinkFile = _linkFile.Text.Trim();
-
-                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
-                        _macro.LinkFile = oldLinkFile;
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        return;
-                    }
-
-                    UpdateLinkFileState(true);
-
+                _linkFileState.RightMouseButtonReleased += (_, _) => {
+                    GameService.Content.PlaySoundEffectByName("button-click");
+                    _macro.LinkFile = string.Empty;
+                    UpdateLinkFileState();
                     ChatMacros.Instance.Data.LinkFileChanged(_macro);
                 };
 
-                var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
-                    Parent = buildPanel,
-                    Width  = _linesPanel.Width - 20,
-                    Top    = _linkFile.Bottom + Panel.TOP_PADDING,
-                    Left   = 10,
-                    Height = 50,
-                    Text   = Resources.Add_Line
-                };
-
-                addLineBttn.Click += (_, _) => {
-                    CreateLine(_linesPanel);
-                };
-
+                UpdateLinkFileState();
                 ChatMacros.Instance.Macro.Observer.MacroUpdate += OnLinkFileUpdate;
+
+                var editMode = new Image {
+                    Parent = buildPanel,
+                    Width  = 32,
+                    Height = 32,
+                    Left   = _linkFileState.Left - 32 - Panel.RIGHT_PADDING,
+                    Top    = _editField.Top      + 4,
+                    Texture = ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit ? ChatMacros.Instance.Resources.SwitchModeOnIcon : ChatMacros.Instance.Resources.SwitchModeOffIcon,
+                    BasicTooltipText = "Change Edit Mode"
+                };
+
+                editMode.Click += (_, _) => {
+                    GameService.Content.PlaySoundEffectByName("button-click");
+
+                    ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit = !ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit;
+
+                    if (ChatMacros.Instance.LibraryConfig.Value.AdvancedEdit) {
+                        _editField.Show(new RawLinesEditView(_macro));
+                        editMode.Texture = ChatMacros.Instance.Resources.SwitchModeOnIcon;
+                    } else {
+                        _editField.Show(new FancyLinesEditView(_macro));
+                        editMode.Texture = ChatMacros.Instance.Resources.SwitchModeOffIcon;
+                    }
+                };
+
                 base.Build(buildPanel);
             }
 
-            private void AddLine(Container parent, ChatLine line) {
-                var lineDisplay = new ViewContainer {
-                    Parent = parent,
-                    Width  = parent.ContentRegion.Width - 18,
-                    Height = 32
-                };
+            private class RawLinesEditView : View {
 
-                var lineView = new LineView(line);
-                lineDisplay.Show(lineView);
+                protected ChatMacro _macro;
 
-                lineView.RemoveClick += (_, _) => {
-                    var oldLines = _macro.Lines.ToList();
-
-                    if (_macro.Lines.RemoveAll(x => x.Id.Equals(line.Id)) < 1) {
-                        return;
-                    }
-
-                    if (!ChatMacros.Instance.Data.Delete(line)) {
-                        _macro.Lines = oldLines;
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        GameService.Content.PlaySoundEffectByName("error");
-                        return;
-                    }
-
-                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        GameService.Content.PlaySoundEffectByName("error");
-                    }
-
-                    ChatMacros.Instance.Speech.UpdateGrammar();
-                    lineDisplay.Dispose();
-                };
-
-                int lineIndex = _macro.Lines.IndexOf(line);
-                void OnMouseMoved(object o, MouseEventArgs mouseEventArgs) {
-                    if (lineView.IsDragging) {
-                        var tempLines = _macro.Lines.ToList();
-                        var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
-
-                        if (lineIndex != dropIndex) {
-                            ChatMacros.Instance.Resources.PlayMenuItemClick();
-                            lineIndex = dropIndex;
-                        }
-
-                        tempLines.Remove(line);
-                        tempLines.Insert(dropIndex, line);
-                        parent.ClearChildren();
-                        foreach (var reLine in tempLines) {
-                            AddLine(parent, reLine);
-                        }
-                    }
-                }
-
-                GameService.Input.Mouse.MouseMoved += OnMouseMoved;
-
-                lineDisplay.Disposed += (_, _) => {
-                    GameService.Input.Mouse.MouseMoved -= OnMouseMoved;
-                };
-
-                lineView.DragEnd += (_, _) => {
-                    var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
-
-                    var oldOrder = _macro.Lines.ToList();
-
-                    if (_macro.Lines.RemoveAll(l => l.Id.Equals(line.Id)) < 1) {
-                        _macro.Lines = oldOrder;
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        GameService.Content.PlaySoundEffectByName("error");
-                        return;
-                    }
-
-                    _macro.Lines.Insert(dropIndex, line);
-
-                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
-                        _macro.Lines = oldOrder;
-                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                        GameService.Content.PlaySoundEffectByName("error");
-                        return;
-                    }
-
-                    ChatMacros.Instance.Macro.UpdateMacros();
-
-                    GameService.Content.PlaySoundEffectByName("color-change");
-
-                    parent.ClearChildren();
-                    foreach (var reLine in _macro.Lines) {
-                        AddLine(parent, reLine);
-                    }
-                };
-            }
-
-            private void CreateLine(Container parent) {
-                var line = new ChatLine {
-                    Channel = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel,
-                    WhisperTo = _macro.Lines.IsNullOrEmpty() ? string.Empty : _macro.Lines.Last().WhisperTo,
-                };
-
-                if (!ChatMacros.Instance.Data.Upsert(line)) {
-                    ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
-                    GameService.Content.PlaySoundEffectByName("error");
-                    return;
-                }
-
-                GameService.Content.PlaySoundEffectByName("button-click");
-
-                _macro.Lines.Add(line);
-
-                if (ChatMacros.Instance.Data.Upsert(_macro)) {
-                    ChatMacros.Instance.Speech.UpdateGrammar();
-                }
-
-                AddLine(parent, line);
-            }
-            private class LineView : View {
-
-                public event EventHandler<EventArgs> RemoveClick; 
-                public event EventHandler<EventArgs> DragEnd;
-
-                private readonly ChatLine _line;
-
-                public bool IsDragging { get; private set; }
-
-                private AsyncTexture2D _squadBroadcastActive;
-                private AsyncTexture2D _squadBroadcastInactive;
-                private AsyncTexture2D _squadBroadcastActiveHover;
-                private AsyncTexture2D _squadBroadcastInactiveHover;
-
-                public LineView(ChatLine line) {
-                    _line                        = line;
-                    _squadBroadcastActive        = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304068);
-                    _squadBroadcastActiveHover   = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304069);
-                    _squadBroadcastInactive      = GameService.Content.DatAssetCache.GetTextureFromAssetId(1234950);
-                    _squadBroadcastInactiveHover = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304070);
+                public RawLinesEditView(ChatMacro macro) {
+                    _macro = macro;
                 }
 
                 protected override void Build(Container buildPanel) {
-
-                    var targetChannelDd = new KeyValueDropdown<ChatChannel> {
-                        Parent           = buildPanel,
-                        PlaceholderText  = Resources.Select_a_target_channel___,
-                        SelectedItem     = _line.Channel,
-                        BasicTooltipText = Resources.Select_a_target_channel___,
-                        AutoSizeWidth    = true
-                    };
-
-                    foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
-                        targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
-                    }
-
-                    TextBox messageInput   = null;
-                    TextBox whisperTo      = null;
-                    Image   squadBroadcast = null;
-
-                    void CreateWhisperToField() {
-                        whisperTo = new TextBox {
-                            Parent          = buildPanel,
-                            PlaceholderText = Resources.Recipient___,
-                            Width           = 100,
-                            ForeColor       = _line.Channel.GetMessageColor(),
-                            Left            = targetChannelDd.Right + Panel.RIGHT_PADDING,
-                            Font            = ChatMacros.Instance.Resources.SourceCodePro24,
-                            Text            = _line.WhisperTo,
-                        };
-
-                        whisperTo.TextChanged += (_, _) => {
-                            _line.WhisperTo = whisperTo.Text.Trim();
-                            whisperTo.BasicTooltipText = _line.WhisperTo;
-                            Save();
-                        };
-
-                        messageInput.Width = buildPanel.ContentRegion.Width - whisperTo.Right - Panel.RIGHT_PADDING * 3 - 50;
-                        messageInput.Left  = whisperTo.Right + Panel.RIGHT_PADDING;
-                        messageInput.Invalidate();
-                    }
-
-                    void CreateSquadBroadcastTick() {
-
-                        bool hovering = false;
-                        squadBroadcast = new Image {
-                            Parent           = buildPanel,
-                            Left             = targetChannelDd.Right,
-                            Height           = 32,
-                            Width            = 32,
-                            Top              = -2,
-                            BasicTooltipText = Resources.Broadcast_to_Squad,
-                            Texture          = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive
-                        };
-
-                        squadBroadcast.Click += (_, _) => {
-                            _line.SquadBroadcast = !_line.SquadBroadcast;
-
-                            if (hovering) {
-                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
-                            } else {
-                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
-                            }
-
-                            GameService.Content.PlaySoundEffectByName("button-click");
-
-                            Save();
-                        };
-
-                        squadBroadcast.MouseEntered += (_, _) => {
-                            hovering = true;
-                            squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
-                        };
-
-                        squadBroadcast.MouseLeft += (_, _) => {
-                            hovering = false;
-                            squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
-                        };
-
-                        messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 2 - 50 - Panel.RIGHT_PADDING / 2;
-                        messageInput.Left  = squadBroadcast.Right + Panel.RIGHT_PADDING / 2;
-                        messageInput.Invalidate();
-                    }
-
-                    messageInput = new TextBox {
-                        Parent           = buildPanel,
-                        PlaceholderText  = Resources.Enter_a_message___,
-                        Text             = _line.Message,
-                        Width            = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 3 - 50,
-                        Left             = targetChannelDd.Right + Panel.RIGHT_PADDING,
-                        ForeColor        = _line.Channel.GetMessageColor(),
-                        BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage(),
-                        Font             = ChatMacros.Instance.Resources.SourceCodePro24
-                    };
-
-                    var overlengthWarn = new Image(GameService.Content.DatAssetCache.GetTextureFromAssetId(1444522)) {
-                        Parent           = buildPanel,
-                        Left             = messageInput.Right - 32,
-                        Width            = 32,
-                        Height           = 32,
-                        Top              = -2,
-                        BasicTooltipText = string.Format(Resources.Message_exceeds_limit_of__0__characters_, ChatUtil.MAX_MESSAGE_LENGTH),
-                        Visible          = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH,
-                        ZIndex           = messageInput.ZIndex + 1
-                    };
-
-                    if (targetChannelDd.SelectedItem == ChatChannel.Whisper) {
-                        CreateWhisperToField();
-                    } else if (targetChannelDd.SelectedItem == ChatChannel.Squad) {
-                        CreateSquadBroadcastTick();
-                    }
-
-                    var remove = new Image {
-                        Parent  = buildPanel,
-                        Width   = 25,
-                        Height  = 25,
-                        Left    = messageInput.Right + Panel.RIGHT_PADDING,
-                        Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782),
-                        BasicTooltipText = Resources.Remove
-                    };
-
-                    remove.MouseEntered += (_, _) => {
-                        remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175784);
-                    };
-
-                    remove.MouseLeft += (_, _) => {
-                        remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782);
-                    };
-
-                    remove.LeftMouseButtonPressed += (_, _) => {
-                        remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175783);
-                    };
-
-                    remove.LeftMouseButtonReleased += (_, _) => {
-                        GameService.Content.PlaySoundEffectByName("button-click");
-                        RemoveClick?.Invoke(this, EventArgs.Empty);
-                    };
-
-                    var dragReorder = new Image(ChatMacros.Instance.Resources.DragReorderIcon) {
+                    var editLinesBox = new MultilineTextBox {
                         Parent = buildPanel,
-                        Width = 25,
-                        Height = 25,
-                        Left = remove.Right + Panel.RIGHT_PADDING,
-                        BasicTooltipText = Resources.Drag_to_Reorder
+                        Width  = buildPanel.ContentRegion.Width,
+                        Height = buildPanel.ContentRegion.Height,
+                        Font   = ChatMacros.Instance.Resources.SourceCodePro24
                     };
 
-                    dragReorder.LeftMouseButtonPressed += (_, _) => {
-                        IsDragging = true;
-                        GameService.Content.PlaySoundEffectByName("button-click");
-                    };
-
-                    void OnLeftMouseButtonReleased(object o, MouseEventArgs mouseEventArgs) {
-                        if (IsDragging) {
-                            this.DragEnd?.Invoke(this, EventArgs.Empty);
-                        }
-                        IsDragging = false;
-                    }
-
-                    GameService.Input.Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
-
-                    dragReorder.Disposed += (_, _) => {
-                        GameService.Input.Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
-                    };
-
-                    messageInput.TextChanged += (_, _) => {
-                        var cmd = $"{_line.Channel.ToShortChatCommand()} ".TrimStart();
-                        var msg = $"{cmd}{messageInput.Text}";
-                        overlengthWarn.Visible        = msg.Length > ChatUtil.MAX_MESSAGE_LENGTH;
-                        messageInput.BasicTooltipText = string.IsNullOrEmpty(messageInput.Text) ? Resources.Enter_a_message___ : msg;
-                    };
-
-                    messageInput.InputFocusChanged += (_, e) => {
+                    editLinesBox.Text = string.Join("\n", _macro.Lines.Select(l => l.Serialize()));
+                    editLinesBox.InputFocusChanged += (_, e) => {
                         if (e.Value) {
+                            return; // Being focused. Do nothing.
+                        }
+
+                        var oldLines = _macro.Lines.ToList();
+
+                        // Delete all lines to recreate them from parsing all lines of the multiline textbox.
+                        if (!ChatMacros.Instance.Data.DeleteMany(_macro.Lines)) {
+                            _macro.Lines = oldLines;
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
                             return;
                         }
-                        _line.Message                 = messageInput.Text.TrimEnd();
-                        messageInput.BasicTooltipText = string.IsNullOrEmpty(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
-                        Save();
+
+                        _macro.Lines.Clear();
+
+                        var lines = editLinesBox.Text.ReadLines().Select(ChatLine.Parse).ToList();
+                        _macro.Lines = SaveLines(lines.ToArray()) ? lines : oldLines;
                     };
 
-                    targetChannelDd.Resized += (_, _) => {
-                        messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Width - Panel.RIGHT_PADDING * 4 - 50;
-                        messageInput.Left  = targetChannelDd.Right          + Panel.RIGHT_PADDING;
-                    };
-
-                    targetChannelDd.ValueChanged += (_, e) => {
-                        _line.Channel                 = e.NewValue;
-                        messageInput.ForeColor        = _line.Channel.GetMessageColor();
-                        messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
-                        overlengthWarn.Visible        = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH;
-                        Save();
-
-                        whisperTo?.Dispose();
-                        squadBroadcast?.Dispose();
-                        messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 4 - 50;
-                        messageInput.Left  = targetChannelDd.Right          + Panel.RIGHT_PADDING;
-
-                        if (e.NewValue == ChatChannel.Whisper) {
-                            CreateWhisperToField();
-                        } else if (e.NewValue == ChatChannel.Squad) {
-                            CreateSquadBroadcastTick();
-                        }
-                    };
                     base.Build(buildPanel);
                 }
 
-                private void Save() {
-                    if (!ChatMacros.Instance.Data.Upsert(_line)) {
+                protected bool SaveLines(params ChatLine[] lines) {
+                    if (lines.Length > 0 && !ChatMacros.Instance.Data.Insert(lines)) {
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
+                        return false;
+                    }
+
+                    if (ChatMacros.Instance.Data.Upsert(_macro)) {
+                        ChatMacros.Instance.Speech.UpdateGrammar();
+                    }
+
+                    return true;
+                }
+            }
+
+            private class FancyLinesEditView : RawLinesEditView {
+
+                public FancyLinesEditView(ChatMacro macro) : base(macro) {
+                    /* NOOP */
+                }
+
+                protected override void Build(Container buildPanel) {
+                    var linesPanel = new FlowPanel {
+                        Parent              = buildPanel,
+                        Width               = buildPanel.ContentRegion.Width,
+                        Height              = buildPanel.ContentRegion.Height - Panel.TOP_PADDING - 50,
+                        FlowDirection       = ControlFlowDirection.SingleTopToBottom,
+                        Top                 = 0,
+                        ShowBorder          = true,
+                        ControlPadding      = new Vector2(0,                  2),
+                        OuterControlPadding = new Vector2(Panel.LEFT_PADDING, 4),
+                        CanScroll           = true
+                    };
+
+                    foreach (var line in _macro.Lines) {
+                        AddLine(linesPanel, line);
+                    }
+
+                    var addLineBttn = new StandardButtonCustomFont(ChatMacros.Instance.Resources.RubikRegular26) {
+                        Parent = buildPanel,
+                        Width  = linesPanel.Width  - 20,
+                        Top    = linesPanel.Bottom + Panel.TOP_PADDING,
+                        Left   = 10,
+                        Height = 50,
+                        Text   = Resources.Add_Line
+                    };
+
+                    addLineBttn.Click += (_, _) => {
+                        var newLine = ChatLine.Parse(null);
+                        newLine.Channel   = _macro.Lines.IsNullOrEmpty() ? ChatChannel.Current : _macro.Lines.Last().Channel;
+                        newLine.WhisperTo = _macro.Lines.IsNullOrEmpty() ? string.Empty : _macro.Lines.Last().WhisperTo;
+
+                        var oldLines = _macro.Lines.ToList();
+                        if (SaveLines(newLine)) {
+                            _macro.Lines.Add(newLine);
+                            GameService.Content.PlaySoundEffectByName("button-click");
+                            AddLine(linesPanel, newLine);
+                        } else {
+                            _macro.Lines = oldLines;
+                        }
+                    };
+                }
+
+                private void AddLine(Container parent, ChatLine line) {
+                    var lineDisplay = new ViewContainer {
+                        Parent = parent,
+                        Width = parent.ContentRegion.Width - 18,
+                        Height = 32
+                    };
+
+                    var lineView = new LineView(line);
+                    lineDisplay.Show(lineView);
+
+                    lineView.RemoveClick += (_, _) => {
+                        var oldLines = _macro.Lines.ToList();
+
+                        if (_macro.Lines.RemoveAll(x => x.Id.Equals(line.Id)) < 1) {
+                            return;
+                        }
+
+                        if (!ChatMacros.Instance.Data.Delete(line)) {
+                            _macro.Lines = oldLines;
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
+                            return;
+                        }
+
+                        if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
+                        }
+
+                        ChatMacros.Instance.Speech.UpdateGrammar();
+                        lineDisplay.Dispose();
+                    };
+
+                    int lineIndex = _macro.Lines.IndexOf(line);
+                    void OnMouseMoved(object o, MouseEventArgs mouseEventArgs) {
+                        if (lineView.IsDragging) {
+                            var tempLines = _macro.Lines.ToList();
+                            var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
+
+                            if (lineIndex != dropIndex) {
+                                ChatMacros.Instance.Resources.PlayMenuItemClick();
+                                lineIndex = dropIndex;
+                            }
+
+                            tempLines.Remove(line);
+                            tempLines.Insert(dropIndex, line);
+                            parent.ClearChildren();
+                            foreach (var reLine in tempLines) {
+                                AddLine(parent, reLine);
+                            }
+                        }
+                    }
+
+                    GameService.Input.Mouse.MouseMoved += OnMouseMoved;
+
+                    lineDisplay.Disposed += (_, _) => {
+                        GameService.Input.Mouse.MouseMoved -= OnMouseMoved;
+                    };
+
+                    lineView.DragEnd += (_, _) => {
+                        var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
+
+                        var oldOrder = _macro.Lines.ToList();
+
+                        if (_macro.Lines.RemoveAll(l => l.Id.Equals(line.Id)) < 1) {
+                            _macro.Lines = oldOrder;
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
+                            return;
+                        }
+
+                        _macro.Lines.Insert(dropIndex, line);
+
+                        if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                            _macro.Lines = oldOrder;
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            GameService.Content.PlaySoundEffectByName("error");
+                            return;
+                        }
+
+                        ChatMacros.Instance.Macro.UpdateMacros();
+
+                        GameService.Content.PlaySoundEffectByName("color-change");
+
+                        parent.ClearChildren();
+                        foreach (var reLine in _macro.Lines) {
+                            AddLine(parent, reLine);
+                        }
+                    };
+                }
+
+                private class LineView : View {
+
+                    public event EventHandler<EventArgs> RemoveClick;
+                    public event EventHandler<EventArgs> DragEnd;
+
+                    private readonly ChatLine _line;
+
+                    public bool IsDragging { get; private set; }
+
+                    private AsyncTexture2D _squadBroadcastActive;
+                    private AsyncTexture2D _squadBroadcastInactive;
+                    private AsyncTexture2D _squadBroadcastActiveHover;
+                    private AsyncTexture2D _squadBroadcastInactiveHover;
+
+                    public LineView(ChatLine line) {
+                        _line = line;
+                        _squadBroadcastActive = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304068);
+                        _squadBroadcastActiveHover = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304069);
+                        _squadBroadcastInactive = GameService.Content.DatAssetCache.GetTextureFromAssetId(1234950);
+                        _squadBroadcastInactiveHover = GameService.Content.DatAssetCache.GetTextureFromAssetId(1304070);
+                    }
+
+                    protected override void Build(Container buildPanel) {
+
+                        var targetChannelDd = new KeyValueDropdown<ChatChannel> {
+                            Parent = buildPanel,
+                            PlaceholderText = Resources.Select_a_target_channel___,
+                            SelectedItem = _line.Channel,
+                            BasicTooltipText = Resources.Select_a_target_channel___,
+                            AutoSizeWidth = true
+                        };
+
+                        foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
+                            targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
+                        }
+
+                        TextBox messageInput = null;
+                        TextBox whisperTo = null;
+                        Image squadBroadcast = null;
+
+                        void CreateWhisperToField() {
+                            whisperTo = new TextBox {
+                                Parent = buildPanel,
+                                PlaceholderText = Resources.Recipient___,
+                                Width = 100,
+                                ForeColor = _line.Channel.GetMessageColor(),
+                                Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
+                                Font = ChatMacros.Instance.Resources.SourceCodePro24,
+                                Text = _line.WhisperTo,
+                            };
+
+                            whisperTo.TextChanged += (_, _) => {
+                                _line.WhisperTo = whisperTo.Text.Trim();
+                                whisperTo.BasicTooltipText = _line.WhisperTo;
+                                Save();
+                            };
+
+                            messageInput.Width = buildPanel.ContentRegion.Width - whisperTo.Right - Panel.RIGHT_PADDING * 3 - 50;
+                            messageInput.Left = whisperTo.Right + Panel.RIGHT_PADDING;
+                            messageInput.Invalidate();
+                        }
+
+                        void CreateSquadBroadcastTick() {
+
+                            bool hovering = false;
+                            squadBroadcast = new Image {
+                                Parent = buildPanel,
+                                Left = targetChannelDd.Right,
+                                Height = 32,
+                                Width = 32,
+                                Top = -2,
+                                BasicTooltipText = Resources.Broadcast_to_Squad,
+                                Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive
+                            };
+
+                            squadBroadcast.Click += (_, _) => {
+                                _line.SquadBroadcast = !_line.SquadBroadcast;
+
+                                if (hovering) {
+                                    squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
+                                } else {
+                                    squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
+                                }
+
+                                GameService.Content.PlaySoundEffectByName("button-click");
+
+                                Save();
+                            };
+
+                            squadBroadcast.MouseEntered += (_, _) => {
+                                hovering = true;
+                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActiveHover : _squadBroadcastInactiveHover;
+                            };
+
+                            squadBroadcast.MouseLeft += (_, _) => {
+                                hovering = false;
+                                squadBroadcast.Texture = _line.SquadBroadcast ? _squadBroadcastActive : _squadBroadcastInactive;
+                            };
+
+                            messageInput.Width = buildPanel.ContentRegion.Width - squadBroadcast.Right - Panel.RIGHT_PADDING * 2 - 50 - Panel.RIGHT_PADDING / 2;
+                            messageInput.Left = squadBroadcast.Right + Panel.RIGHT_PADDING / 2;
+                            messageInput.Invalidate();
+                        }
+
+                        messageInput = new TextBox {
+                            Parent = buildPanel,
+                            PlaceholderText = Resources.Enter_a_message___,
+                            Text = _line.Message,
+                            Width = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 3 - 50,
+                            Left = targetChannelDd.Right + Panel.RIGHT_PADDING,
+                            ForeColor = _line.Channel.GetMessageColor(),
+                            BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage(),
+                            Font = ChatMacros.Instance.Resources.SourceCodePro24
+                        };
+
+                        var overlengthWarn = new Image(GameService.Content.DatAssetCache.GetTextureFromAssetId(1444522)) {
+                            Parent = buildPanel,
+                            Left = messageInput.Right - 32,
+                            Width = 32,
+                            Height = 32,
+                            Top = -2,
+                            BasicTooltipText = string.Format(Resources.Message_exceeds_limit_of__0__characters_, ChatUtil.MAX_MESSAGE_LENGTH),
+                            Visible = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH,
+                            ZIndex = messageInput.ZIndex + 1
+                        };
+
+                        if (targetChannelDd.SelectedItem == ChatChannel.Whisper) {
+                            CreateWhisperToField();
+                        } else if (targetChannelDd.SelectedItem == ChatChannel.Squad) {
+                            CreateSquadBroadcastTick();
+                        }
+
+                        var remove = new Image {
+                            Parent = buildPanel,
+                            Width = 25,
+                            Height = 25,
+                            Left = messageInput.Right + Panel.RIGHT_PADDING,
+                            Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782),
+                            BasicTooltipText = Resources.Remove
+                        };
+
+                        remove.MouseEntered += (_, _) => {
+                            remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175784);
+                        };
+
+                        remove.MouseLeft += (_, _) => {
+                            remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175782);
+                        };
+
+                        remove.LeftMouseButtonPressed += (_, _) => {
+                            remove.Texture = GameService.Content.DatAssetCache.GetTextureFromAssetId(2175783);
+                        };
+
+                        remove.LeftMouseButtonReleased += (_, _) => {
+                            GameService.Content.PlaySoundEffectByName("button-click");
+                            RemoveClick?.Invoke(this, EventArgs.Empty);
+                        };
+
+                        var dragReorder = new Image(ChatMacros.Instance.Resources.DragReorderIcon) {
+                            Parent = buildPanel,
+                            Width = 25,
+                            Height = 25,
+                            Left = remove.Right + Panel.RIGHT_PADDING,
+                            BasicTooltipText = Resources.Drag_to_Reorder
+                        };
+
+                        dragReorder.LeftMouseButtonPressed += (_, _) => {
+                            IsDragging = true;
+                            GameService.Content.PlaySoundEffectByName("button-click");
+                        };
+
+                        void OnLeftMouseButtonReleased(object o, MouseEventArgs mouseEventArgs) {
+                            if (IsDragging) {
+                                this.DragEnd?.Invoke(this, EventArgs.Empty);
+                            }
+                            IsDragging = false;
+                        }
+
+                        GameService.Input.Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
+
+                        dragReorder.Disposed += (_, _) => {
+                            GameService.Input.Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
+                        };
+
+                        messageInput.TextChanged += (_, _) => {
+                            var cmd = $"{_line.Channel.ToShortChatCommand()} ".TrimStart();
+                            var msg = $"{cmd}{messageInput.Text}";
+                            overlengthWarn.Visible = msg.Length > ChatUtil.MAX_MESSAGE_LENGTH;
+                            messageInput.BasicTooltipText = string.IsNullOrEmpty(messageInput.Text) ? Resources.Enter_a_message___ : msg;
+                        };
+
+                        messageInput.InputFocusChanged += (_, e) => {
+                            if (e.Value) {
+                                return;
+                            }
+                            _line.Message = messageInput.Text.TrimEnd();
+                            messageInput.BasicTooltipText = string.IsNullOrEmpty(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
+                            Save();
+                        };
+
+                        targetChannelDd.Resized += (_, _) => {
+                            messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Width - Panel.RIGHT_PADDING * 4 - 50;
+                            messageInput.Left = targetChannelDd.Right + Panel.RIGHT_PADDING;
+                        };
+
+                        targetChannelDd.ValueChanged += (_, e) => {
+                            _line.Channel = e.NewValue;
+                            messageInput.ForeColor = _line.Channel.GetMessageColor();
+                            messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
+                            overlengthWarn.Visible = _line.ToChatMessage().Length > ChatUtil.MAX_MESSAGE_LENGTH;
+                            Save();
+
+                            whisperTo?.Dispose();
+                            squadBroadcast?.Dispose();
+                            messageInput.Width = buildPanel.ContentRegion.Width - targetChannelDd.Right - Panel.RIGHT_PADDING * 4 - 50;
+                            messageInput.Left = targetChannelDd.Right + Panel.RIGHT_PADDING;
+
+                            if (e.NewValue == ChatChannel.Whisper) {
+                                CreateWhisperToField();
+                            } else if (e.NewValue == ChatChannel.Squad) {
+                                CreateSquadBroadcastTick();
+                            }
+                        };
+                        base.Build(buildPanel);
+                    }
+
+                    private void Save() {
+                        if (!ChatMacros.Instance.Data.Upsert(_line)) {
+                            ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                            return;
+                        }
+                        ChatMacros.Instance.Macro.UpdateMacros();
                         return;
                     }
-                    ChatMacros.Instance.Macro.UpdateMacros();
-                    return;
                 }
             }
         }

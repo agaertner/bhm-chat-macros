@@ -159,9 +159,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
             var voiceCommandsWrap = new FlowPanel {
                 Parent        = buildPanel,
-                Left          = activeMapsWrap.Right + Panel.RIGHT_PADDING / 2,
-                Width         = contentRegion.Width / 2 - Panel.RIGHT_PADDING / 2,
-                Height        = contentRegion.Height - Panel.BOTTOM_PADDING - 16,
+                Left          = activeMapsWrap.Right + Panel.RIGHT_PADDING * 2,
+                Width         = contentRegion.Width                        / 2 - Panel.RIGHT_PADDING / 2,
+                Height        = contentRegion.Height                           - Panel.BOTTOM_PADDING - 16,
                 FlowDirection = ControlFlowDirection.SingleTopToBottom,
                 Title         = Resources.Trigger_Options
             };

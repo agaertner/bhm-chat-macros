@@ -1,8 +1,8 @@
 ﻿using Blish_HUD;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace Nekres.ChatMacros.Core {
     internal static class FileUtil {
@@ -59,6 +59,13 @@ namespace Nekres.ChatMacros.Core {
                 return false;
             }
             return true;
+        }
+
+        public static void OpenExternally(string path) {
+            using var fileopener = new Process();
+            fileopener.StartInfo.FileName  = "explorer";
+            fileopener.StartInfo.Arguments = $"\"{path}\"";
+            fileopener.Start();
         }
 
         public static IEnumerable<string> ReadAllLines(string path) {

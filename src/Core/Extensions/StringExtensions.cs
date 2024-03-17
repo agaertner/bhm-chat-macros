@@ -13,6 +13,13 @@ namespace Nekres.ChatMacros.Core {
             return input.Split(new[] { delimiter }, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public static IEnumerable<string> ReadLines(this string input) {
+            using var sr = new StringReader(input);
+            while (sr.ReadLine() is { } line) {
+                yield return line;
+            }
+        }
+
         public static string GetTextBetweenTags(this string input, string tagName) {
             var match = Regex.Match(input, $"<{tagName}>(.*?)</{tagName}>");
             return match.Success && match.Groups.Count > 1 ? match.Groups[1].Value : string.Empty;

@@ -175,7 +175,8 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         }
 
         private static Regex _whisperRecipientPattern = new (@"^\[(?<name>.*)\]", RegexOptions.Compiled);
-        private const string _squadBroadcastPattern   = "!";
+        private static Regex _squadBroadcastPattern   = new(@"^!", RegexOptions.Compiled);
+
         public static ChatLine Parse(string input) {
 
             var line = new ChatLine {
@@ -194,21 +195,21 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 return line;
             }
 
-            string message = input;
+            string message = input.TrimStart(1);
 
             if (channel == ChatChannel.Whisper) {
-                    var recipientMatch = _whisperRecipientPattern.Match(input);
-
-                    if (recipientMatch.Success) {
-                        line.WhisperTo = recipientMatch.Groups["name"].Value;
-                        message        = input.Remove(0, recipientMatch.Length);
-                    }
+                var recipientMatch = _whisperRecipientPattern.Match(message);
+                if (recipientMatch.Success) {
+                    line.WhisperTo = recipientMatch.Groups["name"].Value;
+                    message        = message.Remove(0, recipientMatch.Index + recipientMatch.Length);
+                }
 
             } else if (channel == ChatChannel.Squad) {
-
-                line.SquadBroadcast = input.StartsWith(_squadBroadcastPattern);
-                message             = input.Remove(0, Convert.ToInt32(line.SquadBroadcast));
-
+                var broadcastMatch = _squadBroadcastPattern.Match(message);
+                if (broadcastMatch.Success) {
+                    line.SquadBroadcast = true;
+                    message             = message.Remove(0, broadcastMatch.Index + broadcastMatch.Length);
+                }
             }
 
             line.Message = message.TrimEnd().TrimStart(1);
@@ -257,6 +258,27 @@ namespace Nekres.ChatMacros.Core.Services.Data {
             }
             Resources.Culture = currentCulture;
             return channel;
+        }
+
+        public string Serialize() {
+            var param = string.Empty;
+            if (Channel == ChatChannel.Whisper && !WhisperTo.IsNullOrEmpty()) {
+                param = $"[{WhisperTo}]";
+            } else if (Channel == ChatChannel.Squad && SquadBroadcast) {
+                param = "!";
+            }
+
+            var channel = Channel.ToShortChatCommand();
+            
+            if (channel.IsNullOrEmpty()) {
+                return Message;
+            }
+
+            if (param.IsNullOrEmpty()) {
+                return $"{channel} {Message}";
+            }
+
+            return $"{channel} {param} {Message}";
         }
     }
 }

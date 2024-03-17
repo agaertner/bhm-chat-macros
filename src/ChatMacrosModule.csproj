@@ -210,6 +210,7 @@
     <Compile Include="Core\UI\Settings\SettingsView.cs" />
     <Compile Include="Core\UI\Settings\VoiceRecognitionSettings.cs" />
     <Compile Include="Core\Utils\AssetUtil.cs" />
+    <Compile Include="Core\Utils\AsyncFileDialog.cs" />
     <Compile Include="Core\Utils\BitmapFont.cs" />
     <Compile Include="Core\Utils\FastenshteinUtil.cs" />
     <Compile Include="Core\Utils\FileUtil.cs" />
