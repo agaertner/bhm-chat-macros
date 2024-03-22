@@ -658,24 +658,34 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                         _macro.Lines.Clear();
 
+                        // Read all lines to re-add them during save.
                         var lines = editLinesBox.Text.ReadLines().Select(ChatLine.Parse).ToList();
-                        _macro.Lines = SaveLines(lines.ToArray()) ? lines : oldLines;
+
+                        if (!SaveLines(lines.ToArray())) {
+                            _macro.Lines = oldLines;
+                        }
                     };
 
                     base.Build(buildPanel);
                 }
 
                 protected bool SaveLines(params ChatLine[] lines) {
-                    if (lines.Length > 0 && !ChatMacros.Instance.Data.Insert(lines)) {
+
+                    if (lines.IsNullOrEmpty() || !ChatMacros.Instance.Data.Insert(lines)) {
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                         GameService.Content.PlaySoundEffectByName("error");
                         return false;
                     }
 
-                    if (ChatMacros.Instance.Data.Upsert(_macro)) {
-                        ChatMacros.Instance.Speech.UpdateGrammar();
+                    _macro.Lines.AddRange(lines);
+
+                    if (!ChatMacros.Instance.Data.Upsert(_macro)) {
+                        ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
+                        GameService.Content.PlaySoundEffectByName("error");
+                        return false;
                     }
 
+                    ChatMacros.Instance.Macro.UpdateMacros();
                     return true;
                 }
             }
@@ -719,7 +729,6 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                         var oldLines = _macro.Lines.ToList();
                         if (SaveLines(newLine)) {
-                            _macro.Lines.Add(newLine);
                             GameService.Content.PlaySoundEffectByName("button-click");
                             AddLine(linesPanel, newLine);
                         } else {
@@ -1050,8 +1059,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                             return;
                         }
+
                         ChatMacros.Instance.Macro.UpdateMacros();
-                        return;
                     }
                 }
             }
