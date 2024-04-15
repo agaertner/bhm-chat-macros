@@ -266,7 +266,6 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             }
 
             menuEntry.Click += (_, _) => {
-                ChatMacros.Instance.Resources.PlayMenuItemClick();
                 CreateMacroView();
             };
         }
@@ -770,17 +769,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         lineDisplay.Dispose();
                     };
 
-                    int lineIndex = _macro.Lines.IndexOf(line);
                     void OnMouseMoved(object o, MouseEventArgs mouseEventArgs) {
                         if (lineView.IsDragging) {
                             var tempLines = _macro.Lines.ToList();
                             var dropIndex = MathHelper.Clamp((parent.RelativeMousePosition.Y - Panel.HEADER_HEIGHT) / lineDisplay.Height, 0, _macro.Lines.Count - 1);
-
-                            if (lineIndex != dropIndex) {
-                                ChatMacros.Instance.Resources.PlayMenuItemClick();
-                                lineIndex = dropIndex;
-                            }
-
                             tempLines.Remove(line);
                             tempLines.Insert(dropIndex, line);
                             parent.ClearChildren();
