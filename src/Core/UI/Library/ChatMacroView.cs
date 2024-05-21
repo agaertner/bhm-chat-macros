@@ -685,6 +685,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     }
 
                     ChatMacros.Instance.Macro.UpdateMacros();
+                    ChatMacros.Instance.Macro.TryExportToFile(_macro);
                     return true;
                 }
             }
@@ -765,8 +766,13 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             GameService.Content.PlaySoundEffectByName("error");
                         }
 
+                        ChatMacros.Instance.Macro.TryExportToFile(_macro);
                         ChatMacros.Instance.Speech.UpdateGrammar();
                         lineDisplay.Dispose();
+                    };
+
+                    lineView.Changed += (_, _) => {
+                        ChatMacros.Instance.Macro.TryExportToFile(_macro);
                     };
 
                     void OnMouseMoved(object o, MouseEventArgs mouseEventArgs) {
@@ -810,6 +816,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                         }
 
                         ChatMacros.Instance.Macro.UpdateMacros();
+                        ChatMacros.Instance.Macro.TryExportToFile(_macro);
 
                         GameService.Content.PlaySoundEffectByName("color-change");
 
@@ -824,6 +831,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                     public event EventHandler<EventArgs> RemoveClick;
                     public event EventHandler<EventArgs> DragEnd;
+                    public event EventHandler<EventArgs> Changed;
 
                     private readonly ChatLine _line;
 
@@ -871,7 +879,10 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                                 Text = _line.WhisperTo,
                             };
 
-                            whisperTo.TextChanged += (_, _) => {
+                            whisperTo.InputFocusChanged += (_, e) => {
+                                if (e.Value) {
+                                    return;
+                                }
                                 _line.WhisperTo = whisperTo.Text.Trim();
                                 whisperTo.BasicTooltipText = _line.WhisperTo;
                                 Save();
@@ -905,7 +916,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                                 }
 
                                 GameService.Content.PlaySoundEffectByName("button-click");
-
+                                
                                 Save();
                             };
 
@@ -1051,8 +1062,8 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);
                             return;
                         }
-
                         ChatMacros.Instance.Macro.UpdateMacros();
+                        this.Changed?.Invoke(this, EventArgs.Empty);
                     }
                 }
             }

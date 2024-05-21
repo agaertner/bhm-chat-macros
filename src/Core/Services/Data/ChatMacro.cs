@@ -151,6 +151,10 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         public List<string> ToChatMessage() {
             return Lines.Select(line => line.ToChatMessage()).ToList();
         }
+
+        public string Serialize() {
+            return string.Join("\r\n", this.Lines?.Select(chatLine => chatLine.Serialize()) ?? Enumerable.Empty<string>()) + "\r\n";
+        }
     }
 
     internal class ChatLine {

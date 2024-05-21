@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace Nekres.ChatMacros.Core {
     internal static class FileUtil {
@@ -59,6 +60,27 @@ namespace Nekres.ChatMacros.Core {
                 return false;
             }
             return true;
+        }
+
+        public static bool TryWriteAllLines(string filePath, string lines, Logger logger = null, params string[] basePaths) {
+            logger ??= Logger.GetLogger<BlishHud>();
+
+            if (!Exists(filePath, out var path, logger, basePaths)) {
+                return false;
+            }
+
+            try {
+                var data = Encoding.UTF8.GetBytes(lines);
+                File.WriteAllBytes(path, data);
+            } catch (Exception e) {
+                logger.Info(e, e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TryWriteAllLines(string filePath, IReadOnlyList<string> lines, Logger logger = null, params string[] basePaths) {
+            return TryWriteAllLines(filePath, string.Join("\r\n", lines) + "\r\n", logger, basePaths);
         }
 
         public static void OpenExternally(string path) {
