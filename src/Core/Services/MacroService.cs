@@ -434,6 +434,11 @@ namespace Nekres.ChatMacros.Core.Services {
             return true;
         }
 
+        public bool TryExportToFile(ChatMacro macro, string filePath = null) {
+            filePath ??= macro.LinkFile;
+            return FileUtil.TryWriteAllLines(filePath, macro.Serialize(), ChatMacros.Logger, ChatMacros.Instance.BasePaths.ToArray());
+        }
+
         public void Dispose() {
             GameService.Gw2Mumble.CurrentMap.MapChanged -= OnMapChanged;
             GameService.Overlay.UserLocaleChanged       -= OnUserLocaleChanged;
