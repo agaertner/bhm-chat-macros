@@ -448,6 +448,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Empty Macro.
+        /// </summary>
+        internal static string Empty_Macro {
+            get {
+                return ResourceManager.GetString("Empty Macro", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to English.
         /// </summary>
         internal static string English {
@@ -907,6 +916,15 @@ namespace Nekres.ChatMacros.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sponsor.
+        /// </summary>
+        internal static string Sponsor {
+            get {
+                return ResourceManager.GetString("Sponsor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Squad.
         /// </summary>
         internal static string Squad {
@@ -930,6 +948,15 @@ namespace Nekres.ChatMacros.Properties {
         internal static string Support_Me_on_Ko_fi {
             get {
                 return ResourceManager.GetString("Support Me on Ko-fi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supporter.
+        /// </summary>
+        internal static string Supporter {
+            get {
+                return ResourceManager.GetString("Supporter", resourceCulture);
             }
         }
         

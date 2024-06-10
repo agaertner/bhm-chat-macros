@@ -53,7 +53,8 @@ namespace Nekres.ChatMacros.Core.UI.Credits {
                 OuterControlPadding = new Vector2(5, 5),
                 ControlPadding      = new Vector2(5, 5),
                 CanScroll           = true,
-                ShowBorder          = true
+                ShowBorder          = true,
+                Title = Resources.Supporter
             };
 
             if (_donors != null) {
