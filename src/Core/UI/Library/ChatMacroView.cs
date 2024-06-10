@@ -156,7 +156,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
             createNewBttn.Click += (_,_) => {
                 var newMacro = new ChatMacro {
                     Id = new ObjectId(),
-                    Title = Resources.New_Macro,
+                    Title = string.Empty,
                     Lines = new List<ChatLine>(),
                     VoiceCommands = new List<string>()
                 };
@@ -234,7 +234,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 Width            = parent.ContentRegion.Width,
                 Height           = 50,
                 Text             = string.IsNullOrEmpty(macro.Title) ? 
-                                       Resources.Enter_a_title___ : 
+                                       Resources.New_Macro : 
                                        AssetUtil.Truncate(macro.Title, MAX_MENU_ENTRY_TITLE_WIDTH, GameService.Content.DefaultFont16),
                 BasicTooltipText = macro.Title
             };
@@ -257,7 +257,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                 var view = new MacroView(m);
                 view.TitleChanged += (_, e) => {
                     menuEntry.Text = string.IsNullOrEmpty(m.Title) ?
-                                         Resources.Enter_a_title___ :
+                                         Resources.New_Macro :
                                          AssetUtil.Truncate(e.Value, MAX_MENU_ENTRY_TITLE_WIDTH, GameService.Content.DefaultFont16);
                     menuEntry.BasicTooltipText = e.Value;
                 };
@@ -483,8 +483,15 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                     if (e.Value) {
                         return;
                     }
-                    var oldTitle = new string(_macro.Title.ToCharArray());
-                    _macro.Title = titleField.Text.Trim();
+                    var oldTitle = new string(_macro.Title?.ToCharArray() ?? Array.Empty<char>());
+                    _macro.Title = titleField.Text?.Trim() ?? string.Empty;
+
+                    if (string.IsNullOrEmpty(_macro.Title) && !string.IsNullOrEmpty(oldTitle)) {
+                        ScreenNotification.ShowNotification(Resources.Enter_a_title___, ScreenNotification.NotificationType.Warning);
+                        titleField.Text = oldTitle;
+                        _macro.Title    = oldTitle;
+                        return;
+                    }
 
                     if (!ChatMacros.Instance.Data.Upsert(_macro)) {
                         ScreenNotification.ShowNotification(Resources.Something_went_wrong__Please_try_again_, ScreenNotification.NotificationType.Error);

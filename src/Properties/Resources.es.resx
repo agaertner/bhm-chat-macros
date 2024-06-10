@@ -483,4 +483,13 @@
   <data name="Map ID {0}" xml:space="preserve">
     <value>Mapa ID {0}</value>
   </data>
+  <data name="Supporter" xml:space="preserve">
+    <value>Partidario</value>
+  </data>
+  <data name="Sponsor" xml:space="preserve">
+    <value>Patrocinador</value>
+  </data>
+  <data name="Empty Macro" xml:space="preserve">
+    <value>Macro vacía</value>
+  </data>
 </root>
