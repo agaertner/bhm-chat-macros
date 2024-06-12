@@ -40,7 +40,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private bool Upsert<T>(T model, string table) {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return false;
+            }
 
             try {
                 using var db = new LiteDatabase(_connectionString);
@@ -69,7 +71,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private bool InsertMany<T>(List<T> model, string table) {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return false;
+            }
 
             try {
                 using var db         = new LiteDatabase(_connectionString);
@@ -92,7 +96,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public List<ChatMacro> GetActiveMacros() {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return Enumerable.Empty<ChatMacro>().ToList();
+            }
 
             try {
                 using var db = new LiteDatabase(_connectionString);
@@ -118,7 +124,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public List<ChatMacro> GetAllMacros() {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return Enumerable.Empty<ChatMacro>().ToList();
+            }
 
             try {
                 using var db         = new LiteDatabase(_connectionString);
@@ -135,7 +143,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public ChatMacro GetChatMacro(BsonValue id) {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return default;
+            }
 
             try {
                 using var db         = new LiteDatabase(_connectionString);
@@ -151,7 +161,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         private bool Delete<T>(string table, params BsonValue[] ids) {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return false;
+            }
 
             try {
                 using var db = new LiteDatabase(_connectionString);
