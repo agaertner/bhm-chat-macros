@@ -164,14 +164,22 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonField("channel")]
         public ChatChannel Channel { get; set; }
 
+        private string _whisperTo;
         [BsonField("whisper_to")]
-        public string WhisperTo { get; set; }
+        public string WhisperTo {
+            get => _whisperTo ?? string.Empty;
+            set => _whisperTo = value ?? string.Empty;
+        }
 
         [BsonField("squad_broadcast")]
-        public bool SquadBroadcast { get; set; } 
+        public bool SquadBroadcast { get; set; }
 
+        private string _message;
         [BsonField("message")]
-        public string Message { get; set; }
+        public string Message {
+            get => _message ?? string.Empty; 
+            set => _message = value ?? string.Empty;
+        }
 
         public string ToChatMessage() {
             var cmd = $"{Channel.ToShortChatCommand()} ".TrimStart();
