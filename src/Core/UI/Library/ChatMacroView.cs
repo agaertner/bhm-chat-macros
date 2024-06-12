@@ -223,9 +223,9 @@ namespace Nekres.ChatMacros.Core.UI.Library {
         }
 
         private IEnumerable<MenuItem<ChatMacro>> SortMacroMenuEntries(IEnumerable<MenuItem<ChatMacro>> toSort) {
-            return toSort.OrderBy(x => ChatMacros.Instance.LibraryConfig.Value.IndexChannelHistory(x.Item.Lines.FirstOrDefault()?.Channel ?? ChatChannel.Current))
-                         .ThenBy(x => x.Item.Lines?.FirstOrDefault()?.Channel ?? ChatChannel.Current)
-                         .ThenBy(x => x.Item.Title.ToLowerInvariant());
+            return toSort.OrderBy(x => ChatMacros.Instance.LibraryConfig.Value.IndexChannelHistory(x.Item?.Lines?.FirstOrDefault()?.Channel ?? ChatChannel.Current))
+                         .ThenBy(x => x.Item?.Lines?.FirstOrDefault()?.Channel ?? ChatChannel.Current)
+                         .ThenBy(x => x.Item?.Title?.ToLowerInvariant() ?? string.Empty);
         }
 
         private void AddMacroEntry(Menu parent, ChatMacro macro) {

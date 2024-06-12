@@ -3,13 +3,17 @@ using System.Threading;
 
 namespace Nekres.ChatMacros.Core {
     internal static class LockUtil {
-        public static void Acquire(ReaderWriterLockSlim rwLock, ManualResetEvent lockReleased, ref bool lockAcquired) {
+        public static bool TryAcquire(ReaderWriterLockSlim rwLock, ManualResetEvent lockReleased, ref bool lockAcquired, int msTimeout = 200) {
             try {
-                rwLock.EnterWriteLock();
+                if (!rwLock.TryEnterWriteLock(msTimeout)) {
+                    return false;
+                }
                 lockReleased.Reset();
                 lockAcquired = true;
+                return true;
             } catch (Exception ex) {
                 ChatMacros.Logger.Debug(ex, ex.Message);
+                return false;
             }
         }
 
@@ -23,6 +27,13 @@ namespace Nekres.ChatMacros.Core {
                 ChatMacros.Logger.Debug(ex, ex.Message);
             } finally {
                 lockReleased.Set();
+            }
+        }
+
+        public static void WaitOne(ManualResetEvent lockReleased, ref bool lockAcquired, int millisecondsTimeout = 500) {
+            // Wait for the lock to be released
+            if (lockAcquired) {
+                lockReleased.WaitOne(millisecondsTimeout);
             }
         }
     }

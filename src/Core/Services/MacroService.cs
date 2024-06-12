@@ -133,7 +133,9 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void ToggleMacros(bool enabled) {
-            LockUtil.Acquire(_rwLock, _lockReleased, ref _lockAcquired);
+            if (!LockUtil.TryAcquire(_rwLock, _lockReleased, ref _lockAcquired)) {
+                return;
+            }
 
             if (enabled) {
                 ChatMacros.Instance.ControlsConfig.Value.OpenQuickAccess.Activated += OnOpenQuickAccessActivated;
@@ -174,7 +176,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 await Fire(chatMacro);
             }
         }
-
+        
         public async Task Fire(ChatMacro macro) {
             ToggleMacros(false);
 
@@ -240,7 +242,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 // Send message to chat.
                 await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage, ChatMacros.Logger);
             }
-            await Task.Delay(200);
+            //await Task.Delay(200);
             ToggleMacros(true);
         }
 
@@ -446,10 +448,7 @@ namespace Nekres.ChatMacros.Core.Services {
 
             Observer.Dispose();
 
-            // Wait for the lock to be released
-            if (_lockAcquired) {
-                _lockReleased.WaitOne(500);
-            }
+            LockUtil.WaitOne(_lockReleased, ref _lockAcquired);
 
             _lockReleased.Dispose();
 
