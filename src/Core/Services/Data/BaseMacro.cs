@@ -41,8 +41,12 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonId(true)]
         public ObjectId Id { get; set; }
 
+        private string _title;
         [BsonField("title")]
-        public string Title { get; set; }
+        public string Title {
+            get => _title ?? string.Empty;
+            set => _title = value ?? string.Empty;
+        }
 
         [BsonField("voice_commands")]
         public List<string> VoiceCommands { get; set; }
@@ -56,8 +60,12 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         [BsonField("map_ids")]
         public List<int> MapIds { get; set; }
 
+        private string _linkFile;
         [BsonField("link_file")]
-        public string LinkFile { get; set; }
+        public string LinkFile {
+            get => _linkFile ?? string.Empty;
+            set => _linkFile = value ?? string.Empty;
+        }
 
         protected BaseMacro() {
             Title         = string.Empty;
