@@ -189,8 +189,6 @@ namespace Nekres.ChatMacros.Core.Services {
             bool isSquadbroadcastCleared = false;
             bool isChatCleared           = false;
             foreach (var line in macro.Lines.ToList()) {
-                await Task.Delay(1);
-
                 var message = await ReplaceCommands(line.ToChatMessage());
 
                 if (string.IsNullOrEmpty(message)) {
@@ -214,7 +212,7 @@ namespace Nekres.ChatMacros.Core.Services {
                     }
 
                     await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.SquadBroadcastMessage, ChatMacros.Logger);
-                    await Task.Delay(100);
+                    await Task.Delay(20);
                     continue;
                 }
 
@@ -236,13 +234,15 @@ namespace Nekres.ChatMacros.Core.Services {
                     }
 
                     await ChatUtil.SendWhisper(line.WhisperTo, message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage, ChatMacros.Logger);
+                    await Task.Delay(20);
                     continue;
                 }
 
                 // Send message to chat.
                 await ChatUtil.Send(message, ChatMacros.Instance.ControlsConfig.Value.ChatMessage, ChatMacros.Logger);
+                await Task.Delay(20);
             }
-            //await Task.Delay(200);
+            await Task.Delay(200);
             ToggleMacros(true);
         }
 
