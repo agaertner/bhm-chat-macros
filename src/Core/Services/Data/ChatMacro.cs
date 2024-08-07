@@ -24,7 +24,8 @@ namespace Nekres.ChatMacros.Core.Services.Data {
         Guild2,
         Guild3,
         Guild4,
-        Guild5
+        Guild5,
+        Guild6
     }
 
     public static class ChannelExtensions {
@@ -45,6 +46,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => string.Format(Resources._g_0_, 3),
                 ChatChannel.Guild4  => string.Format(Resources._g_0_, 4),
                 ChatChannel.Guild5  => string.Format(Resources._g_0_, 5),
+                ChatChannel.Guild6  => string.Format(Resources._g_0_, 6),
                 _                   => string.Empty
             };
         }
@@ -66,6 +68,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => string.Format(Resources._guild_0_, 3),
                 ChatChannel.Guild4  => string.Format(Resources._guild_0_, 4),
                 ChatChannel.Guild5  => string.Format(Resources._guild_0_, 5),
+                ChatChannel.Guild6  => string.Format(Resources._guild_0_, 6),
                 _                   => string.Empty
             };
         }
@@ -87,6 +90,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => string.Format(Resources.G_0_, 3),
                 ChatChannel.Guild4  => string.Format(Resources.G_0_, 4),
                 ChatChannel.Guild5  => string.Format(Resources.G_0_, 5),
+                ChatChannel.Guild6  => string.Format(Resources.G_0_, 6),
                 _                   => string.Empty
             };
             return string.IsNullOrEmpty(name) || !brackets ? name : $"[{name}]";
@@ -109,6 +113,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => new Color(141, 129, 86),
                 ChatChannel.Guild4  => new Color(141, 129, 86),
                 ChatChannel.Guild5  => new Color(141, 129, 86),
+                ChatChannel.Guild6  => new Color(141, 129, 86),
                 _                   => Color.White
             } * 1.25f;
         }
@@ -130,6 +135,7 @@ namespace Nekres.ChatMacros.Core.Services.Data {
                 ChatChannel.Guild3  => new Color(227, 217, 164),
                 ChatChannel.Guild4  => new Color(227, 217, 164),
                 ChatChannel.Guild5  => new Color(227, 217, 164),
+                ChatChannel.Guild6  => new Color(227, 217, 164),
                 _                   => Color.White
             };
         }
