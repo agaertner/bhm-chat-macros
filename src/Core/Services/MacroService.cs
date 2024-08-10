@@ -403,6 +403,7 @@ namespace Nekres.ChatMacros.Core.Services {
                     int.TryParse(args[1], out max);
                 }
             }
+            RandomUtil.GetRandom(min, max); // Call two times to fix GetRandom returning always 0 on first or early call.
             return RandomUtil.GetRandom(min, max);
         }
 
