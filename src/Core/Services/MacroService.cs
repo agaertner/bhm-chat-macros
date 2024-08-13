@@ -247,6 +247,7 @@ namespace Nekres.ChatMacros.Core.Services {
         }
 
         public void Update(GameTime gameTime) {
+            RandomUtil.GetRandom(0, 100); // Fix for calling random too early and returning 0.
             GetClosestPoints();
         }
 
@@ -353,7 +354,9 @@ namespace Nekres.ChatMacros.Core.Services {
         private async Task<string> Exec(string command, IReadOnlyList<string> args) {
             return command switch {
                 "blish"  => GetVersion(),
-                "time"   => DateTime.Now.ToString("HH:mm",          CultureInfo.CurrentUICulture),
+                "time"   => DateTime.Now.ToString("HH:mm", CultureInfo.CurrentUICulture),
+                "hour"   => DateTime.Now.ToString("HH"),
+                "min"    => DateTime.Now.ToString("mm"),
                 "today"  => DateTime.Now.ToString("dddd, d.M.yyyy", CultureInfo.CurrentUICulture),
                 "wp"     => ClosestWaypoint?.ChatLink ?? string.Empty,
                 "poi"    => ClosestPoi?.ChatLink      ?? string.Empty,
@@ -403,7 +406,6 @@ namespace Nekres.ChatMacros.Core.Services {
                     int.TryParse(args[1], out max);
                 }
             }
-            RandomUtil.GetRandom(min, max); // Call two times to fix GetRandom returning always 0 on first or early call.
             return RandomUtil.GetRandom(min, max);
         }
 

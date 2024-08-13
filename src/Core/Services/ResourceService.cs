@@ -1,8 +1,5 @@
-﻿using Blish_HUD;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using NAudio.SoundFont;
 using System;
 using System.Collections.Generic;
 
@@ -35,6 +32,8 @@ namespace Nekres.ChatMacros.Core.Services {
             "{txt :filepath :line} - A specific line from the given file. Filepaths can be absolute, relative to Blish HUD.exe or relative to the chat_shorts module directory.",
             "{today} - Today's date.",
             "{time} - Current local time.",
+            "{hour} - Current local hour.",
+            "{min} - Minutes component from the current local time.",
             "{map} - Current map name."
         };
 
