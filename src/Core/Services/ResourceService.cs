@@ -34,7 +34,8 @@ namespace Nekres.ChatMacros.Core.Services {
             "{time} - Current local time.",
             "{hour} - Current local hour.",
             "{min} - Minutes component from the current local time.",
-            "{map} - Current map name."
+            "{map} - Current map name.",
+            "{area} - Current area (sector) name."
         };
 
         public ResourceService() {

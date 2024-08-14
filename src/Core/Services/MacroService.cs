@@ -361,7 +361,7 @@ namespace Nekres.ChatMacros.Core.Services {
                 "wp"     => ClosestWaypoint?.ChatLink ?? string.Empty,
                 "poi"    => ClosestPoi?.ChatLink      ?? string.Empty,
                 "map"    => CurrentMapName            ?? string.Empty,
-                "sector" => CurrentSector?.Name       ?? string.Empty,
+                "area"   => CurrentSector?.Name       ?? string.Empty,
                 "random" => GetRandom(args).ToString(),
                 "json"   => await GetJson(args),
                 "txt"    => ReadTextFile(args),
