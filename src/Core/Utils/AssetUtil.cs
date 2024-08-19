@@ -42,10 +42,10 @@ namespace Nekres.ChatMacros {
                 case Locale.Spanish:
                 case Locale.German:
                 case Locale.French:
-                    return string.Format(WIKI_SEARCH, GameService.Overlay.UserLocale.Value.Code(), wikiPage);
+                    return string.Format(WIKI_SEARCH, GameService.Overlay.UserLocale.Value.TwoLetterISOLanguageName(), wikiPage);
                 case Locale.Korean:
                 case Locale.Chinese:
-                default: return string.Format(WIKI_SEARCH, Locale.English.Code(), wikiPage);
+                default: return string.Format(WIKI_SEARCH, Locale.English.TwoLetterISOLanguageName(), wikiPage);
             }
         }
     }

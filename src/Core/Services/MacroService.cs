@@ -254,7 +254,7 @@ namespace Nekres.ChatMacros.Core.Services {
         private async void OnMapChanged(object sender, ValueEventArgs<int> e) {
             UpdateMacros();
 
-            if (!ChatMacros.Instance.Gw2Api.IsApiAvailable()) {
+            if (!ChatMacros.Instance.Gw2ApiManager.IsApiAvailable()) {
                 return;
             }
 
