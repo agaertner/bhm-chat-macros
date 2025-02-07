@@ -87,7 +87,8 @@ namespace Nekres.ChatMacros {
 
             _cornerIcon = new CornerIcon {
                 Icon             = _cornerTexture,
-                BasicTooltipText = this.Name
+                BasicTooltipText = this.Name,
+                Priority = 426255433 // Fixed unique value.
             };
             _cornerIcon.Click += OnModuleIconClick;
 
