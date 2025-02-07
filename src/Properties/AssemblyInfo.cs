@@ -28,6 +28,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("0.15.14.197")]
-[assembly: AssemblyFileVersion("0.15.14.197")]
-[assembly: AssemblyInformationalVersion("0.15.14-dev.197+Branch.dev.Sha.7b608cddbe3f0607ae6c34b9c1c8d52449c1688e")]
+[assembly: AssemblyVersion("0.15.16.201")]
+[assembly: AssemblyFileVersion("0.15.16.201")]
+[assembly: AssemblyInformationalVersion("0.15.16-dev.201+Branch.dev.Sha.95f5661d4feff9159f9a533d12f957cf07ef3dff")]
