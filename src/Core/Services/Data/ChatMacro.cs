@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 namespace Nekres.ChatMacros.Core.Services.Data {
 
     public enum ChatChannel {
+        None,
         Current,
         Emote,
         Say,

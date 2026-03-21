@@ -8,6 +8,7 @@ using Nekres.ChatMacros.Properties;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using Blish_HUD.Extended;
 
 namespace Nekres.ChatMacros.Core.UI.Settings {
     internal class VoiceRecognitionSettings : View {
@@ -31,29 +32,32 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 Title               = Resources.Voice_Recognition
             };
 
-            var inputDevice = new KeyValueDropdown<Guid> {
+            var inputDevice = new TextDropdown<Guid> {
                 Parent          = voiceRecognitionPanel,
                 PlaceholderText = Resources.Select_an_input_device___,
                 SelectedItem = _config.InputDevice,
-                BasicTooltipText = Resources.Select_an_input_device___
+                BasicTooltipText = Resources.Select_an_input_device___,
+                Width = 300,
             };
 
             foreach (var device in ChatMacros.Instance.Speech.InputDevices) {
                 inputDevice.AddItem(device.ProductNameGuid, device.ProductName);
             }
 
-            var voiceLanguage = new KeyValueDropdown<VoiceLanguage> {
+            var voiceLanguage = new TextDropdown<VoiceLanguage> {
                 Parent           = voiceRecognitionPanel,
                 PlaceholderText  = Resources.Select_your_primary_command_language___,
                 SelectedItem     = _config.VoiceLanguage,
-                BasicTooltipText = Resources.Select_your_primary_command_language___
+                BasicTooltipText = Resources.Select_your_primary_command_language___,
+                Width = 300,
             };
 
-            var secondaryVoiceLanguage = new KeyValueDropdown<VoiceLanguage> {
+            var secondaryVoiceLanguage = new TextDropdown<VoiceLanguage> {
                 Parent           = voiceRecognitionPanel,
                 PlaceholderText  = Resources.Select_a_secondary_command_language___,
                 SelectedItem     = _config.SecondaryVoiceLanguage,
-                BasicTooltipText = Resources.Select_a_secondary_command_language___
+                BasicTooltipText = Resources.Select_a_secondary_command_language___,
+                Width = 300,
             };
 
             foreach (var lang in Enum.GetValues(typeof(VoiceLanguage)).Cast<VoiceLanguage>()) {
@@ -67,9 +71,9 @@ namespace Nekres.ChatMacros.Core.UI.Settings {
                 BasicTooltipText = $"{Resources.Hold_to_recognize_voice_commands_}\n{Resources.Release_to_trigger_an_action_}"
             };
 
-            inputDevice.ValueChanged   += OnInputDeviceChanged;
-            voiceLanguage.ValueChanged += OnVoiceLanguageChanged;
-            secondaryVoiceLanguage.ValueChanged += OnSecondaryVoiceLanguageChanged;
+            inputDevice.SelectedItemChanged += OnInputDeviceChanged;
+            voiceLanguage.SelectedItemChanged += OnVoiceLanguageChanged;
+            secondaryVoiceLanguage.SelectedItemChanged += OnSecondaryVoiceLanguageChanged;
             base.Build(buildPanel);
         }
 

@@ -859,7 +859,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
 
                     protected override void Build(Container buildPanel) {
 
-                        var targetChannelDd = new KeyValueDropdown<ChatChannel> {
+                        var targetChannelDd = new TextDropdown<ChatChannel> {
                             Parent = buildPanel,
                             PlaceholderText = Resources.Select_a_target_channel___,
                             SelectedItem = _line.Channel,
@@ -867,7 +867,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             AutoSizeWidth = true
                         };
 
-                        foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>()) {
+                        foreach (var channel in Enum.GetValues(typeof(ChatChannel)).Cast<ChatChannel>().Skip(1)) {
                             targetChannelDd.AddItem(channel, channel.ToDisplayName(), channel.GetHeadingColor());
                         }
 
@@ -1043,7 +1043,7 @@ namespace Nekres.ChatMacros.Core.UI.Library {
                             messageInput.Left = targetChannelDd.Right + Panel.RIGHT_PADDING;
                         };
 
-                        targetChannelDd.ValueChanged += (_, e) => {
+                        targetChannelDd.SelectedItemChanged += (_, e) => {
                             _line.Channel = e.NewValue;
                             messageInput.ForeColor = _line.Channel.GetMessageColor();
                             messageInput.BasicTooltipText = string.IsNullOrWhiteSpace(_line.Message) ? Resources.Enter_a_message___ : _line.ToChatMessage();
